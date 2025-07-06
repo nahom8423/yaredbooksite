@@ -71,6 +71,8 @@ class YaredBotAPI {
           session_id: currentSessionId, // Include session for conversation memory
           channel_type: 'web' // Specify this is from web interface
         }),
+        // Add timeout for mobile networks
+        signal: AbortSignal.timeout(30000) // 30 second timeout
       });
 
       if (!response.ok) {

@@ -93,6 +93,27 @@ function App() {
   const [isThinking, setIsThinking] = useState(false)
   const [thinkingText, setThinkingText] = useState('')
   const [thinkingHistory, setThinkingHistory] = useState([])
+  const [safeAreaBottom, setSafeAreaBottom] = useState(0)
+
+  // Detect safe area for mobile bottom spacing
+  useEffect(() => {
+    const updateSafeArea = () => {
+      // Get CSS env() value for safe area bottom
+      const safeAreaBottomValue = getComputedStyle(document.documentElement)
+        .getPropertyValue('env(safe-area-inset-bottom)') || '0px'
+      const pixels = parseInt(safeAreaBottomValue) || 0
+      setSafeAreaBottom(pixels)
+    }
+
+    updateSafeArea()
+    window.addEventListener('resize', updateSafeArea)
+    window.addEventListener('orientationchange', updateSafeArea)
+    
+    return () => {
+      window.removeEventListener('resize', updateSafeArea)
+      window.removeEventListener('orientationchange', updateSafeArea)
+    }
+  }, [])
 
   // Recovery function for lost data
   const recoverChatHistory = () => {
@@ -285,10 +306,19 @@ function App() {
       console.error('Error sending message:', error)
       setIsThinking(false)
       setThinkingText('')
+      
+      // Determine error message based on error type
+      let errorText = 'Sorry, I encountered an error. Please try again.'
+      if (error.name === 'TimeoutError' || error.message.includes('timeout')) {
+        errorText = 'Request timed out. Please check your connection and try again.'
+      } else if (error.message.includes('fetch') || error.message.includes('network')) {
+        errorText = 'Unable to connect to the server. Please check your internet connection.'
+      }
+      
       // Add error message
       const errorMessage = {
         id: Date.now() + 1,
-        text: 'Sorry, I encountered an error. Please try again.',
+        text: errorText,
         isUser: false,
         timestamp: new Date(),
         isError: true
@@ -482,16 +512,18 @@ function App() {
                     </div>
                     
                     {/* Suggestions - Pills */}
-                    <div className="flex flex-wrap justify-center gap-3 max-w-2xl mx-auto">
-                      {yaredBotAPI.getSuggestedQuestions().slice(0, 6).map((suggestion, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleSuggestionClick(suggestion)}
-                          className="px-4 py-2 text-sm rounded-full border border-[#2A2A2A] bg-[#1F1F1F] hover:bg-[#2A2A2A] hover:border-gray-500 cursor-pointer transition-all text-gray-300 hover:text-white"
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
+                    <div className="w-full max-w-2xl mx-auto">
+                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                        {yaredBotAPI.getSuggestedQuestions().map((suggestion, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            className="px-4 py-2 text-sm rounded-full border border-[#2A2A2A] bg-[#1F1F1F] hover:bg-[#2A2A2A] hover:border-gray-500 cursor-pointer transition-all text-gray-300 hover:text-white whitespace-nowrap flex-shrink-0"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -546,7 +578,10 @@ function App() {
           )}
           
           {/* Sticky chat input */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 bg-gradient-to-t from-[#171717] via-[#171717] to-transparent">
+          <div 
+            className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#171717] via-[#171717] to-transparent"
+            style={{ paddingBottom: `${Math.max(32, safeAreaBottom + 16)}px` }}
+          >
             <div className="max-w-4xl mx-auto">
               <ChatInput 
                 onSendMessage={handleSendMessage}

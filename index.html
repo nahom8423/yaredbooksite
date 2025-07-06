@@ -111,8 +111,26 @@
       
       #root {
         height: 100vh;
+        height: 100dvh; /* Dynamic viewport height for mobile */
         width: 100vw;
         overflow: hidden;
+      }
+      
+      /* Support for iOS safe area */
+      @supports (padding: max(0px)) {
+        body {
+          padding-left: env(safe-area-inset-left);
+          padding-right: env(safe-area-inset-right);
+        }
+      }
+      
+      /* Hide scrollbar for horizontal scrolling */
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
       }
     </style>
   </head>

@@ -367,11 +367,12 @@ function ChatItem({
             onChatSelect(chat)
             if (isMobile && onClose) onClose()
           }}
-          className={`w-full text-left px-3 py-2 rounded-lg transition-colors relative ${
+          className={`w-full text-left px-3 py-2 rounded-lg transition-colors relative touch-manipulation ${
             currentChatId === chat.id 
               ? 'bg-[#2A2A2A] text-white' 
               : 'hover:bg-[#1A1A1A] text-gray-300'
           }`}
+          style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
         >
           <div className={`truncate text-sm pr-8 ${isAnimating ? 'animate-slide-in-words' : ''}`}>
             {isAnimating ? (
