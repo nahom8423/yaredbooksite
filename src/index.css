@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Ethiopic:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Prevent page scrolling */
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Ethiopic font class */
+.ethiopic {
+  font-family: 'Noto Serif Ethiopic', serif;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
