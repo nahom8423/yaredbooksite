@@ -141,10 +141,10 @@ function App() {
           // Browser UI partially visible - moderate spacing
           safeAreaBottomPx = Math.max(32, nativeSafeArea + 16)
         } else {
-          // Browser UI hidden or minimal - need safe zone to prevent toolbar activation
-          // Further reduced safe zone - much closer to toolbar
-          const safariSafeZone = isMobileSafari ? 24 : 16
-          safeAreaBottomPx = Math.max(safariSafeZone, nativeSafeArea + 12)
+          // Browser UI hidden or minimal - minimal safe zone
+          // Extremely close to toolbar - minimal spacing
+          const safariSafeZone = isMobileSafari ? 12 : 8
+          safeAreaBottomPx = Math.max(safariSafeZone, nativeSafeArea + 8)
         }
       }
       
