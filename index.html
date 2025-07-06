@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/yaredbooksite/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Kidus Yared AI</title>
     <style>
       @keyframes fadeInUp {
@@ -106,6 +106,7 @@
         position: fixed;
         width: 100%;
         height: 100%;
+        background-color: #171717;
       }
       
       #root {
@@ -115,12 +116,30 @@
         overflow: hidden;
       }
       
-      /* Support for iOS safe area */
+      /* Support for iOS safe area with proper background colors */
       
       @supports (padding: max(0px)) {
         body {
           padding-left: env(safe-area-inset-left);
           padding-right: env(safe-area-inset-right);
+          padding-top: env(safe-area-inset-top);
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+        
+        /* Ensure safe areas match the app background */
+        html {
+          background-color: #171717;
+        }
+        
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #171717;
+          z-index: -1;
         }
       }
       
@@ -135,8 +154,8 @@
         display: none;
       }
     </style>
-    <script type="module" crossorigin src="/yaredbooksite/assets/index-Ck2YSHwT.js"></script>
-    <link rel="stylesheet" crossorigin href="/yaredbooksite/assets/index-BLkSPOX4.css">
+    <script type="module" crossorigin src="/yaredbooksite/assets/index-C8EEupli.js"></script>
+    <link rel="stylesheet" crossorigin href="/yaredbooksite/assets/index-CVxvG2-r.css">
   </head>
   <body>
     <div id="root"></div>
