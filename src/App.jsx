@@ -95,28 +95,72 @@ function App() {
   const [thinkingHistory, setThinkingHistory] = useState([])
   const [safeAreaBottom, setSafeAreaBottom] = useState(0)
 
-  // Detect safe area for mobile bottom spacing
+  // Detect safe area and dynamic viewport for mobile bottom spacing
   useEffect(() => {
     const updateSafeArea = () => {
-      // For mobile Safari, add extra padding to account for search bar
       const isMobileSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
-      const baseBottomPadding = isMobileSafari ? 80 : 32 // Extra space for Safari
+      const isAndroid = /Android/.test(navigator.userAgent)
+      const isMobile = isMobileSafari || isAndroid
       
       // Get CSS env() value for safe area bottom
       const safeAreaBottomValue = getComputedStyle(document.documentElement)
         .getPropertyValue('env(safe-area-inset-bottom)') || '0px'
-      const pixels = parseInt(safeAreaBottomValue) || 0
+      const safeAreaPixels = parseInt(safeAreaBottomValue) || 0
       
-      setSafeAreaBottom(Math.max(baseBottomPadding, pixels + 16))
+      // Calculate dynamic spacing based on viewport changes (toolbar show/hide)
+      const viewportHeight = window.visualViewport?.height || window.innerHeight
+      const screenHeight = window.screen.height
+      const heightDifference = screenHeight - viewportHeight
+      
+      // Base padding for different scenarios
+      let basePadding = 16 // Default desktop spacing
+      
+      if (isMobile) {
+        // Mobile toolbar detection and spacing
+        if (heightDifference > 100) {
+          // Keyboard or large toolbar visible - reduce spacing
+          basePadding = 8
+        } else if (heightDifference > 50) {
+          // Toolbar visible - moderate spacing
+          basePadding = 24
+        } else {
+          // Toolbar hidden or minimal - more spacing needed
+          basePadding = isMobileSafari ? 64 : 48
+        }
+      }
+      
+      // Combine safe area with dynamic padding
+      const totalBottomSpacing = Math.max(basePadding + safeAreaPixels, 16)
+      setSafeAreaBottom(totalBottomSpacing)
+      
+      console.log('Safe area update:', {
+        isMobile,
+        safeAreaPixels,
+        viewportHeight,
+        screenHeight,
+        heightDifference,
+        basePadding,
+        totalBottomSpacing
+      })
     }
 
     updateSafeArea()
+    
+    // Listen to both resize and visual viewport changes
     window.addEventListener('resize', updateSafeArea)
     window.addEventListener('orientationchange', updateSafeArea)
+    
+    // Visual viewport for dynamic toolbar detection
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateSafeArea)
+    }
     
     return () => {
       window.removeEventListener('resize', updateSafeArea)
       window.removeEventListener('orientationchange', updateSafeArea)
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateSafeArea)
+      }
     }
   }, [])
 
@@ -568,11 +612,14 @@ function App() {
             </div>
           </div>
           
-          {/* Scroll to bottom button - positioned above chat bar with gap */}
+          {/* Scroll to bottom button - dynamically positioned above chat bar */}
           {showScrollToBottom && (
             <button
               onClick={scrollToBottom}
-              className="absolute bottom-36 left-1/2 transform -translate-x-1/2 w-10 h-10 bg-[#2A2A2A] hover:bg-[#404040] rounded-full flex items-center justify-center shadow-lg border border-[#404040] transition-all z-10"
+              className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 bg-[#2A2A2A] hover:bg-[#404040] rounded-full flex items-center justify-center shadow-lg border border-[#404040] transition-all z-10"
+              style={{ 
+                bottom: `${safeAreaBottom + 120}px` // Position above message input with dynamic spacing
+              }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                 <path d="M7 10l5 5 5-5"/>
