@@ -157,10 +157,10 @@
         left: 0;
         right: 0;
         z-index: 20;
-        /* Reduced fallback padding based on user feedback */
-        padding-bottom: 48px;
+        /* Much lower positioning - very close to toolbar */
+        padding-bottom: 24px;
         /* Progressive enhancement with env() */
-        padding-bottom: max(48px, env(safe-area-inset-bottom, 16px));
+        padding-bottom: max(24px, env(safe-area-inset-bottom, 16px));
         /* Handle virtual keyboard on supporting browsers */
         transform: translateY(max(0px, env(keyboard-inset-height, 0px)));
       }
@@ -168,8 +168,8 @@
       /* Safe zone to prevent Safari toolbar activation */
       @media (max-width: 768px) {
         .mobile-input-container {
-          /* Reduced safe zone - closer to toolbar but still safe */
-          padding-bottom: max(56px, env(safe-area-inset-bottom, 48px));
+          /* Minimal safe zone - very close to browser UI */
+          padding-bottom: max(28px, env(safe-area-inset-bottom, 24px));
         }
       }
       
