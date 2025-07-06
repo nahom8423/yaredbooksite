@@ -385,7 +385,9 @@ function ChatItem({
           {/* Ellipsis Button */}
           <button
             onClick={(e) => handleEllipsisClick(e, chat.id)}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-md hover:bg-[#404040] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-md hover:bg-[#404040] flex items-center justify-center transition-opacity ${
+              isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="1"/>
