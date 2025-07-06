@@ -158,10 +158,10 @@
         left: 0;
         right: 0;
         z-index: 20;
-        /* Much lower positioning - very close to toolbar */
-        padding-bottom: 24px;
+        /* Extremely low positioning - almost touching toolbar */
+        padding-bottom: 12px;
         /* Progressive enhancement with env() */
-        padding-bottom: max(24px, env(safe-area-inset-bottom, 16px));
+        padding-bottom: max(12px, env(safe-area-inset-bottom, 8px));
         /* Handle virtual keyboard on supporting browsers */
         transform: translateY(max(0px, env(keyboard-inset-height, 0px)));
       }
@@ -170,8 +170,8 @@
       
       @media (max-width: 768px) {
         .mobile-input-container {
-          /* Minimal safe zone - very close to browser UI */
-          padding-bottom: max(28px, env(safe-area-inset-bottom, 24px));
+          /* Absolute minimal safe zone - extremely close to browser UI */
+          padding-bottom: max(16px, env(safe-area-inset-bottom, 12px));
         }
       }
       
@@ -186,7 +186,7 @@
         display: none;
       }
     </style>
-    <script type="module" crossorigin src="/yaredbooksite/assets/index-DzdziNZ4.js"></script>
+    <script type="module" crossorigin src="/yaredbooksite/assets/index-RJRPK8jp.js"></script>
     <link rel="stylesheet" crossorigin href="/yaredbooksite/assets/index-CTCd2OCR.css">
   </head>
   <body>
