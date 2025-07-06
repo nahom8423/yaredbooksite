@@ -98,11 +98,16 @@ function App() {
   // Detect safe area for mobile bottom spacing
   useEffect(() => {
     const updateSafeArea = () => {
+      // For mobile Safari, add extra padding to account for search bar
+      const isMobileSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+      const baseBottomPadding = isMobileSafari ? 80 : 32 // Extra space for Safari
+      
       // Get CSS env() value for safe area bottom
       const safeAreaBottomValue = getComputedStyle(document.documentElement)
         .getPropertyValue('env(safe-area-inset-bottom)') || '0px'
       const pixels = parseInt(safeAreaBottomValue) || 0
-      setSafeAreaBottom(pixels)
+      
+      setSafeAreaBottom(Math.max(baseBottomPadding, pixels + 16))
     }
 
     updateSafeArea()
@@ -578,7 +583,7 @@ function App() {
           {/* Sticky chat input */}
           <div 
             className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#171717] via-[#171717] to-transparent"
-            style={{ paddingBottom: `${Math.max(32, safeAreaBottom + 16)}px` }}
+            style={{ paddingBottom: `${safeAreaBottom}px` }}
           >
             <div className="max-w-4xl mx-auto">
               <ChatInput 
