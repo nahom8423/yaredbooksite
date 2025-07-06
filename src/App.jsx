@@ -512,13 +512,13 @@ function App() {
                     </div>
                     
                     {/* Suggestions - Pills */}
-                    <div className="w-full max-w-2xl mx-auto">
-                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    <div className="w-full max-w-2xl mx-auto max-h-40 overflow-y-auto">
+                      <div className="flex flex-wrap justify-center gap-3">
                         {yaredBotAPI.getSuggestedQuestions().map((suggestion, index) => (
                           <button
                             key={index}
                             onClick={() => handleSuggestionClick(suggestion)}
-                            className="px-4 py-2 text-sm rounded-full border border-[#2A2A2A] bg-[#1F1F1F] hover:bg-[#2A2A2A] hover:border-gray-500 cursor-pointer transition-all text-gray-300 hover:text-white whitespace-nowrap flex-shrink-0"
+                            className="px-4 py-2 text-sm rounded-full border border-[#2A2A2A] bg-[#1F1F1F] hover:bg-[#2A2A2A] hover:border-gray-500 cursor-pointer transition-all text-gray-300 hover:text-white"
                           >
                             {suggestion}
                           </button>
