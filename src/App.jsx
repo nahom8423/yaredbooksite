@@ -142,9 +142,9 @@ function App() {
           safeAreaBottomPx = Math.max(32, nativeSafeArea + 16)
         } else {
           // Browser UI hidden or minimal - need safe zone to prevent toolbar activation
-          // Safari needs ~72px to prevent accidental toolbar triggering
-          const safariSafeZone = isMobileSafari ? 72 : 48
-          safeAreaBottomPx = Math.max(safariSafeZone, nativeSafeArea + 32)
+          // Reduced safe zone based on user feedback - closer to toolbar
+          const safariSafeZone = isMobileSafari ? 48 : 32
+          safeAreaBottomPx = Math.max(safariSafeZone, nativeSafeArea + 24)
         }
       }
       
@@ -657,7 +657,7 @@ function App() {
               onClick={scrollToBottom}
               className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 bg-[#2A2A2A] hover:bg-[#404040] rounded-full flex items-center justify-center shadow-lg border border-[#404040] transition-all z-10"
               style={{ 
-                bottom: `${safeAreaBottom + 120}px` // Position above message input with dynamic spacing
+                bottom: `${safeAreaBottom + 80}px` // Reduced spacing above message input
               }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
