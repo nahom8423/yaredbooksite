@@ -512,18 +512,16 @@ function App() {
                     </div>
                     
                     {/* Suggestions - Pills */}
-                    <div className="w-full max-w-2xl mx-auto max-h-40 overflow-y-auto">
-                      <div className="flex flex-wrap justify-center gap-3">
-                        {yaredBotAPI.getSuggestedQuestions().map((suggestion, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleSuggestionClick(suggestion)}
-                            className="px-4 py-2 text-sm rounded-full border border-[#2A2A2A] bg-[#1F1F1F] hover:bg-[#2A2A2A] hover:border-gray-500 cursor-pointer transition-all text-gray-300 hover:text-white"
-                          >
-                            {suggestion}
-                          </button>
-                        ))}
-                      </div>
+                    <div className="flex flex-wrap justify-center gap-3 max-w-2xl mx-auto">
+                      {yaredBotAPI.getSuggestedQuestions().map((suggestion, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          className="px-4 py-2 text-sm rounded-full border border-[#2A2A2A] bg-[#1F1F1F] hover:bg-[#2A2A2A] hover:border-gray-500 cursor-pointer transition-all text-gray-300 hover:text-white"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -569,7 +567,7 @@ function App() {
           {showScrollToBottom && (
             <button
               onClick={scrollToBottom}
-              className="absolute bottom-28 left-1/2 transform -translate-x-1/2 w-10 h-10 bg-[#2A2A2A] hover:bg-[#404040] rounded-full flex items-center justify-center shadow-lg border border-[#404040] transition-all z-10"
+              className="absolute bottom-36 left-1/2 transform -translate-x-1/2 w-10 h-10 bg-[#2A2A2A] hover:bg-[#404040] rounded-full flex items-center justify-center shadow-lg border border-[#404040] transition-all z-10"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                 <path d="M7 10l5 5 5-5"/>
