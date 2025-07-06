@@ -499,7 +499,7 @@ function App() {
             <div className="max-w-3xl mx-auto py-8">
               {messages.length === 0 ? (
                 /* Welcome Screen */
-                <div className="flex-1 flex flex-col justify-center">
+                <div className="flex-1 flex flex-col justify-center pb-32">
                   <div className="text-center">
                     <div className="w-16 h-16 mx-auto mb-6 rounded-full overflow-hidden">
                       <img src={saintYaredImage} alt="Kidus Yared" className="w-full h-full object-cover" />
@@ -527,7 +527,7 @@ function App() {
                 </div>
               ) : (
                 /* Chat Messages */
-                <div className="pb-32">
+                <div className="pb-40">
                   {messages.map((message) => {
                     // Find thinking record that corresponds to this AI message
                     const thinkingRecord = thinkingHistory.find(
