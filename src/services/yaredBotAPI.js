@@ -3,9 +3,9 @@
  * Connects to the Discord AI API for Ethiopian Orthodox knowledge
  */
 
-// Use environment variable or fallback to localhost for development
+// Use environment variable or fallback to Railway production URL
 // Production site: https://nahom8423.github.io/yaredbooksite/
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://web-production-28e35.up.railway.app';
 
 class YaredBotAPI {
   constructor() {
@@ -58,7 +58,10 @@ class YaredBotAPI {
         chatId,
         currentSessionId,
         message: message.trim(),
-        hasSession: !!currentSessionId
+        hasSession: !!currentSessionId,
+        apiUrl: this.apiUrl,
+        userAgent: navigator.userAgent,
+        isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
       });
       
       const response = await fetch(`${this.apiUrl}/chat`, {
@@ -72,8 +75,17 @@ class YaredBotAPI {
           session_id: currentSessionId, // Include session for conversation memory
           channel_type: 'web' // Specify this is from web interface
         }),
-        // Add timeout for mobile networks
-        signal: AbortSignal.timeout(30000) // 30 second timeout
+        // Add timeout for mobile networks with fallback for older browsers
+        signal: (() => {
+          try {
+            if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) {
+              return AbortSignal.timeout(30000); // 30 second timeout for modern browsers
+            }
+          } catch (e) {
+            console.warn('AbortSignal.timeout not supported, using fallback');
+          }
+          return undefined; // Fallback for older mobile browsers
+        })()
       });
 
       if (!response.ok) {
@@ -113,13 +125,26 @@ class YaredBotAPI {
     } catch (error) {
       console.error('Error calling Yared Bot API:', error);
       
-      // Fallback response
+      // Enhanced error handling for mobile
       let fallbackMessage;
-      if (error.message.includes('fetch')) {
-        fallbackMessage = 'I cannot connect to the server right now. Please make sure the Yared Bot API is running on localhost:5000.';
+      if (error.name === 'TypeError' || error.message.includes('fetch')) {
+        fallbackMessage = 'Network connection error. Please check your internet connection and try again.';
+      } else if (error.name === 'TimeoutError' || error.message.includes('timeout')) {
+        fallbackMessage = 'Request timed out. Please try again.';
+      } else if (error.message.includes('AI service not configured')) {
+        fallbackMessage = 'AI service is temporarily unavailable. Please try again in a moment.';
       } else {
         fallbackMessage = 'I apologize, but I encountered an error while processing your request. Please try again.';
       }
+      
+      // Log additional debug info for mobile
+      console.error('Mobile debug info:', {
+        errorName: error.name,
+        errorMessage: error.message,
+        apiUrl: this.apiUrl,
+        userAgent: navigator.userAgent,
+        online: navigator.onLine
+      });
       
       return {
         response: fallbackMessage,
