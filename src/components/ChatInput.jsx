@@ -41,7 +41,11 @@ export default function ChatInput({ onSendMessage, isLoading }) {
         onKeyDown={handleKeyDown}
         placeholder="Message Kidus Yared AI"
         disabled={isLoading}
-        className="flex-1 bg-transparent text-white placeholder-[#9f9f9f] outline-none disabled:opacity-50"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck="false"
+        className="flex-1 bg-transparent text-white placeholder-[#9f9f9f] outline-none disabled:opacity-50 text-base"
       />
       
       <button 

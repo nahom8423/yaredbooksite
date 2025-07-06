@@ -140,9 +140,12 @@ function App() {
   // Check if mobile on mount and window resize
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-      if (window.innerWidth < 768) {
+      const isMobileDevice = window.innerWidth < 768 || 
+                           /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      setIsMobile(isMobileDevice)
+      if (isMobileDevice) {
         setSidebarVisible(false)
+        setMobileMenuOpen(false)
       } else {
         setSidebarVisible(true)
         setMobileMenuOpen(false)
@@ -151,7 +154,11 @@ function App() {
     
     checkMobile()
     window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    window.addEventListener('orientationchange', checkMobile)
+    return () => {
+      window.removeEventListener('resize', checkMobile)
+      window.removeEventListener('orientationchange', checkMobile)
+    }
   }, [])
 
   // Handle sending messages to Yared Bot
@@ -409,7 +416,7 @@ function App() {
     }
   }, [messages, isLoading])
   return (
-    <div className="flex bg-[#171717] h-screen relative overflow-hidden">
+    <div className="flex bg-[#171717] h-screen relative overflow-hidden touch-none">
       {/* Mobile overlay */}
       {isMobile && (
         <div 
@@ -454,9 +461,10 @@ function App() {
         <div className="flex-1 bg-[#171717] text-white flex flex-col h-full relative">
           {/* Scrollable content area */}
           <div 
-            className="flex-1 overflow-y-auto px-6"
+            className="flex-1 overflow-y-auto px-6 overscroll-behavior-none"
             onScroll={handleScroll}
             ref={setScrollRef}
+            style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <div className="max-w-3xl mx-auto py-8">
               {messages.length === 0 ? (
