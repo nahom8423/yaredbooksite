@@ -8,5 +8,14 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
+  define: {
+    // Fix for crypto.hash issues
+    global: 'globalThis',
   },
 })

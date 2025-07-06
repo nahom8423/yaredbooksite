@@ -4,6 +4,7 @@
  */
 
 // Use environment variable or fallback to localhost for development
+// Production site: https://nahom8423.github.io/yaredbooksite/
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 class YaredBotAPI {
