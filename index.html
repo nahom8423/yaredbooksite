@@ -110,9 +110,16 @@
         background-color: #171717;
       }
       
+      :root {
+        --app-height: 100vh;
+        --viewport-height: 100vh;
+        --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      
       #root {
         height: 100vh;
         height: 100dvh; /* Dynamic viewport height for mobile */
+        height: var(--app-height); /* Fallback for older browsers */
         width: 100vw;
         overflow: hidden;
       }
@@ -140,6 +147,29 @@
           bottom: 0;
           background-color: #171717;
           z-index: -1;
+        }
+      }
+      
+      /* Mobile-specific input positioning fixes */
+      .mobile-input-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 20;
+        /* Fallback for browsers without env() support */
+        padding-bottom: 72px;
+        /* Progressive enhancement with env() */
+        padding-bottom: max(72px, env(safe-area-inset-bottom, 16px));
+        /* Handle virtual keyboard on supporting browsers */
+        transform: translateY(max(0px, env(keyboard-inset-height, 0px)));
+      }
+      
+      /* Safe zone to prevent Safari toolbar activation */
+      @media (max-width: 768px) {
+        .mobile-input-container {
+          /* Safari needs extra space to prevent accidental toolbar trigger */
+          padding-bottom: max(84px, env(safe-area-inset-bottom, 72px));
         }
       }
       

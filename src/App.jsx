@@ -95,72 +95,111 @@ function App() {
   const [thinkingHistory, setThinkingHistory] = useState([])
   const [safeAreaBottom, setSafeAreaBottom] = useState(0)
 
-  // Detect safe area and dynamic viewport for mobile bottom spacing
+  // Enhanced mobile viewport handling with CSS custom properties
   useEffect(() => {
+    const updateViewportHeight = () => {
+      // Set CSS custom property for 100vh fix
+      const vh = window.innerHeight * 0.01
+      document.documentElement.style.setProperty('--vh', `${vh}px`)
+      
+      // Update app height with visual viewport if available
+      const visualHeight = window.visualViewport?.height || window.innerHeight
+      document.documentElement.style.setProperty('--app-height', `${visualHeight}px`)
+      document.documentElement.style.setProperty('--viewport-height', `${visualHeight}px`)
+    }
+
     const updateSafeArea = () => {
       const isMobileSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
       const isAndroid = /Android/.test(navigator.userAgent)
       const isMobile = isMobileSafari || isAndroid
       
-      // Get CSS env() value for safe area bottom
-      const safeAreaBottomValue = getComputedStyle(document.documentElement)
-        .getPropertyValue('env(safe-area-inset-bottom)') || '0px'
-      const safeAreaPixels = parseInt(safeAreaBottomValue) || 0
+      // Get the actual visual viewport height
+      const visualViewport = window.visualViewport
+      const viewportHeight = visualViewport?.height || window.innerHeight
+      const windowHeight = window.innerHeight
       
-      // Calculate dynamic spacing based on viewport changes (toolbar show/hide)
-      const viewportHeight = window.visualViewport?.height || window.innerHeight
-      const screenHeight = window.screen.height
-      const heightDifference = screenHeight - viewportHeight
-      
-      // Base padding for different scenarios
-      let basePadding = 16 // Default desktop spacing
+      // Calculate safe area bottom accounting for browser UI
+      let safeAreaBottomPx = 16 // Base padding
       
       if (isMobile) {
-        // Mobile toolbar detection and spacing
+        // For mobile, we need to account for:
+        // 1. Native safe areas (notches, home indicators)
+        // 2. Browser toolbar visibility
+        // 3. Prevent accidental toolbar activation
+        
+        const safeAreaBottomValue = getComputedStyle(document.documentElement)
+          .getPropertyValue('env(safe-area-inset-bottom)') || '0px'
+        const nativeSafeArea = parseInt(safeAreaBottomValue) || 0
+        
+        // Detect if browser UI is visible by comparing heights
+        const heightDifference = windowHeight - viewportHeight
+        
         if (heightDifference > 100) {
-          // Keyboard or large toolbar visible - reduce spacing
-          basePadding = 8
-        } else if (heightDifference > 50) {
-          // Toolbar visible - moderate spacing
-          basePadding = 24
+          // Keyboard is visible - minimal spacing
+          safeAreaBottomPx = Math.max(8, nativeSafeArea)
+        } else if (heightDifference > 10) {
+          // Browser UI partially visible - moderate spacing
+          safeAreaBottomPx = Math.max(32, nativeSafeArea + 16)
         } else {
-          // Toolbar hidden or minimal - more spacing needed
-          basePadding = isMobileSafari ? 64 : 48
+          // Browser UI hidden or minimal - need safe zone to prevent toolbar activation
+          // Safari needs ~72px to prevent accidental toolbar triggering
+          const safariSafeZone = isMobileSafari ? 72 : 48
+          safeAreaBottomPx = Math.max(safariSafeZone, nativeSafeArea + 32)
         }
       }
       
-      // Combine safe area with dynamic padding
-      const totalBottomSpacing = Math.max(basePadding + safeAreaPixels, 16)
-      setSafeAreaBottom(totalBottomSpacing)
+      setSafeAreaBottom(safeAreaBottomPx)
       
-      console.log('Safe area update:', {
+      // Set CSS custom property for easier use in styles
+      document.documentElement.style.setProperty('--safe-bottom', `${safeAreaBottomPx}px`)
+      
+      console.log('Viewport update:', {
         isMobile,
-        safeAreaPixels,
         viewportHeight,
-        screenHeight,
-        heightDifference,
-        basePadding,
-        totalBottomSpacing
+        windowHeight,
+        heightDifference: windowHeight - viewportHeight,
+        safeAreaBottomPx,
+        userAgent: navigator.userAgent.substr(0, 50)
       })
     }
 
+    // Initial update
+    updateViewportHeight()
     updateSafeArea()
     
-    // Listen to both resize and visual viewport changes
-    window.addEventListener('resize', updateSafeArea)
-    window.addEventListener('orientationchange', updateSafeArea)
+    // Standard event listeners
+    window.addEventListener('resize', () => {
+      updateViewportHeight()
+      updateSafeArea()
+    })
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        updateViewportHeight()
+        updateSafeArea()
+      }, 100) // Delay for orientation change completion
+    })
     
-    // Visual viewport for dynamic toolbar detection
+    // Visual viewport API for better mobile support
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateSafeArea)
+      const handleVisualViewportChange = () => {
+        updateViewportHeight()
+        updateSafeArea()
+      }
+      
+      window.visualViewport.addEventListener('resize', handleVisualViewportChange)
+      window.visualViewport.addEventListener('scroll', handleVisualViewportChange)
+      
+      return () => {
+        window.removeEventListener('resize', updateViewportHeight)
+        window.removeEventListener('orientationchange', updateSafeArea)
+        window.visualViewport.removeEventListener('resize', handleVisualViewportChange)
+        window.visualViewport.removeEventListener('scroll', handleVisualViewportChange)
+      }
     }
     
     return () => {
-      window.removeEventListener('resize', updateSafeArea)
+      window.removeEventListener('resize', updateViewportHeight)
       window.removeEventListener('orientationchange', updateSafeArea)
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', updateSafeArea)
-      }
     }
   }, [])
 
@@ -627,10 +666,15 @@ function App() {
             </button>
           )}
           
-          {/* Sticky chat input */}
+          {/* Sticky chat input with enhanced mobile positioning */}
           <div 
-            className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#171717] via-[#171717] to-transparent"
-            style={{ paddingBottom: `${safeAreaBottom}px` }}
+            className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#171717] via-[#171717] to-transparent z-20"
+            style={{ 
+              paddingBottom: `max(${safeAreaBottom}px, env(safe-area-inset-bottom, 16px))`,
+              transform: `translateY(max(0px, env(keyboard-inset-height, 0px)))`,
+              // Use CSS custom properties for better mobile support
+              bottom: 'max(0px, env(safe-area-inset-bottom, 0px))'
+            }}
           >
             <div className="max-w-4xl mx-auto">
               <ChatInput 
