@@ -1,10 +1,10 @@
 import sidebarIcon from '../assets/icons/sidebar.png'
+import settingsIcon from '../assets/icons/settings.png'
 
 export default function ChatHeader({ isMobile, onMenuToggle, saintYaredMode, onToggleSaintYaredMode, currentTheme, onToggleSettings }) {
   return (
     <div 
-      className={`px-4 py-3 flex items-center justify-between md:justify-center ${saintYaredMode ? 'saint-yared-content' : ''}`}
-      style={!saintYaredMode ? { backgroundColor: currentTheme.background } : {}}
+      className={`px-4 py-3 flex items-center justify-between md:justify-center ${saintYaredMode ? 'saint-yared-content' : 'bg-[#171717]'}`}
     >
       {/* Mobile menu button */}
       {isMobile && (
@@ -23,7 +23,7 @@ export default function ChatHeader({ isMobile, onMenuToggle, saintYaredMode, onT
       
       {/* Desktop Settings Button */}
       {!isMobile && (
-        <div className="absolute right-4 top-3">
+        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10">
           <button 
             onClick={onToggleSettings}
             className="w-8 h-8 flex items-center justify-center rounded-md transition-colors"
@@ -32,11 +32,7 @@ export default function ChatHeader({ isMobile, onMenuToggle, saintYaredMode, onT
             onMouseLeave={(e) => e.target.style.backgroundColor = currentTheme.hover}
             title="Settings"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="m12 1 0 6m0 6 0 6"/>
-              <path d="m21 12-6 0m-6 0-6 0"/>
-            </svg>
+            <img src={settingsIcon} alt="Settings" className="w-4 h-4" />
           </button>
         </div>
       )}

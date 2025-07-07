@@ -625,8 +625,7 @@ function App() {
   
   return (
     <div 
-      className={`flex h-screen relative overflow-hidden touch-none ${saintYaredMode ? 'bg-transparent' : ''}`}
-      style={!saintYaredMode ? { backgroundColor: currentTheme.background } : {}}
+      className={`flex h-screen relative overflow-hidden touch-none ${saintYaredMode ? 'bg-transparent' : 'bg-[#171717]'}`}
     >
       {/* Saint Yared Background Mode */}
       {saintYaredMode && (
@@ -688,8 +687,7 @@ function App() {
         
         {/* Chat content */}
         <div 
-          className={`flex-1 text-white flex flex-col h-full relative ${saintYaredMode ? 'saint-yared-content' : ''}`}
-          style={!saintYaredMode ? { backgroundColor: currentTheme.background } : {}}
+          className={`flex-1 text-white flex flex-col h-full relative ${saintYaredMode ? 'saint-yared-content' : 'bg-[#171717]'}`}
         >
           {/* Scrollable content area */}
           <div 
@@ -797,7 +795,7 @@ function App() {
             className={`fixed bottom-0 left-0 right-0 p-6 z-20 ${saintYaredMode ? 'saint-yared-input' : ''}`}
             style={{
               ...(saintYaredMode ? {} : {
-                background: `linear-gradient(to top, ${currentTheme.background}, ${currentTheme.background}, transparent)`
+                backgroundColor: '#171717'
               }),
               paddingBottom: `max(${safeAreaBottom}px, env(safe-area-inset-bottom, 16px))`,
               transform: `translateY(max(0px, env(keyboard-inset-height, 0px)))`,
