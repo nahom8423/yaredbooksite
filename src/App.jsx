@@ -94,6 +94,7 @@ function App() {
   const [thinkingText, setThinkingText] = useState('')
   const [thinkingHistory, setThinkingHistory] = useState([])
   const [safeAreaBottom, setSafeAreaBottom] = useState(0)
+  const [saintYaredMode, setSaintYaredMode] = useState(false)
 
   // Enhanced mobile viewport handling with CSS custom properties
   useEffect(() => {
@@ -509,6 +510,11 @@ function App() {
     handleSendMessage(suggestion)
   }
 
+  // Toggle Saint Yared background mode
+  const toggleSaintYaredMode = () => {
+    setSaintYaredMode(!saintYaredMode)
+  }
+
   // Handle scroll events
   const handleScroll = (e) => {
     const container = e.target
@@ -534,7 +540,14 @@ function App() {
     }
   }, [messages, isLoading])
   return (
-    <div className="flex bg-[#1A0F08] h-screen relative overflow-hidden touch-none">
+    <div className={`flex h-screen relative overflow-hidden touch-none ${saintYaredMode ? 'bg-transparent' : 'bg-[#1A0F08]'}`}>
+      {/* Saint Yared Background Mode */}
+      {saintYaredMode && (
+        <>
+          <div className="saint-yared-background"></div>
+          <div className="saint-yared-overlay"></div>
+        </>
+      )}
       {/* Mobile overlay */}
       {isMobile && (
         <div 
@@ -564,6 +577,7 @@ function App() {
             onChatDelete={handleChatDelete}
             onChatRename={handleChatRename}
             newChatCreated={newChatCreated}
+            saintYaredMode={saintYaredMode}
           />
         </div>
       )}
@@ -573,10 +587,12 @@ function App() {
         <ChatHeader 
           isMobile={isMobile}
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+          saintYaredMode={saintYaredMode}
+          onToggleSaintYaredMode={toggleSaintYaredMode}
         />
         
         {/* Chat content */}
-        <div className="flex-1 bg-[#1A0F08] text-white flex flex-col h-full relative">
+        <div className={`flex-1 text-white flex flex-col h-full relative ${saintYaredMode ? 'saint-yared-content' : 'bg-[#1A0F08]'}`}>
           {/* Scrollable content area */}
           <div 
             className="flex-1 overflow-y-auto px-6 overscroll-behavior-none"
@@ -668,7 +684,7 @@ function App() {
           
           {/* Sticky chat input with enhanced mobile positioning */}
           <div 
-            className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#171717] via-[#171717] to-transparent z-20"
+            className={`fixed bottom-0 left-0 right-0 p-6 z-20 ${saintYaredMode ? 'saint-yared-input' : 'bg-gradient-to-t from-[#1A0F08] via-[#1A0F08] to-transparent'}`}
             style={{ 
               paddingBottom: `max(${safeAreaBottom}px, env(safe-area-inset-bottom, 16px))`,
               transform: `translateY(max(0px, env(keyboard-inset-height, 0px)))`,
@@ -680,6 +696,7 @@ function App() {
               <ChatInput 
                 onSendMessage={handleSendMessage}
                 isLoading={isLoading}
+                saintYaredMode={saintYaredMode}
               />
               {/* Disclaimer */}
               <p className="text-center text-xs text-gray-500 mt-3 mb-2">

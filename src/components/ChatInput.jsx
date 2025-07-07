@@ -2,7 +2,7 @@ import { useState } from 'react'
 import attachIcon from '../assets/icons/attach.png'
 import sendIcon from '../assets/icons/send.png'
 
-export default function ChatInput({ onSendMessage, isLoading }) {
+export default function ChatInput({ onSendMessage, isLoading, saintYaredMode }) {
   const [message, setMessage] = useState('')
   const hasText = message.trim().length > 0
 
@@ -22,7 +22,7 @@ export default function ChatInput({ onSendMessage, isLoading }) {
   }
 
   return (
-    <div className="w-full bg-[#342016] rounded-full h-11 px-2 flex items-center gap-2 focus-within:bg-[#3D251A] transition-colors">
+    <div className={`w-full rounded-full h-11 px-2 flex items-center gap-2 transition-colors ${saintYaredMode ? 'bg-[rgba(52,32,22,0.9)] focus-within:bg-[rgba(61,37,26,0.95)] backdrop-blur-sm border border-[rgba(61,37,26,0.4)]' : 'bg-[#342016] focus-within:bg-[#3D251A]'}`}>
       <button 
         className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 relative group"
         title="Attach file"

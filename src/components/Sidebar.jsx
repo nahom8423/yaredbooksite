@@ -4,7 +4,7 @@ import sidebarIcon from '../assets/icons/sidebar.png'
 import ellipsisIcon from '../assets/icons/ellipsis.png'
 import saintYaredImage from '../assets/images/saintyared.png'
 
-export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onChatSelect, currentChatId, onChatDelete, onChatRename, newChatCreated }) {
+export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onChatSelect, currentChatId, onChatDelete, onChatRename, newChatCreated, saintYaredMode }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [openDropdown, setOpenDropdown] = useState(null)
   const [isRenaming, setIsRenaming] = useState(null)
@@ -115,7 +115,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
 
   if (isCollapsed && !isMobile) {
     return (
-      <div className="w-12 bg-[#0F0804] text-white h-screen flex flex-col items-center py-3 transition-all duration-300 ease-in-out">
+      <div className={`w-12 text-white h-screen flex flex-col items-center py-3 transition-all duration-300 ease-in-out ${saintYaredMode ? 'saint-yared-sidebar' : 'bg-[#0F0804]'}`}>
         <button 
           onClick={() => setIsCollapsed(false)}
           className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#2F1B12] transition-colors mb-4"
@@ -127,7 +127,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
   }
 
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-64'} bg-[#0F0804] text-white h-screen flex flex-col transition-all duration-300 ease-in-out`}>
+    <div className={`${isMobile ? 'w-full' : 'w-64'} text-white h-screen flex flex-col transition-all duration-300 ease-in-out ${saintYaredMode ? 'saint-yared-sidebar' : 'bg-[#0F0804]'}`}>
       <div className="h-full flex flex-col">
       {/* Top header with icons */}
       <div className="flex items-center justify-between px-4 py-3">
