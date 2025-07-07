@@ -669,7 +669,7 @@ function App() {
           
           {/* Sticky chat input with enhanced mobile positioning */}
           <div 
-            className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#171717] via-[#171717] to-transparent z-20"
+            className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#171717] via-[#171717] to-transparent z-20"
             style={{ 
               paddingBottom: `max(${safeAreaBottom}px, env(safe-area-inset-bottom, 16px))`,
               transform: `translateY(max(0px, env(keyboard-inset-height, 0px)))`,
