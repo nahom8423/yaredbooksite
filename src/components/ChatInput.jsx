@@ -2,15 +2,9 @@ import { useState } from 'react'
 import attachIcon from '../assets/icons/attach.png'
 import sendIcon from '../assets/icons/send.png'
 
-export default function ChatInput({ onSendMessage, isLoading, saintYaredMode, currentTheme }) {
+export default function ChatInput({ onSendMessage, isLoading }) {
   const [message, setMessage] = useState('')
   const hasText = message.trim().length > 0
-
-  // Fallback theme if currentTheme is undefined
-  const theme = currentTheme || {
-    input: '#2d2d2d',
-    inputFocus: '#272727'
-  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -28,18 +22,7 @@ export default function ChatInput({ onSendMessage, isLoading, saintYaredMode, cu
   }
 
   return (
-    <div 
-      className={`w-full rounded-full h-11 px-2 flex items-center gap-2 transition-colors ${saintYaredMode ? 'backdrop-blur-sm border border-[rgba(61,37,26,0.4)]' : ''}`}
-      style={saintYaredMode ? {
-        backgroundColor: 'rgba(52,32,22,0.9)',
-        ':focus-within': { backgroundColor: 'rgba(61,37,26,0.95)' }
-      } : {
-        backgroundColor: theme.input,
-        ':focus-within': { backgroundColor: theme.inputFocus }
-      }}
-      onFocus={(e) => !saintYaredMode && (e.currentTarget.style.backgroundColor = theme.inputFocus)}
-      onBlur={(e) => !saintYaredMode && (e.currentTarget.style.backgroundColor = theme.input)}
-    >
+    <div className="w-full bg-[#2d2d2d] rounded-full h-11 px-2 flex items-center gap-2 focus-within:bg-[#272727] transition-colors">
       <button 
         className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 relative group"
         title="Attach file"

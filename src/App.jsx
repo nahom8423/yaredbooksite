@@ -94,9 +94,6 @@ function App() {
   const [thinkingText, setThinkingText] = useState('')
   const [thinkingHistory, setThinkingHistory] = useState([])
   const [safeAreaBottom, setSafeAreaBottom] = useState(0)
-  const [saintYaredMode, setSaintYaredMode] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
-  const [colorTheme, setColorTheme] = useState('dark-brown') // 'dark-brown', 'warm-brown', 'coffee', 'original', 'forest', 'burgundy'
 
   // Enhanced mobile viewport handling with CSS custom properties
   useEffect(() => {
@@ -512,90 +509,6 @@ function App() {
     handleSendMessage(suggestion)
   }
 
-  // Color theme definitions
-  const colorThemes = {
-    'original': {
-      background: '#171717',
-      sidebar: '#0f0f0f', 
-      element: '#1F1F1F',
-      hover: '#2A2A2A',
-      button: '#404040',
-      input: '#2d2d2d',
-      inputFocus: '#272727'
-    },
-    'dark-brown': {
-      background: '#1A0F08',
-      sidebar: '#0F0804',
-      element: '#261510', 
-      hover: '#2F1B12',
-      button: '#3D251A',
-      input: '#342016',
-      inputFocus: '#3D251A'
-    },
-    'warm-brown': {
-      background: '#2D1810',
-      sidebar: '#1F0F08',
-      element: '#3A2218',
-      hover: '#4A2E1A',
-      button: '#5A3922',
-      input: '#4A2E1A',
-      inputFocus: '#5A3922'
-    },
-    'coffee': {
-      background: '#1C110A',
-      sidebar: '#130A05',
-      element: '#2A1B12',
-      hover: '#362318',
-      button: '#42301F',
-      input: '#362318',
-      inputFocus: '#42301F'
-    },
-    'forest': {
-      background: '#0A1A0F',
-      sidebar: '#051508',
-      element: '#122615',
-      hover: '#182F1B',
-      button: '#1F3D25',
-      input: '#182F1B',
-      inputFocus: '#1F3D25'
-    },
-    'burgundy': {
-      background: '#1A0A0F',
-      sidebar: '#0F0508',
-      element: '#261215',
-      hover: '#2F181B',
-      button: '#3D1F25',
-      input: '#2F181B',
-      inputFocus: '#3D1F25'
-    }
-  }
-
-  // Get current theme colors
-  const getCurrentTheme = () => colorThemes[colorTheme]
-
-  // Toggle Saint Yared background mode
-  const toggleSaintYaredMode = () => {
-    setSaintYaredMode(!saintYaredMode)
-  }
-
-  // Toggle settings panel
-  const toggleSettings = () => {
-    setShowSettings(!showSettings)
-  }
-
-  // Change color theme
-  const changeColorTheme = (theme) => {
-    setColorTheme(theme)
-    localStorage.setItem('yared_color_theme', theme)
-  }
-
-  // Load saved theme on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('yared_color_theme')
-    if (savedTheme && colorThemes[savedTheme]) {
-      setColorTheme(savedTheme)
-    }
-  }, [])
 
   // Handle scroll events
   const handleScroll = (e) => {
@@ -621,19 +534,8 @@ function App() {
       scrollRef.scrollTop = scrollRef.scrollHeight
     }
   }, [messages, isLoading])
-  const currentTheme = getCurrentTheme()
-  
   return (
-    <div 
-      className={`flex h-screen relative overflow-hidden touch-none ${saintYaredMode ? 'bg-transparent' : 'bg-[#171717]'}`}
-    >
-      {/* Saint Yared Background Mode */}
-      {saintYaredMode && (
-        <>
-          <div className="saint-yared-background"></div>
-          <div className="saint-yared-overlay"></div>
-        </>
-      )}
+    <div className="flex h-screen bg-[#171717] relative overflow-hidden touch-none">
       {/* Mobile overlay */}
       {isMobile && (
         <div 
@@ -663,13 +565,6 @@ function App() {
             onChatDelete={handleChatDelete}
             onChatRename={handleChatRename}
             newChatCreated={newChatCreated}
-            saintYaredMode={saintYaredMode}
-            currentTheme={currentTheme}
-            showSettings={showSettings}
-            onToggleSettings={toggleSettings}
-            colorThemes={colorThemes}
-            currentColorTheme={colorTheme}
-            onChangeColorTheme={changeColorTheme}
           />
         </div>
       )}
@@ -679,16 +574,10 @@ function App() {
         <ChatHeader 
           isMobile={isMobile}
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
-          saintYaredMode={saintYaredMode}
-          onToggleSaintYaredMode={toggleSaintYaredMode}
-          currentTheme={currentTheme}
-          onToggleSettings={toggleSettings}
         />
         
         {/* Chat content */}
-        <div 
-          className={`flex-1 text-white flex flex-col h-full relative ${saintYaredMode ? 'saint-yared-content' : 'bg-[#171717]'}`}
-        >
+        <div className="flex-1 bg-[#171717] text-white flex flex-col h-full relative">
           {/* Scrollable content area */}
           <div 
             className="flex-1 overflow-y-auto px-6 overscroll-behavior-none"
@@ -717,14 +606,7 @@ function App() {
                         <button
                           key={index}
                           onClick={() => handleSuggestionClick(suggestion)}
-                          className="px-4 py-2 text-sm rounded-full cursor-pointer transition-all text-gray-300 hover:text-white"
-                          style={{
-                            border: `1px solid ${currentTheme.hover}`,
-                            backgroundColor: currentTheme.element,
-                            '--hover-bg': currentTheme.hover
-                          }}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = currentTheme.hover}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = currentTheme.element}
+                          className="px-4 py-2 text-sm rounded-full border border-[#2A2A2A] bg-[#1F1F1F] hover:bg-[#2A2A2A] hover:border-gray-500 cursor-pointer transition-all text-gray-300 hover:text-white"
                         >
                           {suggestion}
                         </button>
@@ -774,15 +656,10 @@ function App() {
           {showScrollToBottom && (
             <button
               onClick={scrollToBottom}
-              className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all z-10"
+              className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 bg-[#2A2A2A] hover:bg-[#404040] rounded-full flex items-center justify-center shadow-lg border border-[#404040] transition-all z-10"
               style={{ 
-                bottom: `${safeAreaBottom + 60}px`, // Much closer to message input
-                backgroundColor: currentTheme.hover,
-                borderColor: currentTheme.button,
-                border: `1px solid ${currentTheme.button}`
+                bottom: `${safeAreaBottom + 120}px` // Position above message input with dynamic spacing
               }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = currentTheme.button}
-              onMouseLeave={(e) => e.target.style.backgroundColor = currentTheme.hover}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                 <path d="M7 10l5 5 5-5"/>
@@ -792,22 +669,18 @@ function App() {
           
           {/* Sticky chat input with enhanced mobile positioning */}
           <div 
-            className={`fixed bottom-0 left-0 right-0 p-6 z-20 ${saintYaredMode ? 'saint-yared-input' : ''}`}
-            style={{
-              ...(saintYaredMode ? {} : {
-                backgroundColor: '#171717'
-              }),
+            className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#171717] via-[#171717] to-transparent z-20"
+            style={{ 
               paddingBottom: `max(${safeAreaBottom}px, env(safe-area-inset-bottom, 16px))`,
               transform: `translateY(max(0px, env(keyboard-inset-height, 0px)))`,
+              // Use CSS custom properties for better mobile support
               bottom: 'max(0px, env(safe-area-inset-bottom, 0px))'
             }}
           >
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <ChatInput 
                 onSendMessage={handleSendMessage}
                 isLoading={isLoading}
-                saintYaredMode={saintYaredMode}
-                currentTheme={currentTheme}
               />
               {/* Disclaimer */}
               <p className="text-center text-xs text-gray-500 mt-3 mb-2">

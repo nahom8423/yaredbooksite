@@ -4,7 +4,7 @@ import sidebarIcon from '../assets/icons/sidebar.png'
 import ellipsisIcon from '../assets/icons/ellipsis.png'
 import saintYaredImage from '../assets/images/saintyared.png'
 
-export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onChatSelect, currentChatId, onChatDelete, onChatRename, newChatCreated, saintYaredMode, currentTheme, showSettings, onToggleSettings, colorThemes, currentColorTheme, onChangeColorTheme }) {
+export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onChatSelect, currentChatId, onChatDelete, onChatRename, newChatCreated }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [openDropdown, setOpenDropdown] = useState(null)
   const [isRenaming, setIsRenaming] = useState(null)
@@ -115,13 +115,10 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
 
   if (isCollapsed && !isMobile) {
     return (
-      <div 
-        className={`w-12 text-white h-screen flex flex-col items-center py-3 transition-all duration-300 ease-in-out ${saintYaredMode ? 'saint-yared-sidebar' : ''}`}
-        style={!saintYaredMode ? { backgroundColor: currentTheme.sidebar } : {}}
-      >
+      <div className="w-12 bg-[#0f0f0f] text-white h-screen flex flex-col items-center py-3 transition-all duration-300 ease-in-out">
         <button 
           onClick={() => setIsCollapsed(false)}
-          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[rgba(0,0,0,0.2)] transition-colors mb-4"
+          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#2A2A2A] transition-colors mb-4"
         >
           <img src={sidebarIcon} alt="Expand sidebar" className="w-4 h-4" />
         </button>
@@ -130,10 +127,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
   }
 
   return (
-    <div 
-      className={`${isMobile ? 'w-full' : 'w-64'} text-white h-screen flex flex-col transition-all duration-300 ease-in-out ${saintYaredMode ? 'saint-yared-sidebar' : ''}`}
-      style={!saintYaredMode ? { backgroundColor: currentTheme.sidebar } : {}}
-    >
+    <div className={`${isMobile ? 'w-full' : 'w-64'} bg-[#0f0f0f] text-white h-screen flex flex-col transition-all duration-300 ease-in-out`}>
       <div className="h-full flex flex-col">
       {/* Top header with icons */}
       <div className="flex items-center justify-between px-4 py-3">
@@ -141,7 +135,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
         {!isMobile && (
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[rgba(0,0,0,0.2)] transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#2A2A2A] transition-colors"
           >
             <img src={sidebarIcon} alt="Toggle sidebar" className="w-4 h-4" />
           </button>
@@ -151,7 +145,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
         {isMobile && (
           <button 
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[rgba(0,0,0,0.2)] transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#2A2A2A] transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18"/>
@@ -163,7 +157,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
         {/* New Message Icon - Right side */}
         <button 
           onClick={() => handleItemClick(onNewChat)}
-          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[rgba(0,0,0,0.2)] transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#2A2A2A] transition-colors"
         >
           <img src={newMessageIcon} alt="New message" className="w-4 h-4" />
         </button>
@@ -171,7 +165,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
 
       {/* Model Selection */}
       <div className="px-3 pb-3">
-        <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[rgba(0,0,0,0.2)] transition-colors">
+        <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#1A1A1A] transition-colors">
           <div className="w-6 h-6 rounded-full overflow-hidden">
             <img src={saintYaredImage} alt="Kidus Yared" className="w-full h-full object-cover" />
           </div>
@@ -310,17 +304,9 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
         )}
       </div>
 
-      {/* Bottom Menu Section */}
-      <div className="p-3 space-y-1">
-        {/* Donate Button */}
-        <div 
-          className="flex items-center space-x-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors"
-          style={{
-            ':hover': { backgroundColor: currentTheme.hover }
-          }}
-          onMouseEnter={(e) => e.target.style.backgroundColor = currentTheme.hover}
-          onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-        >
+      {/* Bottom Invite Section */}
+      <div className="p-3">
+        <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#2A2A2A] cursor-pointer transition-colors">
           <div className="w-6 h-6 flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -331,81 +317,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
           </div>
           <span className="text-gray-300 text-sm">Donate</span>
         </div>
-
-        {/* Settings Button */}
-        <div 
-          onClick={onToggleSettings}
-          className="flex items-center space-x-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors"
-          style={{
-            backgroundColor: showSettings ? currentTheme.hover : 'transparent'
-          }}
-          onMouseEnter={(e) => !showSettings && (e.target.style.backgroundColor = currentTheme.hover)}
-          onMouseLeave={(e) => !showSettings && (e.target.style.backgroundColor = 'transparent')}
-        >
-          <div className="w-6 h-6 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="m12 1 0 6m0 6 0 6"/>
-              <path d="m21 12-6 0m-6 0-6 0"/>
-            </svg>
-          </div>
-          <span className="text-gray-300 text-sm">Settings</span>
-        </div>
       </div>
-
-      {/* Settings Panel */}
-      {showSettings && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="rounded-xl p-6 max-w-md w-full shadow-2xl border"
-            style={{
-              backgroundColor: currentTheme.background,
-              borderColor: currentTheme.button
-            }}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-white">Customize</h3>
-              <button 
-                onClick={onToggleSettings}
-                className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-                style={{ backgroundColor: currentTheme.hover }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = currentTheme.button}
-                onMouseLeave={(e) => e.target.style.backgroundColor = currentTheme.hover}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-gray-300 mb-3">Color Themes</h4>
-                <div className="grid grid-cols-3 gap-3">
-                  {Object.entries(colorThemes).map(([themeKey, theme]) => (
-                    <button
-                      key={themeKey}
-                      onClick={() => onChangeColorTheme(themeKey)}
-                      className={`w-12 h-12 rounded-full border-2 transition-all ${
-                        currentColorTheme === themeKey 
-                          ? 'border-white scale-110' 
-                          : 'border-gray-600 hover:border-gray-400'
-                      }`}
-                      style={{
-                        background: themeKey === 'forest' || themeKey === 'burgundy' 
-                          ? `linear-gradient(135deg, ${theme.sidebar} 0%, ${theme.button} 100%)`
-                          : theme.sidebar
-                      }}
-                      title={themeKey.charAt(0).toUpperCase() + themeKey.slice(1).replace('-', ' ')}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       </div>
     </div>
   );
@@ -435,7 +347,7 @@ function ChatItem({
   return (
     <div className="relative group">
       {isRenaming === chat.id ? (
-        <div className="px-3 py-2.5 rounded-lg bg-[rgba(0,0,0,0.3)]">
+        <div className="px-3 py-2.5 rounded-lg bg-[#2A2A2A]">
           <input
             type="text"
             value={newTitle}
@@ -455,15 +367,12 @@ function ChatItem({
             onChatSelect(chat)
             if (isMobile && onClose) onClose()
           }}
-          className="w-full text-left px-3 py-2 rounded-lg transition-colors relative touch-manipulation"
-          style={{
-            backgroundColor: currentChatId === chat.id ? currentTheme.hover : 'transparent',
-            color: currentChatId === chat.id ? 'white' : '#D1D5DB',
-            WebkitTouchCallout: 'none', 
-            WebkitUserSelect: 'none'
-          }}
-          onMouseEnter={(e) => currentChatId !== chat.id && (e.target.style.backgroundColor = currentTheme.element)}
-          onMouseLeave={(e) => currentChatId !== chat.id && (e.target.style.backgroundColor = 'transparent')}
+          className={`w-full text-left px-3 py-2 rounded-lg transition-colors relative touch-manipulation ${
+            currentChatId === chat.id 
+              ? 'bg-[#2A2A2A] text-white' 
+              : 'hover:bg-[#1A1A1A] text-gray-300'
+          }`}
+          style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
         >
           <div className={`truncate text-sm pr-8 ${isAnimating ? 'animate-slide-in-words' : ''}`}>
             {isAnimating ? (
@@ -476,7 +385,7 @@ function ChatItem({
           {/* Ellipsis Button */}
           <button
             onClick={(e) => handleEllipsisClick(e, chat.id)}
-            className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-md hover:bg-[rgba(0,0,0,0.2)] flex items-center justify-center transition-opacity ${
+            className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-md hover:bg-[#404040] flex items-center justify-center transition-opacity ${
               isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}
           >
@@ -491,13 +400,13 @@ function ChatItem({
       
       {/* Dropdown Menu */}
       {openDropdown === chat.id && (
-        <div className={`absolute right-0 w-40 bg-[rgba(0,0,0,0.3)] border border-[rgba(0,0,0,0.4)] rounded-lg shadow-lg z-50 ${
+        <div className={`absolute right-0 w-40 bg-[#2A2A2A] border border-[#404040] rounded-lg shadow-lg z-50 ${
           dropdownPosition === 'top' ? 'bottom-0 mb-2' : 'top-0 mt-2'
         }`}>
           <div className="py-1">
             <button
               onClick={() => handleRenameStart(chat.id, chat.title)}
-              className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[rgba(0,0,0,0.2)] flex items-center gap-3"
+              className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#404040] flex items-center gap-3"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
@@ -506,7 +415,7 @@ function ChatItem({
             </button>
             <button
               onClick={() => handleDeleteClick(chat.id)}
-              className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-[rgba(0,0,0,0.2)] flex items-center gap-3"
+              className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-[#404040] flex items-center gap-3"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="3,6 5,6 21,6"/>
