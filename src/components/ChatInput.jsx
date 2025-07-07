@@ -22,7 +22,7 @@ export default function ChatInput({ onSendMessage, isLoading }) {
   }
 
   return (
-    <div className="w-full bg-[#2d2d2d] rounded-full h-11 px-2 flex items-center gap-2 focus-within:bg-[#272727] transition-colors">
+    <div className="w-full bg-[#4A342A] rounded-full h-11 px-2 flex items-center gap-2 focus-within:bg-[#5D4037] transition-colors">
       <button 
         className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 relative group"
         title="Attach file"

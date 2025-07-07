@@ -534,7 +534,7 @@ function App() {
     }
   }, [messages, isLoading])
   return (
-    <div className="flex bg-[#171717] h-screen relative overflow-hidden touch-none">
+    <div className="flex bg-[#2C1810] h-screen relative overflow-hidden touch-none">
       {/* Mobile overlay */}
       {isMobile && (
         <div 
@@ -576,7 +576,7 @@ function App() {
         />
         
         {/* Chat content */}
-        <div className="flex-1 bg-[#171717] text-white flex flex-col h-full relative">
+        <div className="flex-1 bg-[#2C1810] text-white flex flex-col h-full relative">
           {/* Scrollable content area */}
           <div 
             className="flex-1 overflow-y-auto px-6 overscroll-behavior-none"
@@ -605,7 +605,7 @@ function App() {
                         <button
                           key={index}
                           onClick={() => handleSuggestionClick(suggestion)}
-                          className="px-4 py-2 text-sm rounded-full border border-[#2A2A2A] bg-[#1F1F1F] hover:bg-[#2A2A2A] hover:border-gray-500 cursor-pointer transition-all text-gray-300 hover:text-white"
+                          className="px-4 py-2 text-sm rounded-full border border-[#4A3326] bg-[#3D2418] hover:bg-[#4A3326] hover:border-gray-500 cursor-pointer transition-all text-gray-300 hover:text-white"
                         >
                           {suggestion}
                         </button>
@@ -655,7 +655,7 @@ function App() {
           {showScrollToBottom && (
             <button
               onClick={scrollToBottom}
-              className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 bg-[#2A2A2A] hover:bg-[#404040] rounded-full flex items-center justify-center shadow-lg border border-[#404040] transition-all z-10"
+              className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 bg-[#4A3326] hover:bg-[#5D4037] rounded-full flex items-center justify-center shadow-lg border border-[#5D4037] transition-all z-10"
               style={{ 
                 bottom: `${safeAreaBottom + 60}px` // Much closer to message input
               }}
