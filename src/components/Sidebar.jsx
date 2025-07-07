@@ -115,10 +115,10 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
 
   if (isCollapsed && !isMobile) {
     return (
-      <div className="w-12 bg-[#2C1810] text-white h-screen flex flex-col items-center py-3 transition-all duration-300 ease-in-out">
+      <div className="w-12 bg-[#0F0804] text-white h-screen flex flex-col items-center py-3 transition-all duration-300 ease-in-out">
         <button 
           onClick={() => setIsCollapsed(false)}
-          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#4A3326] transition-colors mb-4"
+          className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[#2F1B12] transition-colors mb-4"
         >
           <img src={sidebarIcon} alt="Expand sidebar" className="w-4 h-4" />
         </button>
@@ -127,7 +127,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
   }
 
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-64'} bg-[#2C1810] text-white h-screen flex flex-col transition-all duration-300 ease-in-out`}>
+    <div className={`${isMobile ? 'w-full' : 'w-64'} bg-[#0F0804] text-white h-screen flex flex-col transition-all duration-300 ease-in-out`}>
       <div className="h-full flex flex-col">
       {/* Top header with icons */}
       <div className="flex items-center justify-between px-4 py-3">
@@ -135,7 +135,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
         {!isMobile && (
           <button 
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#4A3326] transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#2F1B12] transition-colors"
           >
             <img src={sidebarIcon} alt="Toggle sidebar" className="w-4 h-4" />
           </button>
@@ -145,7 +145,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
         {isMobile && (
           <button 
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#4A3326] transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#2F1B12] transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18"/>
@@ -157,7 +157,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
         {/* New Message Icon - Right side */}
         <button 
           onClick={() => handleItemClick(onNewChat)}
-          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#4A3326] transition-colors"
+          className="w-7 h-7 flex items-center justify-center rounded-md hover:bg-[#2F1B12] transition-colors"
         >
           <img src={newMessageIcon} alt="New message" className="w-4 h-4" />
         </button>
@@ -165,7 +165,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
 
       {/* Model Selection */}
       <div className="px-3 pb-3">
-        <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#3D2418] transition-colors">
+        <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#261510] transition-colors">
           <div className="w-6 h-6 rounded-full overflow-hidden">
             <img src={saintYaredImage} alt="Kidus Yared" className="w-full h-full object-cover" />
           </div>
@@ -306,7 +306,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
 
       {/* Bottom Invite Section */}
       <div className="p-3">
-        <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#4A3326] cursor-pointer transition-colors">
+        <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#2F1B12] cursor-pointer transition-colors">
           <div className="w-6 h-6 flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -347,7 +347,7 @@ function ChatItem({
   return (
     <div className="relative group">
       {isRenaming === chat.id ? (
-        <div className="px-3 py-2.5 rounded-lg bg-[#4A3326]">
+        <div className="px-3 py-2.5 rounded-lg bg-[#2F1B12]">
           <input
             type="text"
             value={newTitle}
@@ -369,8 +369,8 @@ function ChatItem({
           }}
           className={`w-full text-left px-3 py-2 rounded-lg transition-colors relative touch-manipulation ${
             currentChatId === chat.id 
-              ? 'bg-[#4A3326] text-white' 
-              : 'hover:bg-[#3D2418] text-gray-300'
+              ? 'bg-[#2F1B12] text-white' 
+              : 'hover:bg-[#261510] text-gray-300'
           }`}
           style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
         >
@@ -385,7 +385,7 @@ function ChatItem({
           {/* Ellipsis Button */}
           <button
             onClick={(e) => handleEllipsisClick(e, chat.id)}
-            className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-md hover:bg-[#5D4037] flex items-center justify-center transition-opacity ${
+            className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-md hover:bg-[#3D251A] flex items-center justify-center transition-opacity ${
               isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`}
           >
@@ -400,13 +400,13 @@ function ChatItem({
       
       {/* Dropdown Menu */}
       {openDropdown === chat.id && (
-        <div className={`absolute right-0 w-40 bg-[#4A3326] border border-[#5D4037] rounded-lg shadow-lg z-50 ${
+        <div className={`absolute right-0 w-40 bg-[#2F1B12] border border-[#3D251A] rounded-lg shadow-lg z-50 ${
           dropdownPosition === 'top' ? 'bottom-0 mb-2' : 'top-0 mt-2'
         }`}>
           <div className="py-1">
             <button
               onClick={() => handleRenameStart(chat.id, chat.title)}
-              className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#5D4037] flex items-center gap-3"
+              className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-[#3D251A] flex items-center gap-3"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
@@ -415,7 +415,7 @@ function ChatItem({
             </button>
             <button
               onClick={() => handleDeleteClick(chat.id)}
-              className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-[#5D4037] flex items-center gap-3"
+              className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-[#3D251A] flex items-center gap-3"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="3,6 5,6 21,6"/>
