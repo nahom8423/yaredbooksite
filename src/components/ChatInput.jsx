@@ -6,6 +6,12 @@ export default function ChatInput({ onSendMessage, isLoading, saintYaredMode, cu
   const [message, setMessage] = useState('')
   const hasText = message.trim().length > 0
 
+  // Fallback theme if currentTheme is undefined
+  const theme = currentTheme || {
+    input: '#2d2d2d',
+    inputFocus: '#272727'
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     if (hasText && !isLoading && onSendMessage) {
@@ -28,11 +34,11 @@ export default function ChatInput({ onSendMessage, isLoading, saintYaredMode, cu
         backgroundColor: 'rgba(52,32,22,0.9)',
         ':focus-within': { backgroundColor: 'rgba(61,37,26,0.95)' }
       } : {
-        backgroundColor: currentTheme.input,
-        ':focus-within': { backgroundColor: currentTheme.inputFocus }
+        backgroundColor: theme.input,
+        ':focus-within': { backgroundColor: theme.inputFocus }
       }}
-      onFocus={(e) => !saintYaredMode && (e.currentTarget.style.backgroundColor = currentTheme.inputFocus)}
-      onBlur={(e) => !saintYaredMode && (e.currentTarget.style.backgroundColor = currentTheme.input)}
+      onFocus={(e) => !saintYaredMode && (e.currentTarget.style.backgroundColor = theme.inputFocus)}
+      onBlur={(e) => !saintYaredMode && (e.currentTarget.style.backgroundColor = theme.input)}
     >
       <button 
         className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 relative group"
