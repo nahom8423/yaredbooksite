@@ -109,9 +109,14 @@ function App() {
     }
 
     const updateSafeArea = () => {
-      const isMobileSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
-      const isAndroid = /Android/.test(navigator.userAgent)
-      const isMobile = isMobileSafari || isAndroid
+      // Enhanced browser detection
+      const userAgent = navigator.userAgent
+      const isMobileSafari = /iPad|iPhone|iPod/.test(userAgent) && /Safari/.test(userAgent) && !/Chrome/.test(userAgent) && !window.MSStream
+      const isChromeIOS = /iPad|iPhone|iPod/.test(userAgent) && /Chrome/.test(userAgent) && !window.MSStream
+      const isAndroidChrome = /Android/.test(userAgent) && /Chrome/.test(userAgent)
+      const isAndroidFirefox = /Android/.test(userAgent) && /Firefox/.test(userAgent)
+      const isAndroidSamsung = /Android/.test(userAgent) && /SamsungBrowser/.test(userAgent)
+      const isMobile = isMobileSafari || isChromeIOS || isAndroidChrome || isAndroidFirefox || isAndroidSamsung
       
       // Get the actual visual viewport height
       const visualViewport = window.visualViewport
@@ -119,14 +124,10 @@ function App() {
       const windowHeight = window.innerHeight
       
       // Calculate safe area bottom accounting for browser UI
-      let safeAreaBottomPx = 16 // Base padding
+      let safeAreaBottomPx = 16 // Base padding for desktop
       
       if (isMobile) {
-        // For mobile, we need to account for:
-        // 1. Native safe areas (notches, home indicators)
-        // 2. Browser toolbar visibility
-        // 3. Prevent accidental toolbar activation
-        
+        // Get native safe area (for devices with notches/home bars)
         const safeAreaBottomValue = getComputedStyle(document.documentElement)
           .getPropertyValue('env(safe-area-inset-bottom)') || '0px'
         const nativeSafeArea = parseInt(safeAreaBottomValue) || 0
@@ -137,14 +138,27 @@ function App() {
         if (heightDifference > 100) {
           // Keyboard is visible - minimal spacing
           safeAreaBottomPx = Math.max(8, nativeSafeArea)
-        } else if (heightDifference > 10) {
-          // Browser UI partially visible - moderate spacing
-          safeAreaBottomPx = Math.max(32, nativeSafeArea + 16)
         } else {
-          // Browser UI hidden or minimal - minimal safe zone
-          // Extremely close to toolbar - minimal spacing
-          const safariSafeZone = isMobileSafari ? 12 : 8
-          safeAreaBottomPx = Math.max(safariSafeZone, nativeSafeArea + 8)
+          // Browser-specific positioning above toolbar
+          if (isMobileSafari) {
+            // Safari iOS - toolbar is 44px high, need to be well above it
+            safeAreaBottomPx = Math.max(60, nativeSafeArea + 44)
+          } else if (isChromeIOS) {
+            // Chrome on iOS - similar to Safari but slightly different toolbar
+            safeAreaBottomPx = Math.max(55, nativeSafeArea + 40)
+          } else if (isAndroidChrome) {
+            // Chrome on Android - toolbar varies but typically 48-56px
+            safeAreaBottomPx = Math.max(65, nativeSafeArea + 48)
+          } else if (isAndroidFirefox) {
+            // Firefox on Android
+            safeAreaBottomPx = Math.max(60, nativeSafeArea + 45)
+          } else if (isAndroidSamsung) {
+            // Samsung Browser
+            safeAreaBottomPx = Math.max(58, nativeSafeArea + 42)
+          } else {
+            // Generic mobile browser fallback
+            safeAreaBottomPx = Math.max(55, nativeSafeArea + 40)
+          }
         }
       }
       
@@ -153,13 +167,24 @@ function App() {
       // Set CSS custom property for easier use in styles
       document.documentElement.style.setProperty('--safe-bottom', `${safeAreaBottomPx}px`)
       
+      // Determine browser type for logging
+      let browserType = 'Desktop'
+      if (isMobileSafari) browserType = 'Safari iOS'
+      else if (isChromeIOS) browserType = 'Chrome iOS'  
+      else if (isAndroidChrome) browserType = 'Chrome Android'
+      else if (isAndroidFirefox) browserType = 'Firefox Android'
+      else if (isAndroidSamsung) browserType = 'Samsung Android'
+      else if (isMobile) browserType = 'Unknown Mobile'
+      
       console.log('Viewport update:', {
+        browserType,
         isMobile,
         viewportHeight,
         windowHeight,
         heightDifference: windowHeight - viewportHeight,
         safeAreaBottomPx,
-        userAgent: navigator.userAgent.substr(0, 50)
+        nativeSafeArea: isMobile ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0 : 0,
+        userAgent: navigator.userAgent.slice(0, 50) + '...'
       })
     }
 
