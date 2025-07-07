@@ -141,11 +141,23 @@ function App() {
         } else {
           // Browser-specific positioning above toolbar
           if (isMobileSafari) {
-            // Safari iOS - toolbar is 44px high, need to be well above it
-            safeAreaBottomPx = Math.max(60, nativeSafeArea + 44)
+            // Safari iOS - detect toolbar state and adjust accordingly
+            // When toolbar is hidden, heightDifference is very small (0-5px)
+            // When toolbar is visible, heightDifference is significant (30-50px)
+            if (heightDifference < 10) {
+              // Toolbar is hidden - perfect position (as you mentioned)
+              safeAreaBottomPx = Math.max(16, nativeSafeArea + 8)
+            } else {
+              // Toolbar is visible - need much more space above it
+              safeAreaBottomPx = Math.max(80, nativeSafeArea + 60)
+            }
           } else if (isChromeIOS) {
-            // Chrome on iOS - similar to Safari but slightly different toolbar
-            safeAreaBottomPx = Math.max(55, nativeSafeArea + 40)
+            // Chrome on iOS - similar logic
+            if (heightDifference < 10) {
+              safeAreaBottomPx = Math.max(20, nativeSafeArea + 12)
+            } else {
+              safeAreaBottomPx = Math.max(75, nativeSafeArea + 55)
+            }
           } else if (isAndroidChrome) {
             // Chrome on Android - toolbar varies but typically 48-56px
             safeAreaBottomPx = Math.max(65, nativeSafeArea + 48)
@@ -167,21 +179,29 @@ function App() {
       // Set CSS custom property for easier use in styles
       document.documentElement.style.setProperty('--safe-bottom', `${safeAreaBottomPx}px`)
       
-      // Determine browser type for logging
+      // Determine browser type and toolbar state for logging
       let browserType = 'Desktop'
-      if (isMobileSafari) browserType = 'Safari iOS'
-      else if (isChromeIOS) browserType = 'Chrome iOS'  
-      else if (isAndroidChrome) browserType = 'Chrome Android'
+      let toolbarState = 'N/A'
+      const heightDiff = windowHeight - viewportHeight
+      
+      if (isMobileSafari) {
+        browserType = 'Safari iOS'
+        toolbarState = heightDiff < 10 ? 'Hidden' : 'Visible'
+      } else if (isChromeIOS) {
+        browserType = 'Chrome iOS'
+        toolbarState = heightDiff < 10 ? 'Hidden' : 'Visible'
+      } else if (isAndroidChrome) browserType = 'Chrome Android'
       else if (isAndroidFirefox) browserType = 'Firefox Android'
       else if (isAndroidSamsung) browserType = 'Samsung Android'
       else if (isMobile) browserType = 'Unknown Mobile'
       
       console.log('Viewport update:', {
         browserType,
+        toolbarState,
         isMobile,
         viewportHeight,
         windowHeight,
-        heightDifference: windowHeight - viewportHeight,
+        heightDifference: heightDiff,
         safeAreaBottomPx,
         nativeSafeArea: isMobile ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0 : 0,
         userAgent: navigator.userAgent.slice(0, 50) + '...'
