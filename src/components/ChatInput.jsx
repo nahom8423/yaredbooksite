@@ -2,7 +2,7 @@ import { useState } from 'react'
 import attachIcon from '../assets/icons/attach.png'
 import sendIcon from '../assets/icons/send.png'
 
-export default function ChatInput({ onSendMessage, isLoading, saintYaredMode }) {
+export default function ChatInput({ onSendMessage, isLoading, saintYaredMode, currentTheme }) {
   const [message, setMessage] = useState('')
   const hasText = message.trim().length > 0
 
@@ -22,7 +22,18 @@ export default function ChatInput({ onSendMessage, isLoading, saintYaredMode }) 
   }
 
   return (
-    <div className={`w-full rounded-full h-11 px-2 flex items-center gap-2 transition-colors ${saintYaredMode ? 'bg-[rgba(52,32,22,0.9)] focus-within:bg-[rgba(61,37,26,0.95)] backdrop-blur-sm border border-[rgba(61,37,26,0.4)]' : 'bg-[#342016] focus-within:bg-[#3D251A]'}`}>
+    <div 
+      className={`w-full rounded-full h-11 px-2 flex items-center gap-2 transition-colors ${saintYaredMode ? 'backdrop-blur-sm border border-[rgba(61,37,26,0.4)]' : ''}`}
+      style={saintYaredMode ? {
+        backgroundColor: 'rgba(52,32,22,0.9)',
+        ':focus-within': { backgroundColor: 'rgba(61,37,26,0.95)' }
+      } : {
+        backgroundColor: currentTheme.input,
+        ':focus-within': { backgroundColor: currentTheme.inputFocus }
+      }}
+      onFocus={(e) => !saintYaredMode && (e.currentTarget.style.backgroundColor = currentTheme.inputFocus)}
+      onBlur={(e) => !saintYaredMode && (e.currentTarget.style.backgroundColor = currentTheme.input)}
+    >
       <button 
         className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 relative group"
         title="Attach file"

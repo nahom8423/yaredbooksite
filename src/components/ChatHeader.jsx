@@ -1,8 +1,11 @@
 import sidebarIcon from '../assets/icons/sidebar.png'
 
-export default function ChatHeader({ isMobile, onMenuToggle, saintYaredMode, onToggleSaintYaredMode }) {
+export default function ChatHeader({ isMobile, onMenuToggle, saintYaredMode, onToggleSaintYaredMode, currentTheme, onToggleSettings }) {
   return (
-    <div className={`px-4 py-3 flex items-center justify-between md:justify-center ${saintYaredMode ? 'saint-yared-content' : 'bg-[#1A0F08]'}`}>
+    <div 
+      className={`px-4 py-3 flex items-center justify-between md:justify-center ${saintYaredMode ? 'saint-yared-content' : ''}`}
+      style={!saintYaredMode ? { backgroundColor: currentTheme.background } : {}}
+    >
       {/* Mobile menu button */}
       {isMobile && (
         <button 
@@ -18,29 +21,28 @@ export default function ChatHeader({ isMobile, onMenuToggle, saintYaredMode, onT
         <h1 className="text-white font-medium text-lg">Kidus Yared</h1>
       )}
       
-      {/* Saint Yared Mode Toggle - Right side */}
-      {isMobile ? (
-        <button 
-          onClick={onToggleSaintYaredMode}
-          className={`w-8 h-8 flex items-center justify-center rounded-md transition-colors ${saintYaredMode ? 'bg-[#3D251A] text-white' : 'hover:bg-[#2F1B12]'}`}
-          title={saintYaredMode ? 'Disable Saint Yared Background' : 'Enable Saint Yared Background'}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
-          </svg>
-        </button>
-      ) : (
+      {/* Desktop Settings Button */}
+      {!isMobile && (
         <div className="absolute right-4 top-3">
           <button 
-            onClick={onToggleSaintYaredMode}
-            className={`px-3 py-1.5 text-sm rounded-md transition-colors ${saintYaredMode ? 'bg-[#3D251A] text-white' : 'hover:bg-[#2F1B12] text-gray-300'}`}
-            title={saintYaredMode ? 'Disable Saint Yared Background' : 'Enable Saint Yared Background'}
+            onClick={onToggleSettings}
+            className="w-8 h-8 flex items-center justify-center rounded-md transition-colors"
+            style={{ backgroundColor: currentTheme.hover }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = currentTheme.button}
+            onMouseLeave={(e) => e.target.style.backgroundColor = currentTheme.hover}
+            title="Settings"
           >
-            {saintYaredMode ? 'Saint Yared Mode' : 'Classic Mode'}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="m12 1 0 6m0 6 0 6"/>
+              <path d="m21 12-6 0m-6 0-6 0"/>
+            </svg>
           </button>
         </div>
       )}
+
+      {/* Mobile placeholder */}
+      {isMobile && <div className="w-8 h-8" />}
     </div>
   );
 }
