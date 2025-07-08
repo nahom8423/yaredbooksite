@@ -123,11 +123,19 @@
       
       .input-bar {
         position: fixed;
-        inset-inline: 0;
         bottom: calc(var(--safe-bottom) * 1);
         transform: translateY(calc(var(--kb-offset) * -1));
         padding: 12px max(var(--safe-bottom), 8px);
         background: #171717;
+        left: 0;
+        right: 0;
+      }
+      
+      /* Desktop: offset input bar to not cover sidebar */
+      @media (min-width: 768px) {
+        .input-bar {
+          left: 256px; /* Width of sidebar (w-64 = 16rem = 256px) */
+        }
       }
       
       :root {
