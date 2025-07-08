@@ -93,158 +93,22 @@ function App() {
   const [isThinking, setIsThinking] = useState(false)
   const [thinkingText, setThinkingText] = useState('')
   const [thinkingHistory, setThinkingHistory] = useState([])
-  const [safeAreaBottom, setSafeAreaBottom] = useState(0)
 
-  // Enhanced mobile viewport handling with CSS custom properties
+
+  // Modern viewport offset handling for mobile browsers
   useEffect(() => {
-    const updateViewportHeight = () => {
-      // Set CSS custom property for 100vh fix
-      const vh = window.innerHeight * 0.01
-      document.documentElement.style.setProperty('--vh', `${vh}px`)
-      
-      // Update app height with visual viewport if available
-      const visualHeight = window.visualViewport?.height || window.innerHeight
-      document.documentElement.style.setProperty('--app-height', `${visualHeight}px`)
-      document.documentElement.style.setProperty('--viewport-height', `${visualHeight}px`)
-    }
-
-    const updateSafeArea = () => {
-      // Enhanced browser detection
-      const userAgent = navigator.userAgent
-      const isMobileSafari = /iPad|iPhone|iPod/.test(userAgent) && /Safari/.test(userAgent) && !/Chrome/.test(userAgent) && !window.MSStream
-      const isChromeIOS = /iPad|iPhone|iPod/.test(userAgent) && /Chrome/.test(userAgent) && !window.MSStream
-      const isAndroidChrome = /Android/.test(userAgent) && /Chrome/.test(userAgent)
-      const isAndroidFirefox = /Android/.test(userAgent) && /Firefox/.test(userAgent)
-      const isAndroidSamsung = /Android/.test(userAgent) && /SamsungBrowser/.test(userAgent)
-      const isMobile = isMobileSafari || isChromeIOS || isAndroidChrome || isAndroidFirefox || isAndroidSamsung
-      
-      // Get the actual visual viewport height
-      const visualViewport = window.visualViewport
-      const viewportHeight = visualViewport?.height || window.innerHeight
-      const windowHeight = window.innerHeight
-      
-      // Calculate safe area bottom accounting for browser UI
-      let safeAreaBottomPx = 16 // Base padding for desktop
-      
-      if (isMobile) {
-        // Get native safe area (for devices with notches/home bars)
-        const safeAreaBottomValue = getComputedStyle(document.documentElement)
-          .getPropertyValue('env(safe-area-inset-bottom)') || '0px'
-        const nativeSafeArea = parseInt(safeAreaBottomValue) || 0
-        
-        // Detect if browser UI is visible by comparing heights
-        const heightDifference = windowHeight - viewportHeight
-        
-        if (heightDifference > 100) {
-          // Keyboard is visible - minimal spacing
-          safeAreaBottomPx = Math.max(8, nativeSafeArea)
-        } else {
-          // Browser-specific positioning above toolbar
-          if (isMobileSafari) {
-            // Safari iOS - detect toolbar state and adjust accordingly
-            // When toolbar is hidden, heightDifference is very small (0-5px)
-            // When toolbar is visible, heightDifference is significant (30-50px)
-            if (heightDifference < 10) {
-              // Toolbar is hidden - perfect position (as you mentioned)
-              safeAreaBottomPx = Math.max(16, nativeSafeArea + 8)
-            } else {
-              // Toolbar is visible - need much more space above it
-              safeAreaBottomPx = Math.max(80, nativeSafeArea + 60)
-            }
-          } else if (isChromeIOS) {
-            // Chrome on iOS - similar logic
-            if (heightDifference < 10) {
-              safeAreaBottomPx = Math.max(20, nativeSafeArea + 12)
-            } else {
-              safeAreaBottomPx = Math.max(75, nativeSafeArea + 55)
-            }
-          } else if (isAndroidChrome) {
-            // Chrome on Android - toolbar varies but typically 48-56px
-            safeAreaBottomPx = Math.max(65, nativeSafeArea + 48)
-          } else if (isAndroidFirefox) {
-            // Firefox on Android
-            safeAreaBottomPx = Math.max(60, nativeSafeArea + 45)
-          } else if (isAndroidSamsung) {
-            // Samsung Browser
-            safeAreaBottomPx = Math.max(58, nativeSafeArea + 42)
-          } else {
-            // Generic mobile browser fallback
-            safeAreaBottomPx = Math.max(55, nativeSafeArea + 40)
-          }
-        }
+    function setOffset() {
+      const vv = window.visualViewport
+      if (vv) {
+        const extra = vv.height - document.documentElement.clientHeight
+        document.documentElement.style.setProperty('--kb-offset', extra + 'px')
       }
-      
-      setSafeAreaBottom(safeAreaBottomPx)
-      
-      // Set CSS custom property for easier use in styles
-      document.documentElement.style.setProperty('--safe-bottom', `${safeAreaBottomPx}px`)
-      
-      // Determine browser type and toolbar state for logging
-      let browserType = 'Desktop'
-      let toolbarState = 'N/A'
-      const heightDiff = windowHeight - viewportHeight
-      
-      if (isMobileSafari) {
-        browserType = 'Safari iOS'
-        toolbarState = heightDiff < 10 ? 'Hidden' : 'Visible'
-      } else if (isChromeIOS) {
-        browserType = 'Chrome iOS'
-        toolbarState = heightDiff < 10 ? 'Hidden' : 'Visible'
-      } else if (isAndroidChrome) browserType = 'Chrome Android'
-      else if (isAndroidFirefox) browserType = 'Firefox Android'
-      else if (isAndroidSamsung) browserType = 'Samsung Android'
-      else if (isMobile) browserType = 'Unknown Mobile'
-      
-      console.log('Viewport update:', {
-        browserType,
-        toolbarState,
-        isMobile,
-        viewportHeight,
-        windowHeight,
-        heightDifference: heightDiff,
-        safeAreaBottomPx,
-        nativeSafeArea: isMobile ? parseInt(getComputedStyle(document.documentElement).getPropertyValue('env(safe-area-inset-bottom)')) || 0 : 0,
-        userAgent: navigator.userAgent.slice(0, 50) + '...'
-      })
     }
-
-    // Initial update
-    updateViewportHeight()
-    updateSafeArea()
     
-    // Standard event listeners
-    window.addEventListener('resize', () => {
-      updateViewportHeight()
-      updateSafeArea()
-    })
-    window.addEventListener('orientationchange', () => {
-      setTimeout(() => {
-        updateViewportHeight()
-        updateSafeArea()
-      }, 100) // Delay for orientation change completion
-    })
-    
-    // Visual viewport API for better mobile support
+    setOffset()
     if (window.visualViewport) {
-      const handleVisualViewportChange = () => {
-        updateViewportHeight()
-        updateSafeArea()
-      }
-      
-      window.visualViewport.addEventListener('resize', handleVisualViewportChange)
-      window.visualViewport.addEventListener('scroll', handleVisualViewportChange)
-      
-      return () => {
-        window.removeEventListener('resize', updateViewportHeight)
-        window.removeEventListener('orientationchange', updateSafeArea)
-        window.visualViewport.removeEventListener('resize', handleVisualViewportChange)
-        window.visualViewport.removeEventListener('scroll', handleVisualViewportChange)
-      }
-    }
-    
-    return () => {
-      window.removeEventListener('resize', updateViewportHeight)
-      window.removeEventListener('orientationchange', updateSafeArea)
+      window.visualViewport.addEventListener('resize', setOffset)
+      return () => window.visualViewport.removeEventListener('resize', setOffset)
     }
   }, [])
 
@@ -622,7 +486,7 @@ function App() {
         />
         
         {/* Chat content */}
-        <div className="flex-1 bg-[#171717] text-white flex flex-col h-full relative">
+        <div className="flex-1 bg-[#171717] text-white flex flex-col h-full relative chat-scroll">
           {/* Scrollable content area */}
           <div 
             className="flex-1 overflow-y-auto px-6 overscroll-behavior-none"
@@ -703,7 +567,7 @@ function App() {
               onClick={scrollToBottom}
               className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 bg-[#2A2A2A] hover:bg-[#404040] rounded-full flex items-center justify-center shadow-lg border border-[#404040] transition-all z-10"
               style={{ 
-                bottom: `${safeAreaBottom + 120}px` // Position above message input with dynamic spacing
+                bottom: '120px' // Position above message input
               }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
@@ -712,16 +576,8 @@ function App() {
             </button>
           )}
           
-          {/* Sticky chat input with enhanced mobile positioning */}
-          <div 
-            className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#171717] via-[#171717] to-transparent z-20"
-            style={{ 
-              paddingBottom: `max(${safeAreaBottom}px, env(safe-area-inset-bottom, 16px))`,
-              transform: `translateY(max(0px, env(keyboard-inset-height, 0px)))`,
-              // Use CSS custom properties for better mobile support
-              bottom: 'max(0px, env(safe-area-inset-bottom, 0px))'
-            }}
-          >
+          {/* Modern viewport-aware chat input */}
+          <div className="input-bar bg-gradient-to-t from-[#171717] via-[#171717] to-transparent z-20">
             <div className="max-w-4xl mx-auto">
               <ChatInput 
                 onSendMessage={handleSendMessage}

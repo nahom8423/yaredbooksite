@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Kidus Yared AI</title>
     <style>
+      :root{
+        --kb-offset:0px;
+        --safe-bottom:env(safe-area-inset-bottom,0px);
+      }
+      
       @keyframes fadeInUp {
         from {
           opacity: 0;
@@ -104,10 +109,25 @@
       body {
         overscroll-behavior: none;
         -webkit-overflow-scrolling: touch;
-        position: fixed;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
         width: 100%;
-        height: 100%;
         background-color: #171717;
+      }
+      
+      .chat-scroll {
+        flex: 1 1 auto;
+        overflow: auto;
+      }
+      
+      .input-bar {
+        position: fixed;
+        inset-inline: 0;
+        bottom: calc(var(--safe-bottom) * 1);
+        transform: translateY(calc(var(--kb-offset) * -1));
+        padding: 12px max(var(--safe-bottom), 8px);
+        background: #171717;
       }
       
       :root {
