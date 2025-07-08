@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import saintYaredImage from '../assets/images/saintyared.png'
+import regenerateIcon from '../assets/icons/regenerate.png'
 
-export default function ChatMessage({ message, isTyping = false, skipAnimation = false }) {
+export default function ChatMessage({ message, isTyping = false, skipAnimation = false, onRegenerate }) {
   const [displayText, setDisplayText] = useState('')
   const [isAnimating, setIsAnimating] = useState(false)
   const [showActions, setShowActions] = useState(false)
@@ -294,6 +295,36 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                     </svg>
                   )}
                 </button>
+
+                {/* Regenerate button */}
+                {onRegenerate && (
+                  <button
+                    onClick={() => onRegenerate(message)}
+                    style={{
+                      padding: '4px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: 0,
+                      animation: 'slideInLeft 0.8s ease-out 0.7s forwards'
+                    }}
+                    title="Regenerate response"
+                  >
+                    <img 
+                      src={regenerateIcon} 
+                      alt="Regenerate" 
+                      style={{ 
+                        width: '16px', 
+                        height: '16px',
+                        filter: 'brightness(0) saturate(100%) invert(56%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(93%) contrast(89%)'
+                      }} 
+                    />
+                  </button>
+                )}
               </div>
             )}
           </div>

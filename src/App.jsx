@@ -418,6 +418,131 @@ function App() {
     handleSendMessage(suggestion)
   }
 
+  // Handle message regeneration
+  const handleRegenerateMessage = async (messageToRegenerate) => {
+    if (!currentChatId || isLoading) return
+
+    // Find the message index and get the user message that preceded this AI response
+    const messageIndex = messages.findIndex(msg => msg.id === messageToRegenerate.id)
+    if (messageIndex <= 0) return // No preceding message or message not found
+
+    const userMessage = messages[messageIndex - 1]
+    if (!userMessage.isUser) return // Previous message wasn't from user
+
+    // Remove the AI message we're regenerating
+    const messagesWithoutRegenerated = messages.slice(0, messageIndex)
+    setMessages(messagesWithoutRegenerated)
+
+    // Update chat history to remove the regenerated message
+    setChatHistory(prevHistory => 
+      prevHistory.map(chat => 
+        chat.id === currentChatId 
+          ? { ...chat, messages: messagesWithoutRegenerated }
+          : chat
+      )
+    )
+
+    // Resend the user's message to get a new AI response
+    setIsLoading(true)
+
+    // Determine if this requires searching through texts
+    const needsTextSearch = (text) => {
+      const searchKeywords = [
+        'saint yared', 'liturgy', 'church', 'orthodox', 'tradition', 'history',
+        'calendar', 'fasting', 'feast', 'prayer', 'scripture', 'theology',
+        'monastery', 'priest', 'deacon', 'communion', 'baptism', 'chrismation',
+        'ge\'ez', 'amharic', 'ethiopia', 'tewahedo', 'coptic', 'bible'
+      ]
+      const lowerText = text.toLowerCase()
+      return searchKeywords.some(keyword => lowerText.includes(keyword)) || text.length > 50
+    }
+
+    const requiresSearch = needsTextSearch(userMessage.text)
+    
+    if (requiresSearch) {
+      // Add delay before thinking starts for more realistic timing
+      setTimeout(() => {
+        setIsThinking(true)
+        setThinkingText('Looking through Ethiopian Orthodox texts...')
+
+        // Simulate thinking process
+        setTimeout(() => {
+          setThinkingText('Analyzing liturgical knowledge...')
+        }, 1000)
+
+        setTimeout(() => {
+          setThinkingText('Preparing response...')
+        }, 2000)
+      }, 600) // Initial delay before thinking starts
+    }
+
+    try {
+      // Get new AI response
+      const { response: aiResponse, sessionId } = await yaredBotAPI.sendMessage(userMessage.text, currentChatId)
+      
+      // Save thinking indicator to history only if it was used
+      if (requiresSearch && isThinking) {
+        const thinkingRecord = {
+          id: Date.now() - 1, // ID before the AI message
+          text: 'Looking through Ethiopian Orthodox texts...',
+          timestamp: new Date()
+        }
+        setThinkingHistory(prev => [...prev, thinkingRecord])
+      }
+      
+      setIsThinking(false)
+      
+      // Add new AI message
+      const newAiMessage = {
+        id: Date.now() + 1,
+        text: aiResponse,
+        isUser: false,
+        timestamp: new Date(),
+        sessionId: sessionId
+      }
+      setNewMessageId(newAiMessage.id) // Mark this as the new message for animation
+      const finalMessages = [...messagesWithoutRegenerated, newAiMessage]
+      setMessages(finalMessages)
+      
+      // Update chat history with new AI response
+      setChatHistory(prevHistory => 
+        prevHistory.map(chat => 
+          chat.id === currentChatId 
+            ? { ...chat, messages: finalMessages }
+            : chat
+        )
+      )
+    } catch (error) {
+      console.error('Error regenerating message:', error)
+      setIsThinking(false)
+      setThinkingText('')
+      
+      // Add error message
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: 'Sorry, I encountered an error while regenerating. Please try again.',
+        isUser: false,
+        timestamp: new Date(),
+        isError: true
+      }
+      const errorMessages = [...messagesWithoutRegenerated, errorMessage]
+      setMessages(errorMessages)
+      
+      // Update chat history with error message
+      setChatHistory(prevHistory => 
+        prevHistory.map(chat => 
+          chat.id === currentChatId 
+            ? { ...chat, messages: errorMessages }
+            : chat
+        )
+      )
+    } finally {
+      setIsLoading(false)
+      setIsThinking(false)
+      setThinkingText('')
+    }
+  }
+
 
   // Handle scroll events
   const handleScroll = (e) => {
@@ -546,6 +671,7 @@ function App() {
                           message={message}
                           avatar={saintYaredImage}
                           skipAnimation={message.id !== newMessageId}
+                          onRegenerate={!message.isUser ? handleRegenerateMessage : undefined}
                         />
                       </div>
                     )
