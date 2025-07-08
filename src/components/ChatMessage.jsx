@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import saintYaredImage from '../assets/images/saintyared.png'
-import regenerateIcon from '../assets/icons/regenerate.png'
 
 export default function ChatMessage({ message, isTyping = false, skipAnimation = false, onRegenerate }) {
   const [displayText, setDisplayText] = useState('')
@@ -314,15 +313,12 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                     }}
                     title="Regenerate response"
                   >
-                    <img 
-                      src={regenerateIcon} 
-                      alt="Regenerate" 
-                      style={{ 
-                        width: '16px', 
-                        height: '16px',
-                        filter: 'brightness(0) saturate(100%) invert(56%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(93%) contrast(89%)'
-                      }} 
-                    />
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8e8e8e" strokeWidth="2">
+                      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                      <path d="M21 3v5h-5"/>
+                      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                      <path d="M3 21v-5h5"/>
+                    </svg>
                   </button>
                 )}
               </div>
