@@ -5,6 +5,7 @@ import ChatHeader from './components/ChatHeader';
 import ChatMessage from './components/ChatMessage';
 import ThinkingIndicator from './components/ThinkingIndicator';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import DeviceDetector from './components/DeviceDetector';
 import saintYaredImage from './assets/images/saintyared.png';
 import { yaredBotAPI } from './services/yaredBotAPI';
 import analytics from './services/analytics';
@@ -96,6 +97,7 @@ function App() {
   const [thinkingText, setThinkingText] = useState('')
   const [thinkingHistory, setThinkingHistory] = useState([])
   const [showAnalytics, setShowAnalytics] = useState(false)
+  const [showDeviceDetector, setShowDeviceDetector] = useState(false)
 
 
   // Modern viewport offset handling for mobile browsers
@@ -195,13 +197,18 @@ function App() {
     }
   }, [])
 
-  // Analytics keyboard shortcut (Ctrl+Shift+A)
+  // Analytics keyboard shortcut (Ctrl+Shift+A) and Device detector (Ctrl+Shift+D)
   useEffect(() => {
     const handleKeydown = (e) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'A') {
         e.preventDefault()
         setShowAnalytics(true)
         analytics.trackEngagement('analytics_opened', { method: 'keyboard_shortcut' })
+      }
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        e.preventDefault()
+        setShowDeviceDetector(true)
+        analytics.trackEngagement('device_detector_opened', { method: 'keyboard_shortcut' })
       }
     }
 
@@ -765,6 +772,12 @@ function App() {
       <AnalyticsDashboard 
         isVisible={showAnalytics}
         onClose={() => setShowAnalytics(false)}
+      />
+
+      {/* Device Detector */}
+      <DeviceDetector 
+        isVisible={showDeviceDetector}
+        onClose={() => setShowDeviceDetector(false)}
       />
     </div>
   );
