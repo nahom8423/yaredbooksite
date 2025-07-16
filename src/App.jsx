@@ -648,7 +648,6 @@ function App() {
             onChatRename={handleChatRename}
             newChatCreated={newChatCreated}
             onAnalyticsOpen={() => setShowAnalytics(true)}
-            onDeviceDetectorOpen={() => setShowDeviceDetector(true)}
           />
         </div>
       )}
