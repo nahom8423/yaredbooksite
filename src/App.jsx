@@ -97,21 +97,31 @@ function App() {
 
   // Modern viewport offset handling for mobile browsers
   useEffect(() => {
+    let timeoutId = null
+    
     function setOffset() {
-      const vv = window.visualViewport
-      if (vv) {
-        // Calculate how much the keyboard has reduced the viewport
-        const keyboardHeight = window.innerHeight - vv.height
-        // Only move up if keyboard is showing (positive keyboard height)
-        const offset = keyboardHeight > 0 ? -keyboardHeight : 0
-        document.documentElement.style.setProperty('--kb-offset', offset + 'px')
-      }
+      // Clear any pending timeout to debounce rapid changes
+      if (timeoutId) clearTimeout(timeoutId)
+      
+      timeoutId = setTimeout(() => {
+        const vv = window.visualViewport
+        if (vv) {
+          // Calculate how much the keyboard has reduced the viewport
+          const keyboardHeight = Math.max(0, window.innerHeight - vv.height)
+          // Only apply offset if keyboard height is significant (> 50px)
+          const offset = keyboardHeight > 50 ? -keyboardHeight : 0
+          document.documentElement.style.setProperty('--kb-offset', offset + 'px')
+        }
+      }, 10) // Small debounce to prevent rapid jumping
     }
     
     setOffset()
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', setOffset)
-      return () => window.visualViewport.removeEventListener('resize', setOffset)
+      return () => {
+        window.visualViewport.removeEventListener('resize', setOffset)
+        if (timeoutId) clearTimeout(timeoutId)
+      }
     }
   }, [])
 

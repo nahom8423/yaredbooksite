@@ -23,12 +23,17 @@ html, body, #root {
   right: 0;
   padding: 16px;
   transform: translateY(var(--kb-offset));
-  transition: transform 0.3s ease-out;
+  transition: transform 0.15s ease-out;
 }
 
 /* Ensure chat content has proper bottom padding for input */
 .chat-scroll {
   padding-bottom: calc(120px + env(safe-area-inset-bottom));
+}
+
+/* Hide scrollbar on textarea */
+textarea::-webkit-scrollbar {
+  display: none;
 }
 
 /* Ethiopic font class */

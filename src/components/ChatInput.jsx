@@ -1,10 +1,20 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import attachIcon from '../assets/icons/attach.png'
 import sendIcon from '../assets/icons/send.png'
 
 export default function ChatInput({ onSendMessage, isLoading }) {
   const [message, setMessage] = useState('')
+  const textareaRef = useRef(null)
   const hasText = message.trim().length > 0
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const textarea = textareaRef.current
+    if (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px'
+    }
+  }, [message])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -21,10 +31,14 @@ export default function ChatInput({ onSendMessage, isLoading }) {
     }
   }
 
+  const handleChange = (e) => {
+    setMessage(e.target.value)
+  }
+
   return (
-    <div className="w-full bg-[#2d2d2d] rounded-full h-11 px-2 flex items-center gap-2 focus-within:bg-[#272727] transition-colors">
+    <div className="w-full bg-[#2d2d2d] rounded-3xl min-h-[44px] px-2 py-1 flex items-end gap-2 focus-within:bg-[#272727] transition-colors">
       <button 
-        className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 relative group"
+        className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 relative group flex-shrink-0 mb-1"
         title="Attach file"
       >
         <img src={attachIcon} alt="" className="w-4 h-4" />
@@ -34,24 +48,25 @@ export default function ChatInput({ onSendMessage, isLoading }) {
         </div>
       </button>
       
-      <input 
-        type="text"
+      <textarea
+        ref={textareaRef}
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder="Message Kidus Yared AI"
         disabled={isLoading}
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellCheck="false"
-        className="flex-1 bg-transparent text-white placeholder-[#9f9f9f] outline-none disabled:opacity-50 text-base"
+        rows="1"
+        className="flex-1 bg-transparent text-white placeholder-[#9f9f9f] outline-none disabled:opacity-50 text-base resize-none py-2 max-h-[120px] overflow-y-auto"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}
       />
       
       <button 
         onClick={handleSubmit}
         disabled={!hasText}
-        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
+        className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 flex-shrink-0 mb-1 ${
           hasText
             ? 'bg-[#D4AF37] hover:bg-[#B8941F] cursor-pointer' 
             : 'hover:rotate-45 cursor-pointer'
