@@ -16,6 +16,13 @@ html, body, #root {
   --sidebar-offset: 0px; /* For desktop sidebar spacing */
 }
 
+/* Set initial sidebar offset for desktop to prevent flash */
+@media (min-width: 768px) {
+  :root {
+    --sidebar-offset: 256px;
+  }
+}
+
 /* Prevent flash of unstyled content during initial render */
 .app-container {
   opacity: 0;
@@ -34,7 +41,12 @@ html, body, #root {
   right: 0;
   padding: 16px;
   transform: translateY(var(--kb-offset));
-  transition: transform 0.15s ease-out, left 0.3s ease-in-out;
+  transition: transform 0.15s ease-out;
+}
+
+/* Prevent transition flash on initial load */
+.app-container:not(.initialized) .input-bar {
+  transition: none;
 }
 
 /* Ensure chat content has proper bottom padding for input */

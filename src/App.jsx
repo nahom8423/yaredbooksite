@@ -138,14 +138,19 @@ function App() {
 
   // Handle sidebar offset for input bar positioning (desktop only)
   useEffect(() => {
-    const sidebarOffset = (!isMobile && sidebarVisible) ? '256px' : '0px'
+    let sidebarOffset = '0px'
+    if (!isMobile && sidebarVisible) {
+      sidebarOffset = '256px' // Full sidebar width
+    }
     document.documentElement.style.setProperty('--sidebar-offset', sidebarOffset)
   }, [isMobile, sidebarVisible])
 
   // Set initial CSS variables synchronously to prevent FOUC
   useEffect(() => {
-    const initialSidebarOffset = (!isMobile && sidebarVisible) ? '256px' : '0px'
-    document.documentElement.style.setProperty('--sidebar-offset', initialSidebarOffset)
+    // Only override if sidebar is not visible on desktop
+    if (!isMobile && !sidebarVisible) {
+      document.documentElement.style.setProperty('--sidebar-offset', '0px')
+    }
     document.documentElement.style.setProperty('--kb-offset', '0px')
     
     // Mark as initialized after CSS variables are set
