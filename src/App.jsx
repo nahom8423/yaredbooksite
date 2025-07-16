@@ -6,6 +6,7 @@ import ChatMessage from './components/ChatMessage';
 import ThinkingIndicator from './components/ThinkingIndicator';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import DeviceDetector from './components/DeviceDetector';
+import DebugAuth from './components/DebugAuth';
 import saintYaredImage from './assets/images/saintyared.png';
 import { yaredBotAPI } from './services/yaredBotAPI';
 import analytics from './services/analytics';
@@ -98,6 +99,7 @@ function App() {
   const [thinkingHistory, setThinkingHistory] = useState([])
   const [showAnalytics, setShowAnalytics] = useState(false)
   const [showDeviceDetector, setShowDeviceDetector] = useState(false)
+  const [showDebugAuth, setShowDebugAuth] = useState(false)
 
 
   // Modern viewport offset handling for mobile browsers
@@ -209,6 +211,11 @@ function App() {
         e.preventDefault()
         setShowDeviceDetector(true)
         analytics.trackEngagement('device_detector_opened', { method: 'keyboard_shortcut' })
+      }
+      if (e.ctrlKey && e.shiftKey && e.key === 'X') {
+        e.preventDefault()
+        setShowDebugAuth(true)
+        analytics.trackEngagement('debug_auth_opened', { method: 'keyboard_shortcut' })
       }
     }
 
@@ -778,6 +785,12 @@ function App() {
       <DeviceDetector 
         isVisible={showDeviceDetector}
         onClose={() => setShowDeviceDetector(false)}
+      />
+
+      {/* Debug Authorization */}
+      <DebugAuth 
+        isVisible={showDebugAuth}
+        onClose={() => setShowDebugAuth(false)}
       />
     </div>
   );
