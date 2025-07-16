@@ -10,6 +10,27 @@ html, body, #root {
   overflow: hidden;
 }
 
+/* Mobile keyboard offset support */
+:root {
+  --kb-offset: 0px;
+}
+
+/* Input bar positioning with keyboard awareness */
+.input-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  transform: translateY(var(--kb-offset));
+  transition: transform 0.3s ease-out;
+}
+
+/* Ensure chat content has proper bottom padding for input */
+.chat-scroll {
+  padding-bottom: calc(120px + env(safe-area-inset-bottom));
+}
+
 /* Ethiopic font class */
 .ethiopic {
   font-family: 'Noto Serif Ethiopic', serif;

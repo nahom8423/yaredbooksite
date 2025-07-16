@@ -702,19 +702,20 @@ function App() {
             </button>
           )}
           
-          {/* Modern viewport-aware chat input */}
-          <div className="input-bar bg-gradient-to-t from-[#171717] via-[#171717] to-transparent z-20">
-            <div className="max-w-4xl mx-auto">
-              <ChatInput 
-                onSendMessage={handleSendMessage}
-                isLoading={isLoading}
-              />
-              {/* Disclaimer */}
-              <p className="text-center text-xs text-gray-500 mt-3 mb-2">
-                Kidus Yared AI can make mistakes. Consider checking important information.
-              </p>
-            </div>
-          </div>
+        </div>
+      </div>
+      
+      {/* Modern viewport-aware chat input */}
+      <div className="input-bar bg-gradient-to-t from-[#171717] via-[#171717] to-transparent z-20">
+        <div className="max-w-4xl mx-auto">
+          <ChatInput 
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+          />
+          {/* Disclaimer */}
+          <p className="text-center text-xs text-gray-500 mt-3 mb-2">
+            Kidus Yared AI can make mistakes. Consider checking important information.
+          </p>
         </div>
       </div>
     </div>
