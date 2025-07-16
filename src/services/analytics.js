@@ -6,7 +6,8 @@
 class AnalyticsService {
   constructor() {
     this.sessionId = this.getOrCreateSessionId()
-    this.apiBase = 'https://yaredbott.onrender.com' // Update with your backend URL
+    // Try to get API base from localStorage, fallback to Railway (update this URL)
+    this.apiBase = localStorage.getItem('yared_api_base') || 'https://yaredbott-production.up.railway.app' // UPDATE THIS WITH YOUR RAILWAY URL
     this.isEnabled = true
     this.pageStartTime = Date.now()
     this.isAuthorizedDevice = null // Will be checked when needed
@@ -208,6 +209,13 @@ class AnalyticsService {
     } catch (error) {
       return false
     }
+  }
+
+  // Configure API base URL (for Railway setup)
+  setApiBase(url) {
+    this.apiBase = url
+    localStorage.setItem('yared_api_base', url)
+    console.log(`Analytics API base set to: ${url}`)
   }
 
   // Disable analytics (privacy)
