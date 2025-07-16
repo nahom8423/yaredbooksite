@@ -16,6 +16,16 @@ html, body, #root {
   --sidebar-offset: 0px; /* For desktop sidebar spacing */
 }
 
+/* Prevent flash of unstyled content during initial render */
+.app-container {
+  opacity: 0;
+  transition: opacity 0.1s ease-in;
+}
+
+.app-container.initialized {
+  opacity: 1;
+}
+
 /* Input bar positioning with keyboard awareness */
 .input-bar {
   position: fixed;

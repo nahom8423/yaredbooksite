@@ -12,8 +12,11 @@ import { yaredBotAPI } from './services/yaredBotAPI';
 import analytics from './services/analytics';
 
 function App() {
-  const [sidebarVisible, setSidebarVisible] = useState(true)
-  const [isMobile, setIsMobile] = useState(false)
+  // Initialize with proper mobile detection to prevent FOUC
+  const [isMobile, setIsMobile] = useState(() => {
+    return window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  })
+  const [sidebarVisible, setSidebarVisible] = useState(() => !isMobile)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [messages, setMessages] = useState([])
   const [isLoading, setIsLoading] = useState(false)
@@ -100,6 +103,7 @@ function App() {
   const [showAnalytics, setShowAnalytics] = useState(false)
   const [showDeviceDetector, setShowDeviceDetector] = useState(false)
   const [showDebugAuth, setShowDebugAuth] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
 
 
   // Modern viewport offset handling for mobile browsers
@@ -137,6 +141,16 @@ function App() {
     const sidebarOffset = (!isMobile && sidebarVisible) ? '256px' : '0px'
     document.documentElement.style.setProperty('--sidebar-offset', sidebarOffset)
   }, [isMobile, sidebarVisible])
+
+  // Set initial CSS variables synchronously to prevent FOUC
+  useEffect(() => {
+    const initialSidebarOffset = (!isMobile && sidebarVisible) ? '256px' : '0px'
+    document.documentElement.style.setProperty('--sidebar-offset', initialSidebarOffset)
+    document.documentElement.style.setProperty('--kb-offset', '0px')
+    
+    // Mark as initialized after CSS variables are set
+    setIsInitialized(true)
+  }, []) // Run once on mount
 
   // Recovery function for lost data
   const recoverChatHistory = () => {
@@ -186,24 +200,28 @@ function App() {
     const checkMobile = () => {
       const isMobileDevice = window.innerWidth < 768 || 
                            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-      setIsMobile(isMobileDevice)
-      if (isMobileDevice) {
-        setSidebarVisible(false)
-        setMobileMenuOpen(false)
-      } else {
-        setSidebarVisible(true)
-        setMobileMenuOpen(false)
+      
+      // Only update state if it actually changed to prevent unnecessary re-renders
+      if (isMobileDevice !== isMobile) {
+        setIsMobile(isMobileDevice)
+        if (isMobileDevice) {
+          setSidebarVisible(false)
+          setMobileMenuOpen(false)
+        } else {
+          setSidebarVisible(true)
+          setMobileMenuOpen(false)
+        }
       }
     }
     
-    checkMobile()
+    // Only add listeners, don't run checkMobile since state is already initialized correctly
     window.addEventListener('resize', checkMobile)
     window.addEventListener('orientationchange', checkMobile)
     return () => {
       window.removeEventListener('resize', checkMobile)
       window.removeEventListener('orientationchange', checkMobile)
     }
-  }, [])
+  }, [isMobile])
 
   // Analytics keyboard shortcut (Ctrl+Shift+A) and Device detector (Ctrl+Shift+D)
   useEffect(() => {
@@ -630,7 +648,7 @@ function App() {
     }
   }, [messages, isLoading])
   return (
-    <div className="flex h-screen bg-[#171717] relative overflow-hidden touch-none">
+    <div className={`app-container flex h-screen bg-[#171717] relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}>
       {/* Mobile overlay */}
       {isMobile && (
         <div 
