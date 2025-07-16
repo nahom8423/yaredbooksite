@@ -3,14 +3,16 @@ import newMessageIcon from '../assets/icons/new-message.png'
 import sidebarIcon from '../assets/icons/sidebar.png'
 import ellipsisIcon from '../assets/icons/ellipsis.png'
 import saintYaredImage from '../assets/images/saintyared.png'
+import analytics from '../services/analytics'
 
-export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onChatSelect, currentChatId, onChatDelete, onChatRename, newChatCreated }) {
+export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onChatSelect, currentChatId, onChatDelete, onChatRename, newChatCreated, onAnalyticsOpen }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [openDropdown, setOpenDropdown] = useState(null)
   const [isRenaming, setIsRenaming] = useState(null)
   const [newTitle, setNewTitle] = useState('')
   const [dropdownPosition, setDropdownPosition] = useState('bottom')
   const [animatingChatId, setAnimatingChatId] = useState(null)
+  const [canAccessAnalytics, setCanAccessAnalytics] = useState(false)
   
   // Auto-close on mobile when clicking items
   const handleItemClick = (action) => {
@@ -112,6 +114,20 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
       setTimeout(() => setAnimatingChatId(null), 3000) // Clear animation after 3 seconds
     }
   }, [newChatCreated])
+
+  // Check if analytics access is available
+  useEffect(() => {
+    const checkAnalyticsAccess = async () => {
+      try {
+        const hasAccess = await analytics.canAccessAnalytics()
+        setCanAccessAnalytics(hasAccess)
+      } catch (error) {
+        setCanAccessAnalytics(false)
+      }
+    }
+    
+    checkAnalyticsAccess()
+  }, [])
 
   if (isCollapsed && !isMobile) {
     return (
@@ -303,6 +319,29 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
           </div>
         )}
       </div>
+
+      {/* Analytics Button (Only for authorized devices) */}
+      {canAccessAnalytics && (
+        <div className="px-3 pb-2">
+          <button 
+            onClick={() => {
+              onAnalyticsOpen?.()
+              analytics.trackButtonClick('analytics_open', isMobile ? 'mobile_sidebar' : 'desktop_sidebar')
+              if (isMobile && onClose) onClose()
+            }}
+            className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#2A2A2A] transition-colors text-left"
+          >
+            <div className="w-6 h-6 flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 20V10"/>
+                <path d="M18 20V4"/>
+                <path d="M6 20v-6"/>
+              </svg>
+            </div>
+            <span className="text-gray-300 text-sm">Analytics</span>
+          </button>
+        </div>
+      )}
 
       {/* Bottom Invite Section */}
       <div className="p-3">

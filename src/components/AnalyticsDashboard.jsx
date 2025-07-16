@@ -29,7 +29,11 @@ export default function AnalyticsDashboard({ isVisible, onClose }) {
       setRealtimeStats(realtimeData)
       setError(null)
     } catch (err) {
-      setError('Failed to load analytics data')
+      if (err.message.includes('not authorized')) {
+        setError('Access denied: This device is not authorized to view analytics')
+      } else {
+        setError('Failed to load analytics data')
+      }
       console.error('Analytics error:', err)
     } finally {
       setLoading(false)

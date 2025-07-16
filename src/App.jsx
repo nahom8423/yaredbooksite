@@ -640,6 +640,7 @@ function App() {
             onChatDelete={handleChatDelete}
             onChatRename={handleChatRename}
             newChatCreated={newChatCreated}
+            onAnalyticsOpen={() => setShowAnalytics(true)}
           />
         </div>
       )}

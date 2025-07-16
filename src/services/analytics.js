@@ -9,6 +9,7 @@ class AnalyticsService {
     this.apiBase = 'https://yaredbott.onrender.com' // Update with your backend URL
     this.isEnabled = true
     this.pageStartTime = Date.now()
+    this.isAuthorizedDevice = null // Will be checked when needed
     
     // Track initial page load
     this.trackPageView(window.location.pathname)
@@ -26,6 +27,46 @@ class AnalyticsService {
       localStorage.setItem('yared_session_id', sessionId)
     }
     return sessionId
+  }
+
+  // Check if current device is authorized for analytics access
+  async checkDeviceAuthorization() {
+    if (this.isAuthorizedDevice !== null) {
+      return this.isAuthorizedDevice
+    }
+
+    try {
+      const deviceInfo = {
+        user_agent: navigator.userAgent,
+        screen_width: screen.width,
+        screen_height: screen.height
+      }
+
+      const response = await fetch(`${this.apiBase}/analytics/check_device`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(deviceInfo)
+      })
+      
+      const result = await response.json()
+      this.isAuthorizedDevice = result.authorized || false
+      
+      // Cache the result for this session
+      sessionStorage.setItem('yared_device_authorized', this.isAuthorizedDevice.toString())
+      
+      return this.isAuthorizedDevice
+    } catch (error) {
+      console.warn('Device authorization check failed:', error)
+      this.isAuthorizedDevice = false
+      return false
+    }
+  }
+
+  // Get device check string for authenticated requests
+  getDeviceCheckString() {
+    return `${screen.width}:${screen.height}`
   }
 
   async sendEvent(endpoint, data) {
@@ -114,25 +155,58 @@ class AnalyticsService {
     })
   }
 
-  // Get analytics data (for admin dashboard)
+  // Get analytics data (for admin dashboard) - REQUIRES DEVICE AUTHORIZATION
   async getAnalytics() {
+    // Check device authorization first
+    const isAuthorized = await this.checkDeviceAuthorization()
+    if (!isAuthorized) {
+      throw new Error('Device not authorized for analytics access')
+    }
+
     try {
-      const response = await fetch(`${this.apiBase}/analytics/stats`)
+      const deviceCheck = this.getDeviceCheckString()
+      const response = await fetch(`${this.apiBase}/analytics/stats?device_check=${encodeURIComponent(deviceCheck)}`)
+      
+      if (response.status === 403) {
+        throw new Error('Access denied: Device not authorized')
+      }
+      
       return await response.json()
     } catch (error) {
       console.error('Failed to fetch analytics:', error)
-      return null
+      throw error
     }
   }
 
-  // Get real-time stats
+  // Get real-time stats - REQUIRES DEVICE AUTHORIZATION
   async getRealtimeStats() {
+    // Check device authorization first
+    const isAuthorized = await this.checkDeviceAuthorization()
+    if (!isAuthorized) {
+      throw new Error('Device not authorized for analytics access')
+    }
+
     try {
-      const response = await fetch(`${this.apiBase}/analytics/realtime`)
+      const deviceCheck = this.getDeviceCheckString()
+      const response = await fetch(`${this.apiBase}/analytics/realtime?device_check=${encodeURIComponent(deviceCheck)}`)
+      
+      if (response.status === 403) {
+        throw new Error('Access denied: Device not authorized')
+      }
+      
       return await response.json()
     } catch (error) {
       console.error('Failed to fetch realtime stats:', error)
-      return null
+      throw error
+    }
+  }
+
+  // Check if analytics dashboard access is available
+  async canAccessAnalytics() {
+    try {
+      return await this.checkDeviceAuthorization()
+    } catch (error) {
+      return false
     }
   }
 
