@@ -5,7 +5,7 @@ import ellipsisIcon from '../assets/icons/ellipsis.png'
 import saintYaredImage from '../assets/images/saintyared.png'
 import analytics from '../services/analytics'
 
-export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onChatSelect, currentChatId, onChatDelete, onChatRename, newChatCreated, onAnalyticsOpen }) {
+export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onChatSelect, currentChatId, onChatDelete, onChatRename, newChatCreated, onAnalyticsOpen, onDeviceDetectorOpen }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [openDropdown, setOpenDropdown] = useState(null)
   const [isRenaming, setIsRenaming] = useState(null)
@@ -318,6 +318,27 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
             )}
           </div>
         )}
+      </div>
+
+      {/* Device Detector Button (Temporary - for setup) */}
+      <div className="px-3 pb-2">
+        <button 
+          onClick={() => {
+            onDeviceDetectorOpen?.()
+            analytics.trackButtonClick('device_detector_open', isMobile ? 'mobile_sidebar' : 'desktop_sidebar')
+            if (isMobile && onClose) onClose()
+          }}
+          className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#2A2A2A] transition-colors text-left"
+        >
+          <div className="w-6 h-6 flex items-center justify-center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <span className="text-gray-300 text-sm">Device Info</span>
+        </button>
       </div>
 
       {/* Analytics Button (Only for authorized devices) */}
