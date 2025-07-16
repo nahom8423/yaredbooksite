@@ -6,8 +6,8 @@
 class AnalyticsService {
   constructor() {
     this.sessionId = this.getOrCreateSessionId()
-    // Try to get API base from localStorage, fallback to Railway (update this URL)
-    this.apiBase = localStorage.getItem('yared_api_base') || 'https://yaredbott-production.up.railway.app' // UPDATE THIS WITH YOUR RAILWAY URL
+    // Try to get API base from localStorage, fallback to Railway
+    this.apiBase = localStorage.getItem('yared_api_base') || 'https://web-production-28e35.up.railway.app'
     this.isEnabled = true
     this.pageStartTime = Date.now()
     this.isAuthorizedDevice = null // Will be checked when needed
