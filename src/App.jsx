@@ -132,6 +132,12 @@ function App() {
     }
   }, [])
 
+  // Handle sidebar offset for input bar positioning (desktop only)
+  useEffect(() => {
+    const sidebarOffset = (!isMobile && sidebarVisible) ? '256px' : '0px'
+    document.documentElement.style.setProperty('--sidebar-offset', sidebarOffset)
+  }, [isMobile, sidebarVisible])
+
   // Recovery function for lost data
   const recoverChatHistory = () => {
     try {

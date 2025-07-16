@@ -13,17 +13,18 @@ html, body, #root {
 /* Mobile keyboard offset support */
 :root {
   --kb-offset: 0px;
+  --sidebar-offset: 0px; /* For desktop sidebar spacing */
 }
 
 /* Input bar positioning with keyboard awareness */
 .input-bar {
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: var(--sidebar-offset);
   right: 0;
   padding: 16px;
   transform: translateY(var(--kb-offset));
-  transition: transform 0.15s ease-out;
+  transition: transform 0.15s ease-out, left 0.3s ease-in-out;
 }
 
 /* Ensure chat content has proper bottom padding for input */
