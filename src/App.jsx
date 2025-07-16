@@ -4,8 +4,10 @@ import ChatInput from './components/ChatInput';
 import ChatHeader from './components/ChatHeader';
 import ChatMessage from './components/ChatMessage';
 import ThinkingIndicator from './components/ThinkingIndicator';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 import saintYaredImage from './assets/images/saintyared.png';
 import { yaredBotAPI } from './services/yaredBotAPI';
+import analytics from './services/analytics';
 
 function App() {
   const [sidebarVisible, setSidebarVisible] = useState(true)
@@ -93,6 +95,7 @@ function App() {
   const [isThinking, setIsThinking] = useState(false)
   const [thinkingText, setThinkingText] = useState('')
   const [thinkingHistory, setThinkingHistory] = useState([])
+  const [showAnalytics, setShowAnalytics] = useState(false)
 
 
   // Modern viewport offset handling for mobile browsers
@@ -192,9 +195,26 @@ function App() {
     }
   }, [])
 
+  // Analytics keyboard shortcut (Ctrl+Shift+A)
+  useEffect(() => {
+    const handleKeydown = (e) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        e.preventDefault()
+        setShowAnalytics(true)
+        analytics.trackEngagement('analytics_opened', { method: 'keyboard_shortcut' })
+      }
+    }
+
+    window.addEventListener('keydown', handleKeydown)
+    return () => window.removeEventListener('keydown', handleKeydown)
+  }, [])
+
   // Handle sending messages to Yared Bot
   const handleSendMessage = async (messageText) => {
     if (!messageText.trim() || isLoading) return
+
+    // Track chat message analytics
+    analytics.trackChatMessage(messageText)
 
     // Create new chat if this is the first message
     let chatId = currentChatId
@@ -273,6 +293,12 @@ function App() {
       
       // Get AI response with session tracking
       const { response: aiResponse, sessionId } = await yaredBotAPI.sendMessage(messageText, chatId)
+      
+      // Track successful AI response
+      analytics.trackEngagement('ai_response_received', { 
+        response_length: aiResponse.length,
+        response_type: requiresSearch ? 'ai_response_with_knowledge' : 'ai_response'
+      })
       
       // Save thinking indicator to history only if it was used
       if (requiresSearch && isThinking) {
@@ -353,6 +379,7 @@ function App() {
 
   // Handle new chat
   const handleNewChat = () => {
+    analytics.trackButtonClick('new_chat')
     setMessages([])
     setCurrentChatId(null)
     setNewMessageId(null)
@@ -428,6 +455,7 @@ function App() {
 
   // Handle suggestion clicks
   const handleSuggestionClick = (suggestion) => {
+    analytics.trackButtonClick('suggestion_click', suggestion)
     handleSendMessage(suggestion)
   }
 
@@ -731,6 +759,12 @@ function App() {
           </p>
         </div>
       </div>
+
+      {/* Analytics Dashboard */}
+      <AnalyticsDashboard 
+        isVisible={showAnalytics}
+        onClose={() => setShowAnalytics(false)}
+      />
     </div>
   );
 }
