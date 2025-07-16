@@ -161,15 +161,61 @@ export default function AnalyticsDashboard({ isVisible, onClose }) {
                     </div>
                   )}
 
-                  {/* Top Countries */}
-                  {stats.top_countries && stats.top_countries.length > 0 && (
+                  {/* Device Breakdown */}
+                  {stats.top_devices && stats.top_devices.length > 0 && (
                     <div className="bg-[#2A2A2A] rounded-lg p-4">
-                      <h3 className="text-lg font-semibold text-white mb-4">Top Countries</h3>
+                      <h3 className="text-lg font-semibold text-white mb-4">Devices Used</h3>
                       <div className="space-y-2">
-                        {stats.top_countries.slice(0, 5).map((country, index) => (
+                        {stats.top_devices.map((device, index) => (
                           <div key={index} className="flex justify-between items-center">
-                            <span className="text-gray-300">{country.country}</span>
-                            <span className="text-[#D4AF37] font-semibold">{country.users} users</span>
+                            <span className="text-gray-300">{device.device}</span>
+                            <span className="text-[#D4AF37] font-semibold">{device.count} sessions</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Browsers Used */}
+                  {stats.top_browsers && stats.top_browsers.length > 0 && (
+                    <div className="bg-[#2A2A2A] rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-white mb-4">Browsers Used</h3>
+                      <div className="space-y-2">
+                        {stats.top_browsers.map((browser, index) => (
+                          <div key={index} className="flex justify-between items-center">
+                            <span className="text-gray-300">{browser.browser}</span>
+                            <span className="text-[#D4AF37] font-semibold">{browser.count} sessions</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recent Sessions (Who's been on your site) */}
+                  {stats.recent_sessions && stats.recent_sessions.length > 0 && (
+                    <div className="bg-[#2A2A2A] rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-white mb-4">Recent Visitors (Last 24h)</h3>
+                      <div className="space-y-3">
+                        {stats.recent_sessions.map((session, index) => (
+                          <div key={index} className={`p-3 rounded-lg border ${session.is_you ? 'border-green-500/30 bg-green-900/10' : 'border-gray-600/30 bg-gray-900/10'}`}>
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-white font-medium">{session.device_model}</span>
+                                  {session.is_you && (
+                                    <span className="px-2 py-1 bg-green-500 text-black text-xs rounded-full font-semibold">
+                                      YOU
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-sm text-gray-400 mt-1">
+                                  {session.browser} • Last active: {session.last_activity}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {session.pages_viewed} pages viewed • {session.messages_sent} messages sent
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </div>
