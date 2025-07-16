@@ -144,9 +144,8 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
 
   return (
     <div className={`${isMobile ? 'w-full' : 'w-64'} bg-[#0f0f0f] text-white h-screen flex flex-col transition-all duration-300 ease-in-out`}>
-      <div className="h-full flex flex-col">
-      {/* Top header with icons */}
-      <div className="flex items-center justify-between px-4 py-3">
+      {/* Top header with icons - Fixed at top */}
+      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
         {/* Sidebar Toggle Icon - Left side */}
         {!isMobile && (
           <button 
@@ -179,8 +178,8 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
         </button>
       </div>
 
-      {/* Model Selection */}
-      <div className="px-3 pb-3">
+      {/* Model Selection - Fixed at top */}
+      <div className="px-3 pb-3 flex-shrink-0">
         <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#1A1A1A] transition-colors">
           <div className="w-6 h-6 rounded-full overflow-hidden">
             <img src={saintYaredImage} alt="Kidus Yared" className="w-full h-full object-cover" />
@@ -189,8 +188,8 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
         </div>
       </div>
 
-      {/* Chat History */}
-      <div className="flex-1 overflow-y-auto px-3">
+      {/* Chat History - Scrollable middle section */}
+      <div className="flex-1 overflow-y-auto px-3 min-h-0">
         {chatHistory.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500 text-sm">No chats yet</p>
@@ -320,44 +319,45 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
         )}
       </div>
 
+      {/* Bottom fixed section */}
+      <div className="flex-shrink-0 border-t border-[#2A2A2A]/30">
+        {/* Analytics Button (Only for authorized devices) */}
+        {canAccessAnalytics && (
+          <div className="px-3 pt-3 pb-2">
+            <button 
+              onClick={() => {
+                onAnalyticsOpen?.()
+                analytics.trackButtonClick('analytics_open', isMobile ? 'mobile_sidebar' : 'desktop_sidebar')
+                if (isMobile && onClose) onClose()
+              }}
+              className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#2A2A2A] transition-colors text-left"
+            >
+              <div className="w-6 h-6 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 20V10"/>
+                  <path d="M18 20V4"/>
+                  <path d="M6 20v-6"/>
+                </svg>
+              </div>
+              <span className="text-gray-300 text-sm">Analytics</span>
+            </button>
+          </div>
+        )}
 
-      {/* Analytics Button (Only for authorized devices) */}
-      {canAccessAnalytics && (
-        <div className="px-3 pb-2">
-          <button 
-            onClick={() => {
-              onAnalyticsOpen?.()
-              analytics.trackButtonClick('analytics_open', isMobile ? 'mobile_sidebar' : 'desktop_sidebar')
-              if (isMobile && onClose) onClose()
-            }}
-            className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#2A2A2A] transition-colors text-left"
-          >
+        {/* Bottom Donate Section */}
+        <div className="p-3">
+          <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#2A2A2A] cursor-pointer transition-colors">
             <div className="w-6 h-6 flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 20V10"/>
-                <path d="M18 20V4"/>
-                <path d="M6 20v-6"/>
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
             </div>
-            <span className="text-gray-300 text-sm">Analytics</span>
-          </button>
-        </div>
-      )}
-
-      {/* Bottom Invite Section */}
-      <div className="p-3">
-        <div className="flex items-center space-x-3 px-3 py-2.5 rounded-lg hover:bg-[#2A2A2A] cursor-pointer transition-colors">
-          <div className="w-6 h-6 flex items-center justify-center">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
+            <span className="text-gray-300 text-sm">Donate</span>
           </div>
-          <span className="text-gray-300 text-sm">Donate</span>
         </div>
-      </div>
       </div>
     </div>
   );
