@@ -100,8 +100,11 @@ function App() {
     function setOffset() {
       const vv = window.visualViewport
       if (vv) {
-        const extra = vv.height - document.documentElement.clientHeight
-        document.documentElement.style.setProperty('--kb-offset', extra + 'px')
+        // Calculate how much the keyboard has reduced the viewport
+        const keyboardHeight = window.innerHeight - vv.height
+        // Only move up if keyboard is showing (positive keyboard height)
+        const offset = keyboardHeight > 0 ? -keyboardHeight : 0
+        document.documentElement.style.setProperty('--kb-offset', offset + 'px')
       }
     }
     
