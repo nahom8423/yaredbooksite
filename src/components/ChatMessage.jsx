@@ -175,7 +175,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
             backgroundColor: '#2f2f2f',
             color: 'white'
           }}>
-            <div style={{ whiteSpace: 'pre-wrap' }}>{displayText}</div>
+            <div style={{ whiteSpace: 'pre-wrap', userSelect: 'text', WebkitUserSelect: 'text', cursor: 'text' }}>{displayText}</div>
           </div>
         </div>
       </div>
@@ -213,7 +213,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
             <div style={{
               color: 'white'
             }}>
-              <div style={{ whiteSpace: 'pre-wrap' }}>{displayText}{isAnimating && <span className="animate-pulse">|</span>}</div>
+              <div style={{ whiteSpace: 'pre-wrap', userSelect: 'text', WebkitUserSelect: 'text', cursor: 'text' }}>{displayText}{isAnimating && <span className="animate-pulse">|</span>}</div>
             </div>
             
             {/* Action buttons - only show for completed AI messages */}
