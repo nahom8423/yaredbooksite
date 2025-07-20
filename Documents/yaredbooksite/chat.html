@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ዜማ ቤት AI Assistant</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="AI Assistant for Ethiopian Orthodox topics - chat interface for liturgy, history, and theology guidance.">
+    <meta name="keywords" content="ዜማ ቤት, AI assistant, Ethiopian Orthodox, chat, questions, faith, liturgy, theology">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Custom Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Ethiopic:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ChatGPT UI Kit Integration - Exact Colors */
+        :root {
+            /* ChatGPT Official Colors */
+            --chatgpt-black: #0f0f0f;
+            --chatgpt-dark-gray: #171717;
+            --chatgpt-medium-gray: #1f1f1f;
+            --chatgpt-border-gray: #2d2d2d;
+            --chatgpt-text-primary: #ffffff;
+            --chatgpt-text-secondary: #b4b4b4;
+            --chatgpt-text-muted: #8e8e8e;
+            --chatgpt-user-bg: #2f2f2f;
+            --chatgpt-ai-bg: #1f1f1f;
+            --chatgpt-input-bg: #40414f;
+            --chatgpt-button-primary: #19c37d;
+            --chatgpt-button-hover: #0fa968;
+            
+            /* ዜማ ቤት Orthodox Colors */
+            --orthodox-gold: #D4AF37;
+            --orthodox-deep-gold: #B8941F;
+        }
+        
+        /* Ethiopic font styling */
+        .ethiopic {
+            font-family: 'Noto Serif Ethiopic', serif;
+            font-feature-settings: "kern" 1, "liga" 1;
+        }
+
+        /* Enable text selection everywhere */
+        * {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        /* Special selectable class for content that should definitely be copyable */
+        .selectable {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+            cursor: text;
+        }
+        
+        /* ChatGPT-style body */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--chatgpt-black);
+            color: var(--chatgpt-text-primary);
+        }
+        
+        /* Custom scrollbar - ChatGPT style */
+        .chatgpt-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chatgpt-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .chatgpt-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .chatgpt-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Sidebar styling - matches ChatGPT */
+        .sidebar {
+            background-color: var(--chatgpt-dark-gray);
+            border-right: 1px solid var(--chatgpt-border-gray);
+            width: 260px;
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .sidebar-collapsed {
+            transform: translateX(-100%);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 50;
+            }
+        }
+        
+        /* Chat history items - ChatGPT style */
+        .chat-item {
+            padding: 12px;
+            margin: 2px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            color: var(--chatgpt-text-secondary);
+            font-size: 14px;
+        }
+        
+        .chat-item:hover {
+            background-color: var(--chatgpt-medium-gray);
+        }
+        
+        .chat-item.active {
+            background-color: var(--chatgpt-medium-gray);
+            color: var(--chatgpt-text-primary);
+        }
+        
+        /* New chat button - ChatGPT style */
+        .new-chat-btn {
+            background-color: var(--chatgpt-dark-gray);
+            border: 1px solid var(--chatgpt-border-gray);
+            color: var(--chatgpt-text-primary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .new-chat-btn:hover {
+            background-color: var(--chatgpt-medium-gray);
+        }
+        
+        /* Message bubbles - exact ChatGPT styling */
+        .message-user {
+            background-color: var(--chatgpt-user-bg);
+            color: var(--chatgpt-text-primary);
+            padding: 16px;
+            border-radius: 16px;
+            margin-left: auto;
+            max-width: 70%;
+            margin-bottom: 24px;
+        }
+        
+        .message-ai {
+            background-color: var(--chatgpt-ai-bg);
+            color: var(--chatgpt-text-primary);
+            padding: 16px;
+            border-radius: 16px;
+            max-width: 100%;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        
+        .ai-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--orthodox-gold), var(--orthodox-deep-gold));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        /* Input area - ChatGPT style */
+        .chat-input-container {
+            background-color: var(--chatgpt-black);
+            border-top: 1px solid var(--chatgpt-border-gray);
+            padding: 24px;
+        }
+        
+        .chat-input {
+            background-color: var(--chatgpt-input-bg);
+            border: 1px solid var(--chatgpt-border-gray);
+            border-radius: 12px;
+            padding: 16px 50px 16px 16px;
+            color: var(--chatgpt-text-primary);
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none;
+            min-height: 56px;
+            max-height: 200px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        
+        .chat-input:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .chat-input::placeholder {
+            color: var(--chatgpt-text-muted);
+        }
+        
+        .send-button {
+            background-color: var(--chatgpt-button-primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .send-button:hover {
+            background-color: var(--chatgpt-button-hover);
+        }
+        
+        .send-button:disabled {
+            background-color: var(--chatgpt-border-gray);
+            cursor: not-allowed;
+        }
+        
+        /* Header - ChatGPT style */
+        .chat-header {
+            background-color: var(--chatgpt-black);
+            border-bottom: 1px solid var(--chatgpt-border-gray);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .model-selector {
+            background-color: transparent;
+            color: var(--chatgpt-text-primary);
+            font-size: 18px;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .model-selector:hover {
+            background-color: var(--chatgpt-medium-gray);
+        }
+        
+        /* Mobile hamburger */
+        .mobile-menu-btn {
+            position: absolute;
+            left: 16px;
+            background: none;
+            border: none;
+            color: var(--chatgpt-text-primary);
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .mobile-menu-btn:hover {
+            background-color: var(--chatgpt-medium-gray);
+        }
+        
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 16px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--chatgpt-text-muted);
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            30% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Welcome suggestions - ChatGPT style */
+        .suggestion-card {
+            background-color: var(--chatgpt-medium-gray);
+            border: 1px solid var(--chatgpt-border-gray);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+        
+        .suggestion-card:hover {
+            background-color: #2a2a2a;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Message fade in animation */
+        .message-fade-in {
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Chat history time sections */
+        .history-section {
+            padding: 8px 16px;
+            font-size: 12px;
+            color: var(--chatgpt-text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Sidebar footer */
+        .sidebar-footer {
+            border-top: 1px solid var(--chatgpt-border-gray);
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-button {
+            background: none;
+            border: none;
+            color: var(--chatgpt-text-secondary);
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .footer-button:hover {
+            background-color: var(--chatgpt-medium-gray);
+            color: var(--chatgpt-text-primary);
+        }
+    </style>
+</head>
+<body x-data="chatApp()" x-init="init()">
+    <!-- Mobile overlay -->
+    <div x-show="sidebarOpen && window.innerWidth < 768" 
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="sidebarOpen = false"
+         class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
+    
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar chatgpt-scrollbar overflow-y-auto" 
+             :class="{ 'sidebar-collapsed': !sidebarOpen }"
+             x-show="sidebarOpen || window.innerWidth >= 768">
+            
+            <!-- Top Icons Section -->
+            <div class="flex items-center justify-between p-3 border-b" style="border-color: var(--chatgpt-border-gray);">
+                <div class="flex items-center space-x-3">
+                    <!-- New Chat Icon -->
+                    <div class="w-6 h-6 rounded flex items-center justify-center cursor-pointer hover:bg-gray-700 transition-colors"
+                         @click="newChat()"
+                         style="background-color: var(--chatgpt-medium-gray);"
+                         title="New chat">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                        </svg>
+                    </div>
+                    <!-- Edit Icon -->
+                    <div class="w-6 h-6 rounded flex items-center justify-center cursor-pointer hover:bg-gray-700 transition-colors"
+                         style="background-color: var(--chatgpt-medium-gray);"
+                         title="Edit">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m18 2 4 4-14 14H4v-4L18 2z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GPT Models Section -->
+            <div class="p-3 border-b" style="border-color: var(--chatgpt-border-gray);">
+                <!-- Main ChatGPT Option -->
+                <div class="flex items-center space-x-3 p-2 rounded-lg cursor-pointer transition-colors"
+                     style="background-color: var(--chatgpt-medium-gray);">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs"
+                         style="background: linear-gradient(135deg, var(--orthodox-gold), var(--orthodox-deep-gold));">
+                        <span class="ethiopic text-white font-semibold">ዜ</span>
+                    </div>
+                    <span class="text-sm text-white">ዜማ ቤት AI</span>
+                </div>
+                
+                <!-- DALL-E Option -->
+                <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-800 cursor-pointer transition-colors mt-1">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs"
+                         style="background: linear-gradient(135deg, #3b82f6, #1e40af);">
+                        <span class="text-white">🎨</span>
+                    </div>
+                    <span class="text-sm" style="color: var(--chatgpt-text-secondary);">Orthodox Art Generator</span>
+                </div>
+                
+                <!-- Scholar GPT Option -->
+                <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-800 cursor-pointer transition-colors mt-1">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs"
+                         style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                        <span class="text-white">📚</span>
+                    </div>
+                    <span class="text-sm" style="color: var(--chatgpt-text-secondary);">Orthodox Scholar</span>
+                </div>
+                
+                <!-- Explore GPTs -->
+                <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-800 cursor-pointer transition-colors mt-1">
+                    <div class="w-6 h-6 rounded flex items-center justify-center text-xs"
+                         style="background-color: var(--chatgpt-medium-gray);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="21 21l-4.35-4.35"/>
+                        </svg>
+                    </div>
+                    <span class="text-sm" style="color: var(--chatgpt-text-secondary);">Explore ዜማ AIs</span>
+                </div>
+            </div>
+            
+            <!-- Chat History -->
+            <div class="flex-1 overflow-y-auto">
+                <!-- Today -->
+                <template x-if="todayChats.length > 0">
+                    <div class="px-3 py-2">
+                        <h3 class="text-xs font-medium mb-2 px-2" 
+                            style="color: var(--chatgpt-text-muted);">
+                            Today
+                        </h3>
+                        <template x-for="chat in todayChats" :key="chat.id">
+                            <div @click="loadChat(chat.id)"
+                                 class="px-2 py-2 text-sm hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
+                                 :class="currentChatId === chat.id ? 'bg-gray-800' : ''"
+                                 style="color: var(--chatgpt-text-secondary);">
+                                <div class="truncate" x-text="chat.title"></div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                
+                <!-- Previous 7 Days -->
+                <template x-if="weekChats.length > 0">
+                    <div class="px-3 py-2">
+                        <h3 class="text-xs font-medium mb-2 px-2" 
+                            style="color: var(--chatgpt-text-muted);">
+                            Previous 7 Days
+                        </h3>
+                        <template x-for="chat in weekChats" :key="chat.id">
+                            <div @click="loadChat(chat.id)"
+                                 class="px-2 py-2 text-sm hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
+                                 :class="currentChatId === chat.id ? 'bg-gray-800' : ''"
+                                 style="color: var(--chatgpt-text-secondary);">
+                                <div class="truncate" x-text="chat.title"></div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                
+                <!-- Previous 30 Days -->
+                <template x-if="monthChats.length > 0">
+                    <div class="px-3 py-2">
+                        <h3 class="text-xs font-medium mb-2 px-2" 
+                            style="color: var(--chatgpt-text-muted);">
+                            Previous 30 Days
+                        </h3>
+                        <template x-for="chat in monthChats" :key="chat.id">
+                            <div @click="loadChat(chat.id)"
+                                 class="px-2 py-2 text-sm hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
+                                 :class="currentChatId === chat.id ? 'bg-gray-800' : ''"
+                                 style="color: var(--chatgpt-text-secondary);">
+                                <div class="truncate" x-text="chat.title"></div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                
+                <!-- Empty state -->
+                <div x-show="chatHistory.length === 0" class="p-4 text-center">
+                    <div class="text-sm" style="color: var(--chatgpt-text-muted);">No conversations yet</div>
+                </div>
+                
+                <!-- Demo chat items when empty -->
+                <div x-show="chatHistory.length === 0" class="px-3 py-2">
+                    <h3 class="text-xs font-medium mb-2 px-2" style="color: var(--chatgpt-text-muted);">
+                        Today
+                    </h3>
+                    <div class="px-2 py-2 text-sm rounded-lg cursor-pointer transition-colors"
+                         @click="sendMessage('Tell me about Ethiopian Orthodox fasting')"
+                         style="color: var(--chatgpt-text-secondary);"
+                         onmouseover="this.style.backgroundColor='var(--chatgpt-medium-gray)'"
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        Ethiopian Orthodox fasting traditions
+                    </div>
+                    <div class="px-2 py-2 text-sm rounded-lg cursor-pointer transition-colors"
+                         @click="sendMessage('Explain Saint Yared contributions')"
+                         style="color: var(--chatgpt-text-secondary);"
+                         onmouseover="this.style.backgroundColor='var(--chatgpt-medium-gray)'"
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        Saint Yared and liturgical music
+                    </div>
+                    
+                    <h3 class="text-xs font-medium mb-2 px-2 mt-4" style="color: var(--chatgpt-text-muted);">
+                        Previous 7 Days
+                    </h3>
+                    <div class="px-2 py-2 text-sm rounded-lg cursor-pointer transition-colors"
+                         @click="sendMessage('What is Timkat celebration')"
+                         style="color: var(--chatgpt-text-secondary);"
+                         onmouseover="this.style.backgroundColor='var(--chatgpt-medium-gray)'"
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        Understanding Timkat celebration
+                    </div>
+                    <div class="px-2 py-2 text-sm rounded-lg cursor-pointer transition-colors"
+                         @click="sendMessage('Ethiopian calendar explanation')"
+                         style="color: var(--chatgpt-text-secondary);"
+                         onmouseover="this.style.backgroundColor='var(--chatgpt-medium-gray)'"
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        Ethiopian calendar and its significance
+                    </div>
+                    <div class="px-2 py-2 text-sm rounded-lg cursor-pointer transition-colors"
+                         @click="sendMessage('Ge\'ez language in liturgy')"
+                         style="color: var(--chatgpt-text-secondary);"
+                         onmouseover="this.style.backgroundColor='var(--chatgpt-medium-gray)'"
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        Ge'ez language in Orthodox liturgy
+                    </div>
+                    
+                    <h3 class="text-xs font-medium mb-2 px-2 mt-4" style="color: var(--chatgpt-text-muted);">
+                        Previous 30 Days
+                    </h3>
+                    <div class="px-2 py-2 text-sm rounded-lg cursor-pointer transition-colors"
+                         @click="sendMessage('Orthodox monastery traditions')"
+                         style="color: var(--chatgpt-text-secondary);"
+                         onmouseover="this.style.backgroundColor='var(--chatgpt-medium-gray)'"
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        Orthodox monastery traditions
+                    </div>
+                    <div class="px-2 py-2 text-sm rounded-lg cursor-pointer transition-colors"
+                         @click="sendMessage('Ark of the Covenant beliefs')"
+                         style="color: var(--chatgpt-text-secondary);"
+                         onmouseover="this.style.backgroundColor='var(--chatgpt-medium-gray)'"
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        Ark of the Covenant beliefs
+                    </div>
+                    <div class="px-2 py-2 text-sm rounded-lg cursor-pointer transition-colors"
+                         @click="sendMessage('Orthodox church architecture')"
+                         style="color: var(--chatgpt-text-secondary);"
+                         onmouseover="this.style.backgroundColor='var(--chatgpt-medium-gray)'"
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        Ethiopian church architecture
+                    </div>
+                    <div class="px-2 py-2 text-sm rounded-lg cursor-pointer transition-colors"
+                         @click="sendMessage('Coffee ceremony spirituality')"
+                         style="color: var(--chatgpt-text-secondary);"
+                         onmouseover="this.style.backgroundColor='var(--chatgpt-medium-gray)'"
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        Coffee ceremony and spirituality
+                    </div>
+                    <div class="px-2 py-2 text-sm rounded-lg cursor-pointer transition-colors"
+                         @click="sendMessage('Book of Enoch significance')"
+                         style="color: var(--chatgpt-text-secondary);"
+                         onmouseover="this.style.backgroundColor='var(--chatgpt-medium-gray)'"
+                         onmouseout="this.style.backgroundColor='transparent'">
+                        Book of Enoch in Ethiopian Orthodox
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar Footer -->
+            <div class="border-t p-3" style="border-color: var(--chatgpt-border-gray);">
+                <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-800 cursor-pointer transition-colors"
+                     @click="window.location.href='index.html'">
+                    <div class="w-6 h-6 flex items-center justify-center">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m15 18-6-6 6-6"/>
+                        </svg>
+                    </div>
+                    <span class="text-sm" style="color: var(--chatgpt-text-secondary);">Back to ዜማ ቤት</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <div class="chat-header">
+                <button @click="sidebarOpen = !sidebarOpen" class="mobile-menu-btn md:hidden">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="4" y1="6" x2="20" y2="6"></line>
+                        <line x1="4" y1="12" x2="20" y2="12"></line>
+                        <line x1="4" y1="18" x2="20" y2="18"></line>
+                    </svg>
+                </button>
+                
+                <button class="model-selector">
+                    <span class="ethiopic" style="color: var(--orthodox-gold);">ዜማ ቤት</span> AI
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6,9 12,15 18,9"></polyline>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div class="flex-1 overflow-y-auto chatgpt-scrollbar" x-ref="chatContainer">
+                <div class="max-w-3xl mx-auto p-6">
+                    <!-- Welcome Message -->
+                    <div x-show="messages.length === 0" class="text-center py-12">
+                        <div class="w-20 h-20 mx-auto mb-8 rounded-full bg-gradient-to-br flex items-center justify-center"
+                             style="background: linear-gradient(135deg, var(--orthodox-gold), var(--orthodox-deep-gold));">
+                            <span class="text-2xl ethiopic text-white font-semibold">ዜ</span>
+                        </div>
+                        <h1 class="text-3xl font-semibold mb-4" style="color: var(--chatgpt-text-primary);">
+                            How can I help you today?
+                        </h1>
+                        <div class="text-lg mb-12" style="color: var(--chatgpt-text-secondary);">
+                            Ask me about Ethiopian Orthodox tradition, liturgy, history, and theology
+                        </div>
+                        
+                        <!-- Suggestions -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                            <template x-for="suggestion in suggestions" :key="suggestion.title">
+                                <div @click="sendMessage(suggestion.title)" class="suggestion-card">
+                                    <div class="font-medium mb-2" style="color: var(--chatgpt-text-primary);" x-text="suggestion.title"></div>
+                                    <div class="text-sm" style="color: var(--chatgpt-text-secondary);" x-text="suggestion.description"></div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                    
+                    <!-- Messages -->
+                    <div class="space-y-0">
+                        <template x-for="message in messages" :key="message.id">
+                            <div class="message-fade-in">
+                                <!-- User Message -->
+                                <div x-show="message.role === 'user'">
+                                    <div class="message-user" x-text="message.content"></div>
+                                </div>
+                                
+                                <!-- AI Message -->
+                                <div x-show="message.role === 'assistant'" class="message-ai">
+                                    <div class="ai-avatar ethiopic">ዜ</div>
+                                    <div class="flex-1">
+                                        <div x-text="message.content" class="whitespace-pre-wrap"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                        
+                        <!-- Typing Indicator -->
+                        <div x-show="isTyping" class="message-ai">
+                            <div class="ai-avatar ethiopic">ዜ</div>
+                            <div class="typing-indicator">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="chat-input-container">
+                <div class="max-w-3xl mx-auto relative">
+                    <textarea x-model="currentMessage"
+                              @keydown.enter.prevent="handleKeyDown($event)"
+                              @input="autoResize($event)"
+                              placeholder="Message ዜማ ቤት AI"
+                              class="chat-input"
+                              :disabled="isTyping"
+                              x-ref="chatInput"></textarea>
+                    
+                    <button @click="sendCurrentMessage()"
+                            :disabled="!currentMessage.trim() || isTyping"
+                            class="send-button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="text-center mt-3 text-xs" style="color: var(--chatgpt-text-muted);">
+                    <span class="ethiopic">ዜማ ቤት</span> AI can make mistakes. Consider checking important information.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function chatApp() {
+            return {
+                sidebarOpen: window.innerWidth >= 768,
+                currentMessage: '',
+                isTyping: false,
+                messages: [],
+                chatHistory: [],
+                currentChatId: null,
+                
+                suggestions: [
+                    {
+                        title: "Ethiopian Orthodox Calendar",
+                        description: "Explain the Ethiopian calendar and its significance in Orthodox tradition"
+                    },
+                    {
+                        title: "Saint Yared and Zema",
+                        description: "Tell me about Saint Yared and his contributions to liturgical music"
+                    },
+                    {
+                        title: "Fasting Traditions",
+                        description: "What are the major fasting periods in Ethiopian Orthodox faith?"
+                    },
+                    {
+                        title: "Timkat Celebration",
+                        description: "Describe the significance and traditions of Timkat (Epiphany)"
+                    }
+                ],
+                
+                get todayChats() {
+                    const today = new Date();
+                    return this.chatHistory.filter(chat => {
+                        const chatDate = new Date(chat.updatedAt);
+                        return chatDate.toDateString() === today.toDateString();
+                    });
+                },
+                
+                get weekChats() {
+                    const today = new Date();
+                    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return this.chatHistory.filter(chat => {
+                        const chatDate = new Date(chat.updatedAt);
+                        return chatDate >= weekAgo && chatDate.toDateString() !== today.toDateString();
+                    });
+                },
+                
+                get monthChats() {
+                    const today = new Date();
+                    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    return this.chatHistory.filter(chat => {
+                        const chatDate = new Date(chat.updatedAt);
+                        return chatDate >= monthAgo && chatDate < weekAgo;
+                    });
+                },
+                
+                init() {
+                    this.loadChatHistory();
+                    
+                    // Handle window resize
+                    window.addEventListener('resize', () => {
+                        if (window.innerWidth >= 768) {
+                            this.sidebarOpen = true;
+                        } else {
+                            this.sidebarOpen = false;
+                        }
+                    });
+                },
+                
+                newChat() {
+                    this.currentChatId = this.generateId();
+                    this.messages = [];
+                    this.currentMessage = '';
+                    if (window.innerWidth < 768) {
+                        this.sidebarOpen = false;
+                    }
+                },
+                
+                loadChat(chatId) {
+                    const chat = this.chatHistory.find(c => c.id === chatId);
+                    if (chat) {
+                        this.currentChatId = chatId;
+                        this.messages = chat.messages || [];
+                        this.scrollToBottom();
+                        if (window.innerWidth < 768) {
+                            this.sidebarOpen = false;
+                        }
+                    }
+                },
+                
+                sendCurrentMessage() {
+                    if (this.currentMessage.trim() && !this.isTyping) {
+                        this.sendMessage(this.currentMessage.trim());
+                    }
+                },
+                
+                sendMessage(messageText) {
+                    if (!messageText || this.isTyping) return;
+                    
+                    // Create new chat if needed
+                    if (!this.currentChatId) {
+                        this.newChat();
+                    }
+                    
+                    // Add user message
+                    const userMessage = {
+                        id: this.generateId(),
+                        role: 'user',
+                        content: messageText,
+                        timestamp: new Date()
+                    };
+                    
+                    this.messages.push(userMessage);
+                    this.currentMessage = '';
+                    this.isTyping = true;
+                    
+                    // Reset textarea height
+                    this.$nextTick(() => {
+                        const textarea = this.$refs.chatInput;
+                        if (textarea) {
+                            textarea.style.height = '56px';
+                        }
+                    });
+                    
+                    this.scrollToBottom();
+                    
+                    // Simulate AI response
+                    setTimeout(() => {
+                        const aiMessage = {
+                            id: this.generateId(),
+                            role: 'assistant',
+                            content: this.generateAIResponse(messageText),
+                            timestamp: new Date()
+                        };
+                        
+                        this.messages.push(aiMessage);
+                        this.isTyping = false;
+                        this.saveChatHistory();
+                        this.scrollToBottom();
+                    }, 1000 + Math.random() * 2000);
+                },
+                
+                generateAIResponse(userMessage) {
+                    const responses = [
+                        "Thank you for your question about Ethiopian Orthodox tradition. This is a demonstration of the ዜማ ቤት AI interface. In the full implementation, this would connect to a specialized AI trained on Ethiopian Orthodox theology, history, and liturgical practices.",
+                        
+                        "በሰላም (Besalam)! Your question touches on important aspects of our Orthodox faith. The Ethiopian Orthodox Tewahedo Church has preserved ancient traditions for nearly 2,000 years. This demo shows how the AI assistant will help explain these rich traditions.",
+                        
+                        "That's an excellent question about liturgical practices. Ethiopian Orthodox Christianity follows the ancient Coptic traditions with unique adaptations. The church calendar, fasting periods, and ceremonies all have deep theological significance. This interface will eventually provide detailed explanations.",
+                        
+                        "I appreciate your interest in our faith traditions. The Ethiopian Orthodox Church maintains unique practices like the celebration of Timkat, the use of Ge'ez in liturgy, and the preservation of biblical texts like the Book of Enoch. This AI assistant will help explain these treasures of our faith."
+                    ];
+                    
+                    return responses[Math.floor(Math.random() * responses.length)];
+                },
+                
+                handleKeyDown(event) {
+                    if (event.key === 'Enter' && !event.shiftKey) {
+                        event.preventDefault();
+                        this.sendCurrentMessage();
+                    }
+                },
+                
+                autoResize(event) {
+                    const textarea = event.target;
+                    textarea.style.height = '56px';
+                    textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+                },
+                
+                scrollToBottom() {
+                    this.$nextTick(() => {
+                        const container = this.$refs.chatContainer;
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    });
+                },
+                
+                saveChatHistory() {
+                    if (!this.currentChatId) return;
+                    
+                    const existingChatIndex = this.chatHistory.findIndex(c => c.id === this.currentChatId);
+                    const chatTitle = this.messages.length > 0 
+                        ? this.messages[0].content.substring(0, 50) + (this.messages[0].content.length > 50 ? '...' : '')
+                        : 'New Chat';
+                    
+                    const chatData = {
+                        id: this.currentChatId,
+                        title: chatTitle,
+                        messages: this.messages,
+                        createdAt: existingChatIndex === -1 ? new Date() : this.chatHistory[existingChatIndex].createdAt,
+                        updatedAt: new Date()
+                    };
+                    
+                    if (existingChatIndex === -1) {
+                        this.chatHistory.unshift(chatData);
+                    } else {
+                        this.chatHistory[existingChatIndex] = chatData;
+                    }
+                    
+                    // Keep only last 50 chats
+                    this.chatHistory = this.chatHistory.slice(0, 50);
+                    
+                    localStorage.setItem('zema_chat_history', JSON.stringify(this.chatHistory));
+                },
+                
+                loadChatHistory() {
+                    const saved = localStorage.getItem('zema_chat_history');
+                    if (saved) {
+                        try {
+                            this.chatHistory = JSON.parse(saved).map(chat => ({
+                                ...chat,
+                                createdAt: new Date(chat.createdAt),
+                                updatedAt: new Date(chat.updatedAt),
+                                messages: chat.messages.map(msg => ({
+                                    ...msg,
+                                    timestamp: new Date(msg.timestamp)
+                                }))
+                            }));
+                        } catch (e) {
+                            console.error('Error loading chat history:', e);
+                            this.chatHistory = [];
+                        }
+                    }
+                },
+                
+                toggleTheme() {
+                    // Placeholder for theme toggle - currently locked to dark theme to match ChatGPT
+                    console.log('Theme toggle - currently using ChatGPT dark theme');
+                },
+                
+                generateId() {
+                    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

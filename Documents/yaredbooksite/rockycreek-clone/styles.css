@@ -1,0 +1,243 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
+  background-color: #000;
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Navbar styles */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo img {
+  height: 40px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links li a {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  transition: color 0.3s ease;
+}
+
+.nav-links li a:hover {
+  color: #0071bc;
+}
+
+.nav-icons {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-icons button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icons button:hover {
+  color: #0071bc;
+}
+
+/* Hero section */
+.hero {
+  position: relative;
+  height: 100vh;
+  background: url('images/hero-bg.jpg') center center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 700px;
+  color: #fff;
+}
+
+.hero-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.btn-primary {
+  background-color: #0071bc;
+  color: #fff;
+  padding: 0.75rem 2rem;
+  font-weight: 700;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  background-color: #005a8c;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 1rem 0;
+  background-color: #111;
+  font-size: 0.9rem;
+  color: #aaa;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+}
+
+/* Discipleship Section */
+.discipleship {
+  position: relative;
+  padding: 4rem 2rem;
+  background-color: #fff;
+  color: #000;
+  text-align: center;
+  overflow: hidden;
+  max-width: 1200px;
+  margin: 0 auto 4rem auto;
+  border-radius: 8px;
+}
+
+.discipleship-content {
+  max-width: 600px;
+  margin: 0 auto;
+  z-index: 2;
+  position: relative;
+}
+
+.discipleship-content h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.discipleship-content .btn-primary {
+  background-color: #0071bc;
+  color: #fff;
+  padding: 0.75rem 2rem;
+  font-weight: 700;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+}
+
+.discipleship-content .btn-primary:hover {
+  background-color: #005a8c;
+}
+
+.discipleship-images {
+  position: relative;
+  margin-top: 3rem;
+  height: 300px;
+  max-width: 100%;
+}
+
+.discipleship-images img {
+  position: absolute;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  object-fit: cover;
+  width: 150px;
+  height: 150px;
+}
+
+/* Positioning images */
+.img-top-left {
+  top: 0;
+  left: 10%;
+}
+
+.img-top-right {
+  top: 20px;
+  right: 10%;
+}
+
+.img-bottom-left {
+  bottom: 0;
+  left: 15%;
+}
+
+.img-middle-right {
+  top: 50%;
+  right: 20%;
+  transform: translateY(-50%);
+}
+
+.img-bottom-center {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .discipleship-images img {
+    width: 100px;
+    height: 100px;
+  }
+  .discipleship {
+    padding: 2rem 1rem;
+  }
+  .discipleship-content h2 {
+    font-size: 1.5rem;
+  }
+}

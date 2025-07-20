@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sacred Books - ዜማ ቤት Digital Library</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Browse and explore Ethiopian Orthodox sacred texts and manuscripts in the ዜማ ቤት digital library. Search through our growing collection of religious literature.">
+    <meta name="keywords" content="ዜማ ቤት, Zema Bet, Ethiopian Orthodox books, sacred texts, manuscripts, Amharic books, Ge'ez texts, religious library">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Custom Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Ethiopic:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom CSS Variables - Ethiopian Orthodox Theme */
+        :root {
+            --orthodox-gold: #D4AF37;
+            --orthodox-deep-gold: #B8941F;
+            --orthodox-red: #8B0000;
+            --orthodox-burgundy: #722F37;
+            --orthodox-cream: #FDF6E3;
+            --orthodox-dark: #1a1a1a;
+            --orthodox-charcoal: #2D2D2D;
+        }
+        
+        /* Dark mode adjustments */
+        .dark {
+            --orthodox-cream: #0f0f0f;
+        }
+        
+        /* Ethiopic font styling */
+        .ethiopic {
+            font-family: 'Noto Serif Ethiopic', serif;
+            font-feature-settings: "kern" 1, "liga" 1;
+        }
+
+        /* Enable text selection everywhere */
+        * {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        /* Special selectable class for content that should definitely be copyable */
+        .selectable {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+            cursor: text;
+        }
+        
+        /* Custom animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .animate-scale-in {
+            animation: scaleIn 0.5s ease-out;
+        }
+        
+        /* Book card enhancements */
+        .book-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .book-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dark .book-card:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Book cover styling */
+        .book-cover {
+            position: relative;
+            overflow: hidden;
+            background: #f8f9fa;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .dark .book-cover {
+            background: #374151;
+            border-color: #4b5563;
+        }
+        
+        .book-cover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+            opacity: 0.5;
+        }
+        
+        /* PDF-like appearance */
+        .pdf-preview {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem;
+            height: calc(100% - 2rem);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dark .pdf-preview {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+        
+        /* Simulated text lines */
+        .text-lines {
+            position: absolute;
+            top: 2rem;
+            left: 1.5rem;
+            right: 1.5rem;
+        }
+        
+        .text-line {
+            height: 3px;
+            background: #d1d5db;
+            margin-bottom: 0.5rem;
+            border-radius: 1px;
+        }
+        
+        .text-line:nth-child(1) { width: 80%; }
+        .text-line:nth-child(2) { width: 65%; }
+        .text-line:nth-child(3) { width: 90%; }
+        .text-line:nth-child(4) { width: 70%; }
+        .text-line:nth-child(5) { width: 85%; }
+        
+        /* Ethiopian title styling */
+        .ethiopic-title {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--orthodox-gold);
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        /* Search functionality */
+        .search-highlight {
+            background-color: rgba(212, 175, 55, 0.3);
+            border-radius: 2px;
+        }
+        
+        /* Status badges */
+        .status-available {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+        
+        .status-coming-soon {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 640px) {
+            .book-cover {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body x-data="booksLibrary()" 
+      x-init="init()"
+      :class="{ 'dark': darkMode }"
+      class="min-h-screen transition-colors duration-300"
+      :style="darkMode ? 'background: linear-gradient(135deg, #111827 0%, #1f2937 50%, #111827 100%); color: #f3f4f6;' : 'background: linear-gradient(135deg, #fdf6e3 0%, #f8f4e6 50%, #fdf6e3 100%); color: #333333;'">
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-40 border-b transition-colors duration-300"
+            :class="darkMode ? 'bg-gray-900/95 border-gray-800 backdrop-blur-sm' : 'bg-white/95 border-gray-200 backdrop-blur-sm'">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Left - Back to Home -->
+                <div class="flex items-center gap-4">
+                    <a href="index.html" 
+                       class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                       :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Back to Home</span>
+                        <span class="sm:hidden">Home</span>
+                    </a>
+                </div>
+                
+                <!-- Center - Title -->
+                <div class="flex-1 text-center px-4">
+                    <h1 class="text-xl sm:text-2xl font-bold"
+                        :class="darkMode ? 'text-yellow-400' : 'text-yellow-700'">
+                        <span class="ethiopic">ዜማ ቤት</span> Library
+                    </h1>
+                    <p class="text-sm"
+                       :class="darkMode ? 'text-gray-400' : 'text-gray-600'">
+                        <span x-text="filteredBooks.length"></span> sacred books available
+                    </p>
+                </div>
+                
+                <!-- Right - Dark Mode Toggle -->
+                <div class="flex items-center">
+                    <button @click="darkMode = !darkMode" 
+                            class="p-2 rounded-md transition-colors duration-200"
+                            :class="darkMode ? 'text-yellow-400 hover:text-yellow-300 hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'"
+                            title="Toggle dark mode">
+                        <svg x-show="!darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                        <svg x-show="darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Search Section -->
+    <section class="py-8">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5" :class="darkMode ? 'text-gray-400' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <input x-model="searchQuery" 
+                       @input="filterBooks()"
+                       type="text" 
+                       placeholder="Search sacred books and manuscripts..."
+                       class="block w-full pl-12 pr-4 py-4 text-lg rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2"
+                       :class="darkMode ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500 focus:border-yellow-500 focus:ring-yellow-500/20' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-yellow-500 focus:ring-yellow-500/20'">
+            </div>
+            
+            <!-- Search Results Info -->
+            <div class="mt-4 text-center" x-show="searchQuery.length > 0">
+                <p class="text-sm" :class="darkMode ? 'text-gray-400' : 'text-gray-600'">
+                    <span x-show="filteredBooks.length > 0">
+                        Found <strong x-text="filteredBooks.length"></strong> book<span x-show="filteredBooks.length !== 1">s</span> 
+                        matching "<strong x-text="searchQuery"></strong>"
+                    </span>
+                    <span x-show="filteredBooks.length === 0">
+                        No books found matching "<strong x-text="searchQuery"></strong>"
+                    </span>
+                </p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Books Grid -->
+    <main class="pb-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Loading State -->
+            <div x-show="loading" class="flex justify-center items-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2" 
+                     :class="darkMode ? 'border-yellow-400' : 'border-yellow-600'"></div>
+            </div>
+            
+            <!-- Books Grid -->
+            <div x-show="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
+                <template x-for="(book, index) in filteredBooks" :key="book.id">
+                    <div class="book-card rounded-xl overflow-hidden animate-scale-in"
+                         :class="darkMode ? 'bg-gray-800/80 hover:bg-gray-800' : 'bg-white/90 hover:bg-white shadow-lg'"
+                         @click="openBook(book)"
+                         :style="`animation-delay: ${index * 0.1}s`">
+                        
+                        <!-- Book Cover -->
+                        <div class="book-cover h-64 sm:h-72 relative">
+                            <!-- PDF Preview -->
+                            <div class="pdf-preview">
+                                <!-- Ethiopian Title -->
+                                <div class="ethiopic-title ethiopic" x-text="book.titleAmharic"></div>
+                                
+                                <!-- Simulated Text Lines -->
+                                <div class="text-lines">
+                                    <div class="text-line"></div>
+                                    <div class="text-line"></div>
+                                    <div class="text-line"></div>
+                                    <div class="text-line"></div>
+                                    <div class="text-line"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Status Badge -->
+                            <div class="absolute top-3 left-3 z-10">
+                                <span class="px-3 py-1 text-xs font-semibold text-white rounded-full shadow-lg"
+                                      :class="book.available ? 'status-available' : 'status-coming-soon'">
+                                    <span x-text="book.available ? 'Available' : 'Coming Soon'"></span>
+                                </span>
+                            </div>
+                            
+                            <!-- Page Count Badge -->
+                            <div class="absolute bottom-3 right-3 z-10">
+                                <span class="px-2 py-1 text-xs font-medium rounded"
+                                      :class="darkMode ? 'bg-gray-800/80 text-gray-300' : 'bg-white/80 text-gray-700'">
+                                    <span x-text="book.pages + ' pages'"></span>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Book Info -->
+                        <div class="p-6">
+                            <!-- Title -->
+                            <h3 class="font-bold text-lg mb-2 leading-tight"
+                                :class="darkMode ? 'text-gray-100' : 'text-gray-900'">
+                                <span class="ethiopic" x-text="book.titleAmharic"></span>
+                            </h3>
+                            
+                            <!-- English Title -->
+                            <p class="text-sm font-medium mb-3"
+                               :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
+                                <span x-text="book.titleEnglish"></span>
+                            </p>
+                            
+                            <!-- Description -->
+                            <p class="text-sm mb-4 line-clamp-3"
+                               :class="darkMode ? 'text-gray-400' : 'text-gray-600'">
+                                <span x-text="book.description"></span>
+                            </p>
+                            
+                            <!-- Metadata -->
+                            <div class="flex items-center justify-between text-xs"
+                                 :class="darkMode ? 'text-gray-500' : 'text-gray-500'">
+                                <span x-text="book.pages + ' pages'"></span>
+                                <span x-text="book.language"></span>
+                            </div>
+                            
+                            <!-- Action Button -->
+                            <div class="mt-4">
+                                <button class="w-full py-2 px-4 rounded-lg font-medium transition-all duration-200"
+                                        :class="book.available 
+                                            ? (darkMode ? 'bg-yellow-500 hover:bg-yellow-400 text-gray-900' : 'bg-yellow-600 hover:bg-yellow-500 text-white')
+                                            : (darkMode ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-300 text-gray-500 cursor-not-allowed')"
+                                        :disabled="!book.available">
+                                    <span x-text="book.available ? 'Read Now' : 'Coming Soon'"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            
+            <!-- Empty State -->
+            <div x-show="!loading && filteredBooks.length === 0 && searchQuery.length === 0" 
+                 class="text-center py-20">
+                <div class="mb-6">
+                    <svg class="w-16 h-16 mx-auto" :class="darkMode ? 'text-gray-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
+                    No Books Available Yet
+                </h3>
+                <p :class="darkMode ? 'text-gray-500' : 'text-gray-500'">
+                    Our collection is growing. Check back soon for more sacred texts.
+                </p>
+            </div>
+            
+            <!-- No Search Results -->
+            <div x-show="!loading && filteredBooks.length === 0 && searchQuery.length > 0" 
+                 class="text-center py-20">
+                <div class="mb-6">
+                    <svg class="w-16 h-16 mx-auto" :class="darkMode ? 'text-gray-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold mb-2" :class="darkMode ? 'text-gray-300' : 'text-gray-700'">
+                    No Results Found
+                </h3>
+                <p :class="darkMode ? 'text-gray-500' : 'text-gray-500'">
+                    Try adjusting your search terms or browse all available books.
+                </p>
+                <button @click="searchQuery = ''; filterBooks()" 
+                        class="mt-4 px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                        :class="darkMode ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'">
+                    Clear Search
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        function booksLibrary() {
+            return {
+                darkMode: localStorage.getItem('darkMode') !== 'false',
+                searchQuery: '',
+                loading: true,
+                books: [],
+                filteredBooks: [],
+                
+                init() {
+                    // Watch dark mode changes
+                    this.$watch('darkMode', val => localStorage.setItem('darkMode', val));
+                    
+                    // Initialize books data
+                    this.loadBooks();
+                },
+                
+                loadBooks() {
+                    // Simulate loading
+                    setTimeout(() => {
+                        this.books = [
+                            {
+                                id: 1,
+                                titleAmharic: 'ይትባሃል ዘቅድስት ቤተልሔም',
+                                titleEnglish: 'Celebration of Saint Bethlehem',
+                                description: 'A sacred text celebrating the holy place of Bethlehem and its significance in Ethiopian Orthodox tradition. Contains prayers, hymns, and spiritual reflections.',
+                                pages: 120,
+                                language: 'Amharic/Ge\'ez',
+                                available: true,
+                                fileName: 'yitbehalzekidistbetelehem.pdf'
+                            },
+                            {
+                                id: 2,
+                                titleAmharic: 'መጽሐፈ ቅዱሳን',
+                                titleEnglish: 'Book of Saints',
+                                description: 'A comprehensive collection of the lives and miracles of Ethiopian Orthodox saints. Essential reading for understanding the spiritual heritage of the church.',
+                                pages: 200,
+                                language: 'Amharic/Ge\'ez',
+                                available: false,
+                                fileName: null
+                            },
+                            {
+                                id: 3,
+                                titleAmharic: 'መዝሙረ ዳዊት',
+                                titleEnglish: 'Psalms of David',
+                                description: 'The complete Psalms as used in Ethiopian Orthodox liturgy, with traditional commentaries and musical notations for proper chanting.',
+                                pages: 150,
+                                language: 'Ge\'ez',
+                                available: false,
+                                fileName: null
+                            },
+                            {
+                                id: 4,
+                                titleAmharic: 'ድርሳነ ሚካኤል',
+                                titleEnglish: 'Homily of Michael',
+                                description: 'Sacred homilies and teachings attributed to the Archangel Michael, including liturgical texts and spiritual guidance.',
+                                pages: 180,
+                                language: 'Amharic',
+                                available: false,
+                                fileName: null
+                            },
+                            {
+                                id: 5,
+                                titleAmharic: 'ሰላሳዊት መጽሐፍ',
+                                titleEnglish: 'Book of Hours',
+                                description: 'Daily prayers and liturgical hours as prescribed by the Ethiopian Orthodox Church. Includes morning, evening, and night prayers.',
+                                pages: 80,
+                                language: 'Amharic/Ge\'ez',
+                                available: false,
+                                fileName: null
+                            },
+                            {
+                                id: 6,
+                                titleAmharic: 'መጽሐፈ ሄኖክ',
+                                titleEnglish: 'Book of Enoch',
+                                description: 'The Ethiopian version of the Book of Enoch, preserved in Ge\'ez. One of the most important non-canonical texts in Ethiopian Christianity.',
+                                pages: 250,
+                                language: 'Ge\'ez',
+                                available: false,
+                                fileName: null
+                            },
+                            {
+                                id: 7,
+                                titleAmharic: 'ዜማ ዘዳዊት',
+                                titleEnglish: 'Chants of David',
+                                description: 'Traditional Ethiopian Orthodox chants and musical notations for the Psalms of David, essential for liturgical music training.',
+                                pages: 95,
+                                language: 'Ge\'ez/Amharic',
+                                available: false,
+                                fileName: null
+                            },
+                            {
+                                id: 8,
+                                titleAmharic: 'ትምህርተ ኪዳን',
+                                titleEnglish: 'Covenant Teachings',
+                                description: 'Fundamental teachings about the Old and New Covenant in Ethiopian Orthodox theology, with commentaries from church fathers.',
+                                pages: 165,
+                                language: 'Amharic',
+                                available: false,
+                                fileName: null
+                            }
+                        ];
+                        
+                        this.filteredBooks = [...this.books];
+                        this.loading = false;
+                    }, 1000);
+                },
+                
+                filterBooks() {
+                    if (!this.searchQuery.trim()) {
+                        this.filteredBooks = [...this.books];
+                        return;
+                    }
+                    
+                    const query = this.searchQuery.toLowerCase();
+                    this.filteredBooks = this.books.filter(book => 
+                        book.titleAmharic.toLowerCase().includes(query) ||
+                        book.titleEnglish.toLowerCase().includes(query) ||
+                        book.description.toLowerCase().includes(query) ||
+                        book.language.toLowerCase().includes(query)
+                    );
+                },
+                
+                openBook(book) {
+                    if (!book.available) {
+                        alert(`"${book.titleEnglish}" is coming soon! Join our Discord community to stay updated.`);
+                        return;
+                    }
+                    
+                    // For now, only the first book works
+                    if (book.id === 1) {
+                        window.location.href = 'viewer.html';
+                    } else {
+                        alert(`"${book.titleEnglish}" is coming soon! Join our Discord community to stay updated.`);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

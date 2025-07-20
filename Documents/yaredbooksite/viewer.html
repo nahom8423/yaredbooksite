@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Reader - ዜማ ቤት</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- PDF.js (ultra-stable version) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    
+    <!-- Custom Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Ethiopic:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom CSS Variables - ዜማ ቤት Theme */
+        :root {
+            --orthodox-gold: #D4AF37;
+            --orthodox-deep-gold: #B8941F;
+            --orthodox-red: #8B0000;
+            --orthodox-burgundy: #722F37;
+            --orthodox-cream: #FDF6E3;
+            --orthodox-dark: #111827;
+            --orthodox-charcoal: #1F2937;
+        }
+        
+        /* Dark mode adjustments */
+        .dark {
+            --orthodox-cream: #111827;
+        }
+        
+        /* Ethiopic font styling */
+        .ethiopic {
+            font-family: 'Noto Serif Ethiopic', serif;
+            font-feature-settings: "kern" 1, "liga" 1;
+        }
+
+        /* Enable text selection everywhere */
+        * {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        /* Special selectable class for content that should definitely be copyable */
+        .selectable {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+            cursor: text;
+        }
+        
+        /* Scroll Mode PDF Container */
+        #pdfScrollContainer {
+            height: calc(100vh - 4rem);
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: var(--orthodox-charcoal);
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+        
+        .dark #pdfScrollContainer {
+            background: var(--orthodox-dark);
+        }
+        
+        /* PDF Pages in Scroll Mode */
+        .pdf-page {
+            margin: 0 auto 2rem auto;
+            display: block;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            background: white;
+            border-radius: 8px;
+            max-width: calc(100vw - 2rem);
+            height: auto;
+            transition: transform 0.2s ease;
+        }
+        
+        .pdf-page:hover {
+            transform: scale(1.02);
+        }
+        
+        .dark .pdf-page {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            #pdfScrollContainer {
+                height: calc(100vh - 3.5rem);
+                padding: 0.5rem;
+            }
+            
+            .pdf-page {
+                margin: 0 auto 1rem auto;
+                max-width: 100%;
+                border-radius: 4px;
+            }
+            
+            .pdf-page:hover {
+                transform: none;
+            }
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            height: calc(100vh - 4rem);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100vw;
+                height: calc(100vh - 3.5rem);
+                position: fixed;
+                top: 3.5rem;
+                left: 0;
+                z-index: 50;
+            }
+        }
+        
+        /* Page thumbnails */
+        .page-thumb {
+            width: 60px;
+            height: 80px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .page-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        }
+        
+        .page-thumb.active {
+            border: 2px solid var(--orthodox-gold);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.5);
+        }
+        
+        /* Floating Controls */
+        .floating-controls {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 40;
+        }
+        
+        @media (max-width: 768px) {
+            .floating-controls {
+                bottom: 1rem;
+                right: 1rem;
+                gap: 0.25rem;
+            }
+        }
+        
+        /* Zoom controls */
+        .zoom-control {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
+        }
+        
+        .zoom-control:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Custom scrollbar */
+        #pdfScrollContainer::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #pdfScrollContainer::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        #pdfScrollContainer::-webkit-scrollbar-thumb {
+            background: var(--orthodox-gold);
+            border-radius: 4px;
+        }
+        
+        #pdfScrollContainer::-webkit-scrollbar-thumb:hover {
+            background: var(--orthodox-deep-gold);
+        }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 60;
+        }
+        
+        /* Loader animation */
+        .loader {
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-top: 3px solid var(--orthodox-gold);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Smooth fade in for pages */
+        .page-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body x-data="pdfScrollViewer()" 
+      x-init="init()"
+      :class="{ 'dark': darkMode }"
+      class="min-h-screen transition-colors duration-300 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-30 h-16 md:h-16 border-b transition-colors duration-300 backdrop-blur-sm"
+            :class="darkMode ? 'bg-gray-900/95 border-gray-700' : 'bg-white/95 border-gray-200'">
+        <div class="max-w-full mx-auto px-3 sm:px-4 h-full">
+            <div class="flex items-center justify-between h-full">
+                <!-- Left - Back to Books + Sidebar Toggle -->
+                <div class="flex items-center gap-2">
+                    <a href="books.html" 
+                       class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                       :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Back to Books</span>
+                        <span class="sm:hidden">Books</span>
+                    </a>
+                    
+                    <!-- Sidebar Toggle -->
+                    <button @click="sidebarOpen = !sidebarOpen" 
+                            class="p-2 rounded-md transition-colors duration-200 md:hidden"
+                            :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'"
+                            title="Toggle page navigation">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Center - Title -->
+                <div class="flex-1 text-center px-2">
+                    <h1 class="ethiopic text-lg sm:text-xl font-bold truncate"
+                        :class="darkMode ? 'text-yellow-400' : 'text-yellow-700'">
+                        <span x-text="bookTitle"></span>
+                    </h1>
+                </div>
+                
+                <!-- Right - Controls -->
+                <div class="flex items-center gap-1">
+                    <!-- Page Info with Editable Page Number -->
+                    <div class="hidden sm:flex items-center gap-2 text-sm px-3 py-1 rounded-md"
+                         :class="darkMode ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-600'">
+                        <input x-model="pageInput" 
+                               @keyup.enter="goToPage()"
+                               @blur="goToPage()"
+                               type="number" 
+                               min="1" 
+                               :max="totalPages"
+                               class="w-12 bg-transparent text-center border-none outline-none text-sm font-medium"
+                               :class="darkMode ? 'text-gray-200' : 'text-gray-800'">
+                        <span>/</span>
+                        <span x-text="totalPages"></span>
+                    </div>
+                    
+                    <!-- Scroll Mode Toggle - Improved -->
+                    <div class="flex items-center gap-1">
+                        <button @click="toggleScrollMode()" 
+                                class="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                                :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'"
+                                :title="scrollMode ? 'Switch to single page view' : 'Switch to scroll view'">
+                            <svg x-show="!scrollMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                            </svg>
+                            <svg x-show="scrollMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span class="hidden lg:inline" x-text="scrollMode ? 'Page View' : 'Scroll View'"></span>
+                        </button>
+                    </div>
+                    
+                    <!-- Desktop Sidebar Toggle (only in scroll mode) -->
+                    <button x-show="scrollMode" @click="sidebarOpen = !sidebarOpen" 
+                            class="hidden md:block p-2 rounded-md transition-colors duration-200"
+                            :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'"
+                            title="Toggle page navigation">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Dark Mode Toggle -->
+                    <button @click="darkMode = !darkMode" 
+                            class="p-2 rounded-md transition-colors duration-200"
+                            :class="darkMode ? 'text-yellow-400 hover:text-yellow-300 hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'"
+                            title="Toggle dark mode">
+                        <svg x-show="!darkMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                        <svg x-show="darkMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="flex">
+        <!-- Sidebar (only in scroll mode) -->
+        <div x-show="scrollMode" class="sidebar flex-shrink-0 overflow-hidden transition-transform duration-300"
+             :class="sidebarOpen ? '' : 'sidebar-hidden'"
+             x-show="scrollMode && (sidebarOpen || window.innerWidth >= 768)">
+            <div class="h-full"
+                 :class="darkMode ? 'bg-gray-800 border-r border-gray-700' : 'bg-white border-r border-gray-200'">
+                <!-- Sidebar Header -->
+                <div class="p-4 border-b"
+                     :class="darkMode ? 'border-gray-700' : 'border-gray-200'">
+                    <h3 class="font-semibold text-sm"
+                        :class="darkMode ? 'text-gray-200' : 'text-gray-800'">
+                        Page Navigation
+                    </h3>
+                    <p class="text-xs mt-1"
+                       :class="darkMode ? 'text-gray-400' : 'text-gray-600'">
+                        <span x-text="totalPages"></span> pages total
+                    </p>
+                </div>
+                
+                <!-- Page Thumbnails -->
+                <div class="p-4 space-y-3 overflow-y-auto" style="height: calc(100% - 5rem);">
+                    <template x-for="page in Array.from({length: totalPages}, (_, i) => i + 1)" :key="page">
+                        <div class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors duration-200"
+                             :class="page === currentVisiblePage ? (darkMode ? 'bg-yellow-500/20' : 'bg-yellow-100') : (darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50')"
+                             @click="scrollToPage(page)">
+                            <div class="page-thumb bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xs font-medium"
+                                 :class="page === currentVisiblePage ? 'active' : ''">
+                                <span x-text="page"></span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium truncate"
+                                   :class="darkMode ? 'text-gray-200' : 'text-gray-800'">
+                                    Page <span x-text="page"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PDF Content -->
+        <div class="flex-1 min-w-0">
+            <!-- Loading Overlay -->
+            <div x-show="loading" class="loading-overlay flex items-center justify-center">
+                <div class="text-center">
+                    <div class="loader mx-auto mb-4"></div>
+                    <p class="text-white text-lg font-medium">Loading pages...</p>
+                    <p class="text-gray-300 text-sm mt-2">
+                        <span x-text="loadedPages"></span> of <span x-text="totalPages"></span> pages loaded
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Error Message -->
+            <div x-show="!loading && !pdfDoc && !error" class="flex items-center justify-center h-full p-8">
+                <div class="max-w-md text-center">
+                    <div class="mb-6">
+                        <svg class="w-16 h-16 mx-auto mb-4" :class="darkMode ? 'text-gray-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <h3 class="text-xl font-semibold mb-2">PDF Not Found</h3>
+                        <p class="mb-4" :class="darkMode ? 'text-gray-400' : 'text-gray-600'">
+                            The PDF file could not be loaded.
+                        </p>
+                    </div>
+                    
+                    <!-- File Input -->
+                    <div class="mb-4">
+                        <label class="block w-full p-4 border-2 border-dashed rounded-lg cursor-pointer transition-colors"
+                               :class="darkMode ? 'border-gray-600 hover:border-yellow-500' : 'border-gray-300 hover:border-yellow-500'"
+                               for="pdfFileInput">
+                            <input type="file" 
+                                   id="pdfFileInput" 
+                                   accept=".pdf"
+                                   @change="handleFileUpload($event)"
+                                   class="hidden">
+                            <div class="text-center">
+                                <svg class="w-8 h-8 mx-auto mb-2" :class="darkMode ? 'text-gray-500' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <p class="font-medium">Click to select PDF file</p>
+                                <p class="text-sm" :class="darkMode ? 'text-gray-500' : 'text-gray-500'">or drag and drop here</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PDF Scroll Container -->
+            <div id="pdfScrollContainer" 
+                 @scroll="updateCurrentPage()"
+                 x-show="pdfDoc && !loading"
+                 class="relative">
+                <!-- PDF Pages will be inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Floating Controls -->
+    <div class="floating-controls" x-show="pdfDoc">
+        <!-- Page Navigation (Single Page Mode) -->
+        <template x-if="!scrollMode">
+            <div class="flex flex-col gap-2">
+                <!-- Previous Page -->
+                <button @click="prevPage()" 
+                        :disabled="currentPage <= 1"
+                        class="zoom-control"
+                        :class="currentPage <= 1 ? 
+                            (darkMode ? 'bg-gray-800/50 text-gray-500 cursor-not-allowed' : 'bg-gray-100/50 text-gray-400 cursor-not-allowed') : 
+                            (darkMode ? 'bg-gray-800/80 text-gray-200 hover:bg-gray-700/80' : 'bg-white/80 text-gray-700 hover:bg-gray-100/80')"
+                        title="Previous page">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+                
+                <!-- Page Number -->
+                <div class="zoom-control text-xs font-bold"
+                     :class="darkMode ? 'bg-gray-800/80 text-gray-200' : 'bg-white/80 text-gray-700'">
+                    <span x-text="currentPage + '/' + totalPages"></span>
+                </div>
+                
+                <!-- Next Page -->
+                <button @click="nextPage()" 
+                        :disabled="currentPage >= totalPages"
+                        class="zoom-control"
+                        :class="currentPage >= totalPages ? 
+                            (darkMode ? 'bg-gray-800/50 text-gray-500 cursor-not-allowed' : 'bg-gray-100/50 text-gray-400 cursor-not-allowed') : 
+                            (darkMode ? 'bg-gray-800/80 text-gray-200 hover:bg-gray-700/80' : 'bg-white/80 text-gray-700 hover:bg-gray-100/80')"
+                        title="Next page">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+        </template>
+        
+        <!-- Zoom Controls -->
+        <div class="flex flex-col gap-2 mt-4">
+            <!-- Zoom In -->
+            <button @click="zoomIn()" 
+                    class="zoom-control"
+                    :class="darkMode ? 'bg-gray-800/80 text-gray-200 hover:bg-gray-700/80' : 'bg-white/80 text-gray-700 hover:bg-gray-100/80'"
+                    title="Zoom in">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+            </button>
+            
+            <!-- Zoom Out -->
+            <button @click="zoomOut()" 
+                    class="zoom-control"
+                    :class="darkMode ? 'bg-gray-800/80 text-gray-200 hover:bg-gray-700/80' : 'bg-white/80 text-gray-700 hover:bg-gray-100/80'"
+                    title="Zoom out">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                </svg>
+            </button>
+            
+            <!-- Editable Zoom -->
+            <div class="zoom-control text-xs font-bold relative"
+                 :class="darkMode ? 'bg-gray-800/80 text-gray-200 hover:bg-gray-700/80' : 'bg-white/80 text-gray-700 hover:bg-gray-100/80'"
+                 title="Click to edit zoom">
+                <input x-model="zoomInput" 
+                       @keyup.enter="setZoom()"
+                       @blur="setZoom()"
+                       @click="$event.target.select()"
+                       type="number" 
+                       min="30" 
+                       max="300"
+                       step="10"
+                       class="w-10 bg-transparent text-center border-none outline-none text-xs font-bold"
+                       :class="darkMode ? 'text-gray-200' : 'text-gray-700'">
+                <span class="text-xs">%</span>
+            </div>
+            
+            <!-- Scroll to Top (only in scroll mode) -->
+            <button x-show="scrollMode" @click="scrollToTop()" 
+                    class="zoom-control"
+                    :class="darkMode ? 'bg-gray-800/80 text-gray-200 hover:bg-gray-700/80' : 'bg-white/80 text-gray-700 hover:bg-gray-100/80'"
+                    title="Scroll to top">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Mobile Sidebar Backdrop -->
+    <div x-show="sidebarOpen && window.innerWidth < 768"
+         @click="sidebarOpen = false"
+         class="fixed inset-0 bg-black/50 z-40 md:hidden"
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"></div>
+    
+    <script>
+        // Set PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        
+        function pdfScrollViewer() {
+            return {
+                darkMode: localStorage.getItem('darkMode') !== 'false',
+                loading: true,
+                loadedPages: 0,
+                pdfDoc: null,
+                totalPages: 0,
+                currentVisiblePage: 1,
+                currentPage: 1,
+                scale: 1.0,
+                defaultScale: 1.0,
+                error: null,
+                sidebarOpen: false,
+                scrollMode: false,
+                bookTitle: 'ይትባሃል ዘቅድስት ቤተልሔም',
+                pageElements: [],
+                pageInput: 1,
+                zoomInput: 100,
+                
+                async init() {
+                    // Watch dark mode changes
+                    this.$watch('darkMode', val => localStorage.setItem('darkMode', val));
+                    
+                    // Set sidebar default based on screen size
+                    this.sidebarOpen = window.innerWidth >= 768;
+                    
+                    // Handle window resize
+                    window.addEventListener('resize', () => {
+                        if (window.innerWidth >= 768) {
+                            this.sidebarOpen = true;
+                        } else {
+                            this.sidebarOpen = false;
+                        }
+                    });
+                    
+                    // Load PDF
+                    await this.loadPDF();
+                    
+                    // Add drag and drop support
+                    this.setupDragAndDrop();
+                },
+                
+                async loadPDF(fileUrl = './yitbehalzekidistbetelehem.pdf') {
+                    try {
+                        this.loading = true;
+                        this.loadedPages = 0;
+                        this.error = null;
+                        this.pdfDoc = null;
+                        
+                        console.log('Loading PDF:', fileUrl);
+                        
+                        const loadingTask = pdfjsLib.getDocument(fileUrl);
+                        this.pdfDoc = await loadingTask.promise;
+                        this.totalPages = this.pdfDoc.numPages;
+                        
+                        console.log('PDF loaded successfully. Total pages:', this.totalPages);
+                        
+                        // Calculate default scale
+                        const isMobile = window.innerWidth < 768;
+                        this.defaultScale = isMobile ? 0.8 : 1.0;
+                        this.scale = this.defaultScale;
+                        
+                        // Start with single page mode by default
+                        this.pageInput = 1;
+                        this.zoomInput = Math.round(this.scale * 100);
+                        
+                        if (this.scrollMode) {
+                            await this.renderAllPages();
+                        } else {
+                            await this.renderSinglePage(1);
+                        }
+                        
+                        this.loading = false;
+                    } catch (error) {
+                        console.error('Error loading PDF:', error);
+                        this.loading = false;
+                        this.pdfDoc = null;
+                        this.error = error.message;
+                    }
+                },
+                
+                async renderAllPages() {
+                    const container = document.getElementById('pdfScrollContainer');
+                    container.innerHTML = '';
+                    this.pageElements = [];
+                    
+                    for (let pageNum = 1; pageNum <= this.totalPages; pageNum++) {
+                        try {
+                            const page = await this.pdfDoc.getPage(pageNum);
+                            
+                            // Create canvas
+                            const canvas = document.createElement('canvas');
+                            const context = canvas.getContext('2d');
+                            
+                            // Calculate viewport
+                            let viewport;
+                            try {
+                                viewport = page.getViewport({ scale: this.scale });
+                            } catch (e) {
+                                viewport = page.getViewport(this.scale);
+                            }
+                            
+                            // Set canvas dimensions
+                            canvas.width = Math.floor(viewport.width);
+                            canvas.height = Math.floor(viewport.height);
+                            
+                            // Style canvas
+                            canvas.className = 'pdf-page page-fade-in';
+                            canvas.style.animationDelay = `${(pageNum - 1) * 0.1}s`;
+                            canvas.id = `page-${pageNum}`;
+                            
+                            // Render page
+                            const renderContext = {
+                                canvasContext: context,
+                                viewport: viewport
+                            };
+                            
+                            await page.render(renderContext);
+                            
+                            // Add to container
+                            container.appendChild(canvas);
+                            this.pageElements.push(canvas);
+                            
+                            this.loadedPages++;
+                            
+                            console.log(`Rendered page ${pageNum}/${this.totalPages}`);
+                            
+                        } catch (error) {
+                            console.error(`Error rendering page ${pageNum}:`, error);
+                        }
+                    }
+                },
+                
+                async handleFileUpload(event) {
+                    const file = event.target.files[0];
+                    if (file && file.type === 'application/pdf') {
+                        const fileUrl = URL.createObjectURL(file);
+                        this.bookTitle = file.name.replace('.pdf', '');
+                        await this.loadPDF(fileUrl);
+                    } else {
+                        alert('Please select a valid PDF file.');
+                    }
+                },
+                
+                setupDragAndDrop() {
+                    const container = document.getElementById('pdfScrollContainer');
+                    
+                    container.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    });
+                    
+                    container.addEventListener('drop', async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const files = e.dataTransfer.files;
+                        if (files.length > 0 && files[0].type === 'application/pdf') {
+                            const fileUrl = URL.createObjectURL(files[0]);
+                            this.bookTitle = files[0].name.replace('.pdf', '');
+                            await this.loadPDF(fileUrl);
+                        }
+                    });
+                },
+                
+                updateCurrentPage() {
+                    if (!this.scrollMode) return;
+                    
+                    const container = document.getElementById('pdfScrollContainer');
+                    const containerTop = container.scrollTop;
+                    const containerHeight = container.clientHeight;
+                    const centerY = containerTop + containerHeight / 2;
+                    
+                    for (let i = 0; i < this.pageElements.length; i++) {
+                        const pageElement = this.pageElements[i];
+                        const pageTop = pageElement.offsetTop;
+                        const pageBottom = pageTop + pageElement.offsetHeight;
+                        
+                        if (centerY >= pageTop && centerY <= pageBottom) {
+                            this.currentVisiblePage = i + 1;
+                            this.pageInput = this.currentVisiblePage;
+                            break;
+                        }
+                    }
+                },
+                
+                scrollToPage(pageNumber) {
+                    const pageElement = document.getElementById(`page-${pageNumber}`);
+                    if (pageElement) {
+                        pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        this.currentVisiblePage = pageNumber;
+                        
+                        // Close sidebar on mobile after navigation
+                        if (window.innerWidth < 768) {
+                            this.sidebarOpen = false;
+                        }
+                    }
+                },
+                
+                scrollToTop() {
+                    const container = document.getElementById('pdfScrollContainer');
+                    container.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+                
+                async zoomIn() {
+                    this.scale = Math.min(this.scale * 1.2, 3.0);
+                    this.zoomInput = Math.round(this.scale * 100);
+                    await this.rerenderPages();
+                },
+                
+                async zoomOut() {
+                    this.scale = Math.max(this.scale / 1.2, 0.3);
+                    this.zoomInput = Math.round(this.scale * 100);
+                    await this.rerenderPages();
+                },
+                
+                async resetZoom() {
+                    this.scale = this.defaultScale;
+                    this.zoomInput = Math.round(this.scale * 100);
+                    await this.rerenderPages();
+                },
+                
+                async rerenderPages() {
+                    if (!this.pdfDoc) return;
+                    
+                    const container = document.getElementById('pdfScrollContainer');
+                    const currentScrollTop = container.scrollTop;
+                    const scrollRatio = currentScrollTop / container.scrollHeight;
+                    
+                    // Re-render based on current mode
+                    if (this.scrollMode) {
+                        await this.renderAllPages();
+                        // Restore scroll position proportionally
+                        this.$nextTick(() => {
+                            container.scrollTop = scrollRatio * container.scrollHeight;
+                        });
+                    } else {
+                        await this.renderSinglePage(this.currentPage);
+                    }
+                },
+                
+                async renderSinglePage(pageNum) {
+                    const container = document.getElementById('pdfScrollContainer');
+                    container.innerHTML = '';
+                    this.pageElements = [];
+                    this.loadedPages = 0;
+                    
+                    try {
+                        const page = await this.pdfDoc.getPage(pageNum);
+                        
+                        // Create canvas
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        
+                        // Calculate viewport
+                        let viewport;
+                        try {
+                            viewport = page.getViewport({ scale: this.scale });
+                        } catch (e) {
+                            viewport = page.getViewport(this.scale);
+                        }
+                        
+                        // Set canvas dimensions
+                        canvas.width = Math.floor(viewport.width);
+                        canvas.height = Math.floor(viewport.height);
+                        
+                        // Style canvas for single page mode
+                        canvas.className = 'pdf-page page-fade-in mx-auto';
+                        canvas.style.display = 'block';
+                        canvas.style.marginTop = '2rem';
+                        canvas.id = `page-${pageNum}`;
+                        
+                        // Render page
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+                        
+                        await page.render(renderContext);
+                        
+                        // Add to container
+                        container.appendChild(canvas);
+                        this.pageElements.push(canvas);
+                        this.loadedPages = 1;
+                        this.currentVisiblePage = pageNum;
+                        this.currentPage = pageNum;
+                        this.pageInput = pageNum;
+                        
+                        console.log(`Rendered single page ${pageNum}`);
+                        
+                    } catch (error) {
+                        console.error(`Error rendering page ${pageNum}:`, error);
+                    }
+                },
+                
+                async toggleScrollMode() {
+                    this.scrollMode = !this.scrollMode;
+                    
+                    // Update sidebar visibility
+                    if (!this.scrollMode) {
+                        this.sidebarOpen = false;
+                    } else if (window.innerWidth >= 768) {
+                        this.sidebarOpen = true;
+                    }
+                    
+                    // Clear container first to prevent scroll bugs
+                    const container = document.getElementById('pdfScrollContainer');
+                    container.innerHTML = '';
+                    container.scrollTop = 0;
+                    
+                    // Re-render based on new mode
+                    if (this.scrollMode) {
+                        await this.renderAllPages();
+                    } else {
+                        await this.renderSinglePage(this.currentVisiblePage);
+                    }
+                },
+                
+                goToPage() {
+                    const targetPage = parseInt(this.pageInput);
+                    if (targetPage >= 1 && targetPage <= this.totalPages) {
+                        if (this.scrollMode) {
+                            this.scrollToPage(targetPage);
+                        } else {
+                            this.currentPage = targetPage;
+                            this.renderSinglePage(targetPage);
+                        }
+                    } else {
+                        // Reset to current page if invalid
+                        this.pageInput = this.scrollMode ? this.currentVisiblePage : this.currentPage;
+                    }
+                },
+                
+                setZoom() {
+                    const targetZoom = parseInt(this.zoomInput);
+                    if (targetZoom >= 30 && targetZoom <= 300) {
+                        this.scale = targetZoom / 100;
+                        this.rerenderPages();
+                    } else {
+                        // Reset to current zoom if invalid
+                        this.zoomInput = Math.round(this.scale * 100);
+                    }
+                },
+                
+                nextPage() {
+                    if (this.currentPage < this.totalPages) {
+                        this.currentPage++;
+                        this.renderSinglePage(this.currentPage);
+                    }
+                },
+                
+                prevPage() {
+                    if (this.currentPage > 1) {
+                        this.currentPage--;
+                        this.renderSinglePage(this.currentPage);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

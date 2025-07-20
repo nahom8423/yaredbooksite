@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liturgical Music - ዜማ ቤት</title>
+    
+    <meta name="description" content="Listen to Ethiopian Orthodox liturgical music (Zema) organized by Ethiopian calendar months and holidays. Features time markers, personal playlists, and recording types.">
+    <meta name="keywords" content="ዜማ ቤት, Zema, Ethiopian Orthodox music, liturgical music, church music, Saint Yared, chanting, Ethiopian calendar">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Ethiopic:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --gold: #d4af37;
+            --orthodox-deep-gold: #B8941F;
+            --orthodox-red: #8B0000;
+            --orthodox-burgundy: #722F37;
+            --orthodox-cream: #FDF6E3;
+            --orthodox-dark: #111827;
+            --orthodox-charcoal: #1F2937;
+        }
+        
+        .dark {
+            --orthodox-cream: #0a0a12;
+        }
+        
+        .ethiopic {
+            font-family: 'Noto Serif Ethiopic', serif;
+            font-feature-settings: "kern" 1, "liga" 1;
+        }
+
+        /* Enable text selection everywhere */
+        * {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        /* Special selectable class for content that should definitely be copyable */
+        .selectable {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+            cursor: text;
+        }
+        
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 640px) {
+            .month-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+        
+        .month-card {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(184, 148, 31, 0.05));
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .month-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .month-card:hover::before {
+            opacity: 1;
+        }
+        
+        .month-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3);
+        }
+        
+        .dark .month-card {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(184, 148, 31, 0.08));
+        }
+        
+        .dark .month-card:hover {
+            box-shadow: 0 15px 30px rgba(212, 175, 55, 0.4);
+        }
+        
+        .holiday-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .holiday-selector-overlay {
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+        
+        .holiday-bar {
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease-out;
+            color: white;
+            text-align: center;
+        }
+        
+        .holiday-bar:hover {
+            background: var(--gold);
+            color: #1f2937;
+            transform: scale(1.02);
+        }
+        
+        .holiday-switcher {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .recording-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .recording-column {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .recording-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 1rem;
+            text-align: center;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .recording-item {
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .recording-item:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2);
+        }
+        
+        .recording-play-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .recording-item:hover .recording-play-btn {
+            opacity: 1;
+        }
+        
+        .mini-player-collapsed {
+            position: fixed;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: #0a0a12;
+            background-image: url('/noise.svg');
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+            z-index: 40;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideUpFade 0.4s ease-out;
+        }
+        
+        @media (min-width: 768px) {
+            .mini-player-collapsed {
+                bottom: 6px;
+            }
+        }
+        
+        .expand-handle {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .expand-handle:hover {
+            background: var(--gold);
+        }
+        
+        .expand-line {
+            width: 12px;
+            height: 2px;
+            background: currentColor;
+            margin: 1px 0;
+        }
+        
+        .volume-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: var(--gold);
+            transform: scale(1.1);
+        }
+        
+        .mini-player-expanded {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0a0a12 0%, #1f2937 50%, #0a0a12 100%);
+            background-image: url('/noise.svg');
+            z-index: 50;
+            padding: 2rem;
+            animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .mini-player-expanded::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0a0a12 0%, #1f2937 50%, #0a0a12 100%);
+            z-index: -1;
+        }
+        
+        .mini-player-expanded.closing {
+            animation: slideOutDown 0.4s cubic-bezier(0.6, 0, 0.8, 1);
+        }
+        
+        .play-pause-btn {
+            width: 80px;
+            height: 80px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+        }
+        
+        .play-pause-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 30px rgba(212, 175, 55, 0.6);
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+            transition: height 0.2s ease;
+        }
+        
+        .progress-bar:hover {
+            height: 6px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 2px;
+            transition: width 0.1s ease;
+        }
+        
+        .saved-tracks-drawer {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 350px;
+            background: #0a0a12;
+            border-left: 1px solid rgba(212, 175, 55, 0.3);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 60;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .saved-tracks-drawer.open {
+            transform: translateX(0);
+        }
+        
+        .marker-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 400px;
+            background: #0a0a12;
+            border-left: 1px solid rgba(212, 175, 55, 0.3);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 55;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .marker-panel.open {
+            transform: translateX(0);
+        }
+        
+        .marker-list {
+            max-height: none;
+            overflow-y: visible;
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            margin-top: 0;
+        }
+        
+        .marker-item {
+            padding: 1rem;
+            margin: 0.75rem 0;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        .marker-item:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: translateX(4px);
+            border-color: rgba(212, 175, 55, 0.4);
+        }
+        
+        .marker-form {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .marker-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .marker-input:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideInUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        @keyframes slideOutDown {
+            from { transform: translateY(0); }
+            to { transform: translateY(100%); }
+        }
+        
+        @keyframes slideUpFade {
+            from { 
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @media (max-width: 640px) {
+            .recording-columns {
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+            
+            .recording-column {
+                flex: 0 0 85%;
+                scroll-snap-align: center;
+            }
+            
+            .saved-tracks-drawer, .marker-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body x-data="audioApp()" 
+      x-init="init()"
+      :class="{ 'dark': darkMode }"
+      class="min-h-screen transition-colors duration-300 pb-24"
+      :style="darkMode ? 'background: linear-gradient(135deg, #0a0a12 0%, #1f2937 50%, #0a0a12 100%); color: #f3f4f6;' : 'background: linear-gradient(135deg, #fdf6e3 0%, #f8f4e6 50%, #fdf6e3 100%); color: #333333;'">
+    
+    <header class="sticky top-0 z-40 border-b transition-colors duration-300"
+            :class="darkMode ? 'bg-gray-900/95 border-gray-800 backdrop-blur-sm' : 'bg-white/95 border-gray-200 backdrop-blur-sm'">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="index.html" 
+                       class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                       :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        <span class="hidden sm:inline">Back to Home</span>
+                        <span class="sm:hidden">Home</span>
+                    </a>
+                </div>
+                
+                <div class="flex-1 flex justify-center px-4">
+                    <h1 class="text-xl sm:text-2xl font-bold text-center"
+                        :class="darkMode ? 'text-yellow-400' : 'text-yellow-700'">
+                        <span class="ethiopic">ዜማ ቤት</span> Recordings
+                    </h1>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <button @click="showSavedTracks = !showSavedTracks"
+                            class="p-2 rounded-md transition-colors duration-200"
+                            :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'"
+                            aria-label="Toggle saved tracks"
+                            tabindex="0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </button>
+                    <button @click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode)"
+                            class="p-2 rounded-md transition-colors duration-200"
+                            :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'"
+                            aria-label="Toggle dark mode"
+                            tabindex="0">
+                        <svg x-show="!darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                        <svg x-show="darkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div x-show="currentView === 'months'" class="animate-fade-in-up">
+            <div class="text-center mb-12">
+                <div class="flex justify-center">
+                    <h2 class="text-3xl sm:text-4xl font-bold mb-4 ethiopic"
+                        :class="darkMode ? 'text-yellow-400' : 'text-yellow-700'">
+                        ዓመት
+                    </h2>
+                </div>
+                <p class="text-lg max-w-2xl mx-auto"
+                   :class="darkMode ? 'text-gray-300' : 'text-gray-600'">
+                    Select a month from the Ethiopian calendar to explore liturgical recordings organized by holidays and feast days.
+                </p>
+            </div>
+
+            <div class="month-grid">
+                <template x-for="(holidays, month) in monthChannels" :key="month">
+                    <div class="month-card rounded-2xl p-8 text-center"
+                         @click="selectMonth(month)">
+                        <h3 class="text-2xl font-bold mb-4 ethiopic"
+                            :class="darkMode ? 'text-yellow-400' : 'text-yellow-700'"
+                            x-text="month"></h3>
+                        <p class="text-sm mb-4"
+                           :class="darkMode ? 'text-gray-400' : 'text-gray-600'"
+                           x-text="holidays.length + ' holidays'"></p>
+                        <div class="flex flex-wrap gap-2 justify-center">
+                            <template x-for="holiday in holidays.slice(0, 3)" :key="holiday">
+                                <span class="text-xs px-2 py-1 rounded-full"
+                                      :class="darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'"
+                                      x-text="holiday.split('-').slice(-1)[0]"></span>
+                            </template>
+                            <span x-show="holidays.length > 3" 
+                                  class="text-xs px-2 py-1 rounded-full"
+                                  :class="darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'"
+                                  x-text="'+' + (holidays.length - 3)"></span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div x-show="currentView === 'holidays'" class="animate-fade-in-up">
+            <div class="flex items-center justify-between mb-8">
+                <button @click="currentView = 'months'" 
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200"
+                        :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Back to Months
+                </button>
+                
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold ethiopic"
+                        :class="darkMode ? 'text-yellow-400' : 'text-yellow-700'"
+                        x-text="selectedMonth"></h2>
+                    <p class="text-sm"
+                       :class="darkMode ? 'text-gray-400' : 'text-gray-600'">
+                        Ethiopian Orthodox Calendar
+                    </p>
+                </div>
+                
+                <div></div>
+            </div>
+
+            <div class="recording-columns">
+                <template x-for="holiday in getCurrentMonthHolidays()" :key="holiday">
+                    <div class="recording-column cursor-pointer" @click="selectHoliday(holiday)">
+                        <div class="recording-header ethiopic" x-text="holiday.split('-').slice(-1)[0]"></div>
+                        <p class="text-sm text-center"
+                           :class="darkMode ? 'text-gray-400' : 'text-gray-600'">
+                            Click to view recordings
+                        </p>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div x-show="currentView === 'recordings'" class="animate-fade-in-up">
+            <div class="flex items-center justify-between mb-8">
+                <button @click="currentView = 'holidays'" 
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200"
+                        :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Back to Holidays
+                </button>
+                
+                <div class="text-center">
+                    <button @click="showHolidaySwitcher = true"
+                            class="text-xl font-bold ethiopic hover:text-opacity-80 transition-colors cursor-pointer"
+                            :class="darkMode ? 'text-yellow-400' : 'text-yellow-700'"
+                            x-text="selectedHoliday ? selectedHoliday.split('-').slice(-1)[0] : ''"></button>
+                    <p class="text-sm"
+                       :class="darkMode ? 'text-gray-400' : 'text-gray-600'"
+                       x-text="selectedMonth"></p>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button @click="showMarkerPanel = !showMarkerPanel"
+                            x-show="currentRecording"
+                            class="p-2 rounded-md transition-colors duration-200"
+                            :class="darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'"
+                            aria-label="Toggle markers"
+                            tabindex="0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="recording-columns">
+                <div class="recording-column">
+                    <div class="recording-header ethiopic">ቁም</div>
+                    <template x-for="recording in getRecordingsByType('ቁም')" :key="recording.id">
+                        <div class="recording-item" @click="playRecording(recording)">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-base pr-12" x-text="recording.title"></h4>
+                                <span class="text-xs px-2 py-1 rounded"
+                                      :class="darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'"
+                                      x-text="recording.duration"></span>
+                            </div>
+                            <p class="text-sm"
+                               :class="darkMode ? 'text-yellow-400' : 'text-yellow-600'"
+                               x-text="'Chanter: ' + recording.chanter"></p>
+                            <div class="recording-play-btn">
+                                <svg class="w-4 h-4 text-gray-900 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <div class="recording-column">
+                    <div class="recording-header ethiopic">አቋቋም</div>
+                    <template x-for="recording in getRecordingsByType('አቋቋም')" :key="recording.id">
+                        <div class="recording-item" @click="playRecording(recording)">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-base pr-12" x-text="recording.title"></h4>
+                                <span class="text-xs px-2 py-1 rounded"
+                                      :class="darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'"
+                                      x-text="recording.duration"></span>
+                            </div>
+                            <p class="text-sm"
+                               :class="darkMode ? 'text-yellow-400' : 'text-yellow-600'"
+                               x-text="'Chanter: ' + recording.chanter"></p>
+                            <div class="recording-play-btn">
+                                <svg class="w-4 h-4 text-gray-900 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <div class="recording-column">
+                    <div class="recording-header ethiopic">ወረብ</div>
+                    <template x-for="recording in getRecordingsByType('ወረብ')" :key="recording.id">
+                        <div class="recording-item" @click="playRecording(recording)">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-semibold text-base pr-12" x-text="recording.title"></h4>
+                                <span class="text-xs px-2 py-1 rounded"
+                                      :class="darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'"
+                                      x-text="recording.duration"></span>
+                            </div>
+                            <p class="text-sm"
+                               :class="darkMode ? 'text-yellow-400' : 'text-yellow-600'"
+                               x-text="'Chanter: ' + recording.chanter"></p>
+                            <div class="recording-play-btn">
+                                <svg class="w-4 h-4 text-gray-900 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div x-show="showHolidayOverlay" class="holiday-overlay" @click.self="showHolidayOverlay = false">
+        <div class="holiday-selector-overlay">
+            <h3 class="text-xl font-bold mb-4 text-center text-white">Select Holiday</h3>
+            <template x-for="holiday in getCurrentMonthHolidays()" :key="holiday">
+                <div class="holiday-bar ethiopic" @click="selectHolidayFromOverlay(holiday)" x-text="holiday.split('-').slice(-1)[0]"></div>
+            </template>
+        </div>
+    </div>
+
+    <div x-show="showHolidaySwitcher" class="holiday-switcher" @click.self="showHolidaySwitcher = false">
+        <div class="holiday-selector-overlay">
+            <h3 class="text-xl font-bold mb-4 text-center text-white">Switch Holiday</h3>
+            <template x-for="holiday in getCurrentMonthHolidays()" :key="holiday">
+                <div class="holiday-bar ethiopic" 
+                     @click="switchToHoliday(holiday)" 
+                     :class="{'opacity-50': holiday === selectedHoliday}"
+                     x-text="holiday.split('-').slice(-1)[0]"></div>
+            </template>
+        </div>
+    </div>
+
+    <div x-show="currentRecording && !playerExpanded" class="mini-player-collapsed">
+        <div class="absolute top-2 right-2">
+            <div class="expand-handle" @click="expandPlayer()" aria-label="Expand player" tabindex="0">
+                <div class="expand-line"></div>
+                <div class="expand-line"></div>
+            </div>
+        </div>
+        
+        <div class="flex items-center justify-center gap-4">
+            <div class="nav-btn" @click="previousTrack()" aria-label="Previous track" tabindex="0">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                </svg>
+            </div>
+            
+            <div class="nav-btn" @click="togglePlayPause()" aria-label="Play/Pause" tabindex="0">
+                <svg x-show="!isPlaying" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <svg x-show="isPlaying" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            </div>
+            
+            <div class="nav-btn" @click="nextTrack()" aria-label="Next track" tabindex="0">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                </svg>
+            </div>
+        </div>
+        
+        <div class="w-full max-w-lg flex items-center gap-4">
+            <span class="text-xs text-gray-400 min-w-[40px]" x-text="formatTime(currentTime)"></span>
+            <div class="flex-1 progress-bar" @click="seek($event)">
+                <div class="progress-fill" :style="`width: ${progress}%`"></div>
+            </div>
+            <span class="text-xs text-gray-400 min-w-[40px]" x-text="formatTime(duration)"></span>
+        </div>
+        
+        <div class="w-full flex items-center justify-between px-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h4 class="text-xs font-semibold text-white truncate" x-text="currentRecording?.title"></h4>
+                    <p class="text-xs text-gray-400 truncate" x-text="currentRecording?.chanter"></p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <div class="volume-controls">
+                    <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                    </svg>
+                    <input type="range" min="0" max="1" step="0.1" 
+                           x-model="volume" @input="updateVolume()"
+                           class="w-16 h-1 bg-gray-600 rounded outline-none slider">
+                </div>
+                
+                <button @click="saveTrack(currentRecording)" 
+                        aria-label="Save track" 
+                        tabindex="0"
+                        :class="savedTracks.find(t => t.id === currentRecording?.id) ? 'text-yellow-400' : 'text-gray-400'"
+                        class="transition-colors hover:text-yellow-400">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="currentRecording && playerExpanded" 
+         :class="{ 'closing': playerClosing }"
+         class="mini-player-expanded">
+        
+        <button @click="collapsePlayer()" 
+                class="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors z-10"
+                aria-label="Collapse player"
+                tabindex="0">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        
+        <div class="text-center mb-12">
+            <div class="w-32 h-32 bg-gray-800 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <svg class="w-16 h-16 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                </svg>
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-bold text-white mb-4 ethiopic" x-text="currentRecording?.title"></h1>
+            <p class="text-xl text-gray-300 mb-8" x-text="currentRecording?.chanter"></p>
+        </div>
+        
+        <div class="w-full max-w-2xl mx-auto mb-8">
+            <div class="progress-bar mb-4" @click="seek($event)">
+                <div class="progress-fill" :style="`width: ${progress}%`"></div>
+            </div>
+            
+            <div class="flex justify-between text-lg text-gray-400">
+                <span x-text="formatTime(currentTime)"></span>
+                <span x-text="formatTime(duration)"></span>
+            </div>
+        </div>
+        
+        <div class="flex items-center justify-center gap-8 mb-12">
+            <button @click="toggleRepeat()" 
+                    aria-label="Toggle repeat" 
+                    tabindex="0"
+                    :class="repeatMode === 'off' ? 'text-gray-400' : 'text-yellow-400'"
+                    class="nav-btn hover:text-yellow-400 transition-colors relative">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <span x-show="repeatMode === 'one'" class="absolute -top-2 -right-2 w-4 h-4 bg-yellow-400 text-black text-xs rounded-full flex items-center justify-center font-bold">1</span>
+            </button>
+            
+            <div class="nav-btn" @click="previousTrack()" aria-label="Previous track" tabindex="0">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                </svg>
+            </div>
+            
+            <div class="play-pause-btn" @click="togglePlayPause()" aria-label="Play/Pause" tabindex="0">
+                <svg x-show="!isPlaying" class="w-12 h-12 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <svg x-show="isPlaying" class="w-12 h-12 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            </div>
+            
+            <div class="nav-btn" @click="nextTrack()" aria-label="Next track" tabindex="0">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                </svg>
+            </div>
+            
+            <button @click="toggleSpeed()" 
+                    aria-label="Toggle playback speed" 
+                    tabindex="0"
+                    class="nav-btn hover:text-yellow-400 transition-colors">
+                <span class="text-sm font-bold" x-text="playbackSpeed + 'x'"></span>
+            </button>
+        </div>
+        
+        <div class="flex items-start justify-center gap-16">
+            <div class="flex items-center justify-center gap-12">
+                <div class="volume-controls flex items-center gap-3">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                    </svg>
+                    <input type="range" min="0" max="1" step="0.1" 
+                           x-model="volume" @input="updateVolume()"
+                           class="w-32 h-2 bg-gray-600 rounded outline-none slider">
+                </div>
+                
+                <div class="flex items-center gap-6">
+                    <button @click="saveTrack(currentRecording)" 
+                            aria-label="Save track" 
+                            tabindex="0"
+                            :class="savedTracks.find(t => t.id === currentRecording?.id) ? 'text-yellow-400' : 'text-gray-400'"
+                            class="transition-colors hover:text-yellow-400">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                    </button>
+                    <button @click="showMarkerPanel = !showMarkerPanel" 
+                            aria-label="Toggle markers" 
+                            tabindex="0"
+                            class="text-gray-400 hover:text-yellow-400 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div x-show="savedTracks.length > 0" class="w-80 bg-black/20 backdrop-blur-sm rounded-2xl p-6 animate-fade-in">
+                <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                    </svg>
+                    Up Next
+                </h3>
+                <div class="space-y-3 max-h-60 overflow-y-auto">
+                    <template x-for="(track, index) in savedTracks.slice(0, 5)" :key="track.id">
+                        <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 cursor-pointer group"
+                             @click="playRecording(track)">
+                            <div class="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center group-hover:bg-yellow-400 transition-colors">
+                                <svg class="w-4 h-4 text-yellow-400 group-hover:text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-medium text-white truncate" x-text="track.title"></h4>
+                                <p class="text-xs text-gray-400 truncate" x-text="track.chanter"></p>
+                            </div>
+                            <div class="text-xs text-gray-500" x-text="track.duration"></div>
+                        </div>
+                    </template>
+                    <div x-show="savedTracks.length > 5" class="text-center">
+                        <button @click="showSavedTracks = true" 
+                                class="text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
+                            View all <span x-text="savedTracks.length"></span> saved tracks
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="saved-tracks-drawer" :class="{ 'open': showSavedTracks }">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-white">Saved Tracks</h3>
+            <button @click="showSavedTracks = false" 
+                    class="text-gray-400 hover:text-white transition-colors"
+                    aria-label="Close saved tracks"
+                    tabindex="0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="space-y-3">
+            <template x-for="track in savedTracks" :key="track.id">
+                <div class="recording-item cursor-pointer" @click="playRecording(track)">
+                    <h4 class="font-semibold text-sm text-white" x-text="track.title"></h4>
+                    <p class="text-xs text-gray-400" x-text="track.chanter"></p>
+                </div>
+            </template>
+            <div x-show="savedTracks.length === 0" class="text-center text-gray-400 py-8">
+                No saved tracks yet
+            </div>
+        </div>
+    </div>
+
+    <div class="marker-panel" :class="{ 'open': showMarkerPanel }">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-white">Time Markers</h3>
+            <button @click="showMarkerPanel = false" 
+                    class="text-gray-400 hover:text-white transition-colors"
+                    aria-label="Close markers panel"
+                    tabindex="0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div x-show="currentRecording" class="marker-form">
+            <h4 class="text-lg font-semibold mb-3 text-white">Add New Marker</h4>
+            <input type="text" 
+                   x-model="newMarkerTitle" 
+                   placeholder="Marker title..."
+                   class="marker-input"
+                   @keyup.enter="addMarker()">
+            <textarea x-model="newMarkerDescription" 
+                      placeholder="Description (optional)..."
+                      class="marker-input resize-none h-20"></textarea>
+            <div class="flex gap-3">
+                <button @click="addMarker()" 
+                        class="flex-1 px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg transition-colors">
+                    Add at <span x-text="formatTime(currentTime)"></span>
+                </button>
+                <button @click="clearMarkerForm()" 
+                        class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors">
+                    Clear
+                </button>
+            </div>
+        </div>
+        
+        <div x-show="currentRecording" class="marker-list">
+            <h4 class="text-lg font-semibold mb-4 text-white">Current Track Markers</h4>
+            <template x-for="marker in (currentRecording?.markers || [])" :key="marker.id">
+                <div class="marker-item">
+                    <div class="flex justify-between items-start mb-2">
+                        <h5 class="font-semibold text-white" x-text="marker.title"></h5>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-yellow-400" x-text="formatTime(marker.time)"></span>
+                            <button @click="removeMarker(marker.id)" 
+                                    class="text-red-400 hover:text-red-300 text-sm"
+                                    aria-label="Remove marker">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                    <p x-show="marker.description" class="text-sm text-gray-300 mb-2" x-text="marker.description"></p>
+                    <button @click="seekToMarker(marker.time)" 
+                            class="text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
+                        Jump to time
+                    </button>
+                </div>
+            </template>
+            <div x-show="!currentRecording?.markers?.length" class="text-center text-gray-400 py-8">
+                No markers for this track yet
+            </div>
+        </div>
+        
+        <div x-show="!currentRecording" class="text-center text-gray-400 py-12">
+            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+            </svg>
+            <p class="text-lg">No track playing</p>
+            <p class="text-sm">Start playing a track to add markers</p>
+        </div>
+    </div>
+
+    <audio x-ref="audio" 
+           @timeupdate="updateProgress()" 
+           @ended="handleTrackEnd()"
+           @loadedmetadata="updateDuration()"></audio>
+
+    <script>
+        function audioApp() {
+            return {
+                darkMode: localStorage.getItem('darkMode') !== 'false',
+                currentView: 'months',
+                selectedMonth: '',
+                selectedHoliday: '',
+                showHolidayOverlay: false,
+                showHolidaySwitcher: false,
+                currentRecording: null,
+                playerExpanded: false,
+                playerClosing: false,
+                isPlaying: false,
+                currentTime: 0,
+                duration: 0,
+                progress: 0,
+                volume: 0.8,
+                showSavedTracks: false,
+                showMarkerPanel: false,
+                newMarkerTitle: '',
+                newMarkerDescription: '',
+                savedTracks: JSON.parse(localStorage.getItem('savedTracks') || '[]'),
+                repeatMode: 'off',
+                playbackSpeed: 1,
+                
+                monthChannels: {
+                    "መስከረም": [
+                        "መስከረም-1-ዓውደ-ዓመት",
+                        "መስከረም-2-ምትረተ-ርእሱ-ቅዱስ-ዮሐንስ-መጥምቅ",
+                        "መስከረም-11-ፋሲለደስ",
+                        "መስከረም-17-መስቀል",
+                        "መስከረም-17-አስተርእዮተ-መስቀል",
+                        "መስከረም-21-ብዙኃን-ማርያም"
+                    ],
+                    "ጥቅምት": [
+                        "ጥቅምት-5-አቦ-አቡነ-ገብረ-መንፈስ-ቅዱስ",
+                        "ጥቅምንት-14-አቡነ-አረጋዊ",
+                        "ጥቅምት-27-መድኃኔዓለም"
+                    ],
+                    "ኅዳር": [
+                        "ኅዳር-6-ቊስቋም",
+                        "ኅዳር-7-ቅዳሴ-ቤቱ-ለጊዮርጊስ",
+                        "ኅዳር-8-አርባዕቱ-እንስሳ",
+                        "ኅዳር-11-ቅዳሴ-ሐና",
+                        "ኅዳር-12-ቅዱስ-ሚካኤል",
+                        "ኅዳር-13-አዕላፍ",
+                        "ኅዳር-21-ጽዮን",
+                        "ኅዳር-24-ካህናተ-ሰማይ",
+                        "ኅዳር-25-መርቆሬዎስ"
+                    ],
+                    "ታኅሣሥ": [
+                        "ታኅሣሥ-3-በዓታ-ለማርያም",
+                        "ታኅሣሥ-6-ቅድስት-አርሴማ",
+                        "ታኅሣሥ-12-አባ-ሳሙኤል",
+                        "ታኅሣሥ-13-ሩፋኤል",
+                        "ታኅሣሥ-19-ቅዱስ-ገብርኤል",
+                        "ታኅሣሥ-22-ደቅስዮስ",
+                        "ታኅሣሥ-24-ተክለ-ሃይማኖት",
+                        "ታኅሣሥ-28-አማኑኤል",
+                        "ታኅሣሥ-29-ዘልደት"
+                    ],
+                    "ጥር": [
+                        "ጥር-3-አቡነ-ሊባኖስ",
+                        "ጥር-4-ዮሐንስ-ወልደ-ነጎድጓድ",
+                        "ጥር-6-ዘግዝረት",
+                        "ጥር-7-ሥላሴ",
+                        "ጥር-11-ጥምቀት",
+                        "ጥር-12-ቃና-ዘገሊላ",
+                        "ጥር-13-እግዚአብሔር-አብ",
+                        "ጥር-15-ቂርቆስ",
+                        "ጥር-18-ጊዮርጊስ",
+                        "ጥር-21-አስተርእዮ-ማርያም",
+                        "ጥር-22-ዑራኤል"
+                    ],
+                    "የካቲት": [
+                        "የካቲት-8-ልደተ-ስምዖን",
+                        "የካቲት-16-ኪዳን-ምሕረት"
+                    ],
+                    "መጋቢት": [
+                        "መጋቢት-5-አቡነ-ገብረ-መንፈስ-ቅዱስ",
+                        "መጋቢት-10-መስቀል",
+                        "መጋቢት-27-መድሃኔዓለም",
+                        "መጋቢት-29-በዓለ-እግዚአብሔር"
+                    ],
+                    "ሚያዝያ": [
+                        "ሚያዝያ-21-ማርያም",
+                        "ሚያዝያ-23-ጊዮርጊስ",
+                        "ሚያዚያ-30-ማርቆስ"
+                    ],
+                    "ግንቦት": [
+                        "ግንቦት-1-ልደታ",
+                        "ግንቦት-11-ቅዱስ-ያሬድ",
+                        "ግንቦት-11-ያሬድ-ዘደብረ-ይባቤ",
+                        "ግንቦት-12-ተክለ-ሃይማኖት-ወክርስቶስ-ሠምራ",
+                        "ግንቦት-19-ዓቢየ-እግዚእ",
+                        "ግንቦት-21-ደብረ-ምጥማቅ-ማርያም"
+                    ],
+                    "ሰኔ": [
+                        "ሰኔ-12-ቅዱስ-ሚካኤል",
+                        "ሰኔ-21-ሕንፀተ-ቤታ-ለማርያም",
+                        "ሰኔ-26-ቅዳሴ-ቤቱ-ለቅዱስ-ገብርኤል"
+                    ],
+                    "ሐምሌ": [
+                        "ሐምሌ-4-ልደተ-ማርያም",
+                        "ሐምሌ-22-አብ-ወወልድ-ወመንፈስ-ቅዱስ"
+                    ],
+                    "ነሐሴ": [
+                        "ነሐሴ-13-በዓለ-ኢየሱስ",
+                        "ነሐሴ-16-መድኃኔዓለም"
+                    ]
+                },
+
+                recordings: [],
+
+                init() {
+                    this.$refs.audio.volume = this.volume;
+                },
+
+                selectMonth(month) {
+                    this.selectedMonth = month;
+                    this.currentView = 'holidays';
+                },
+
+                selectHoliday(holiday) {
+                    this.selectedHoliday = holiday;
+                    this.currentView = 'recordings';
+                    this.generateSampleRecordings(holiday);
+                },
+
+                selectHolidayFromOverlay(holiday) {
+                    this.selectHoliday(holiday);
+                    this.showHolidayOverlay = false;
+                },
+
+                switchToHoliday(holiday) {
+                    this.selectedHoliday = holiday;
+                    this.generateSampleRecordings(holiday);
+                    this.showHolidaySwitcher = false;
+                },
+
+                getCurrentMonthHolidays() {
+                    return this.monthChannels[this.selectedMonth] || [];
+                },
+
+                generateSampleRecordings(holiday) {
+                    const types = ['ቁም', 'አቋቋም', 'ወረብ'];
+                    const chanters = ['ዲያቆን ሰለሞን ክብሮም', 'ዲያቆን ዮሐንስ አፈወርቅ', 'ዲያቆን ዘራሁን ከበደ'];
+                    
+                    this.recordings = [];
+                    
+                    types.forEach((type, typeIndex) => {
+                        for (let i = 1; i <= 2; i++) {
+                            this.recordings.push({
+                                id: `${holiday}-${type}-${i}`,
+                                title: `${holiday.split('-').slice(-1)[0]} ${type} ${i}`,
+                                type: type,
+                                chanter: chanters[typeIndex],
+                                duration: `${Math.floor(Math.random() * 10) + 3}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`,
+                                audioUrl: '#',
+                                markers: []
+                            });
+                        }
+                    });
+                },
+
+                getRecordingsByType(type) {
+                    return this.recordings.filter(r => r.type === type);
+                },
+
+                playRecording(recording) {
+                    this.currentRecording = recording;
+                    this.isPlaying = true;
+                    this.duration = 180;
+                    this.currentTime = 0;
+                    this.progress = 0;
+                    this.showSavedTracks = false;
+                },
+
+                togglePlayPause() {
+                    this.isPlaying = !this.isPlaying;
+                },
+
+                expandPlayer() {
+                    this.playerExpanded = true;
+                    this.playerClosing = false;
+                },
+
+                collapsePlayer() {
+                    this.playerClosing = true;
+                    setTimeout(() => {
+                        this.playerExpanded = false;
+                        this.playerClosing = false;
+                    }, 400);
+                },
+
+                updateProgress() {
+                    if (this.isPlaying && this.duration > 0) {
+                        this.currentTime += 1;
+                        this.progress = (this.currentTime / this.duration) * 100;
+                        
+                        if (this.currentTime >= this.duration) {
+                            this.handleTrackEnd();
+                        }
+                    }
+                },
+
+                updateDuration() {
+                    this.duration = this.$refs.audio.duration || 180;
+                },
+
+                updateVolume() {
+                    this.$refs.audio.volume = this.volume;
+                },
+
+                seek(event) {
+                    const rect = event.target.getBoundingClientRect();
+                    const percent = (event.clientX - rect.left) / rect.width;
+                    this.currentTime = percent * this.duration;
+                    this.progress = percent * 100;
+                    this.$refs.audio.currentTime = this.currentTime;
+                },
+
+                seekToMarker(time) {
+                    this.currentTime = time;
+                    this.progress = (time / this.duration) * 100;
+                    this.$refs.audio.currentTime = time;
+                },
+
+                addMarker() {
+                    if (!this.currentRecording || !this.newMarkerTitle.trim()) return;
+                    
+                    if (!this.currentRecording.markers) {
+                        this.currentRecording.markers = [];
+                    }
+                    
+                    this.currentRecording.markers.push({
+                        id: Date.now(),
+                        title: this.newMarkerTitle.trim(),
+                        description: this.newMarkerDescription.trim(),
+                        time: this.currentTime
+                    });
+                    
+                    this.currentRecording.markers.sort((a, b) => a.time - b.time);
+                    this.clearMarkerForm();
+                },
+
+                clearMarkerForm() {
+                    this.newMarkerTitle = '';
+                    this.newMarkerDescription = '';
+                },
+
+                removeMarker(markerId) {
+                    if (!this.currentRecording?.markers) return;
+                    
+                    this.currentRecording.markers = this.currentRecording.markers.filter(m => m.id !== markerId);
+                },
+
+                saveTrack(track) {
+                    if (!track || this.savedTracks.find(t => t.id === track.id)) return;
+                    
+                    this.savedTracks.push(track);
+                    localStorage.setItem('savedTracks', JSON.stringify(this.savedTracks));
+                },
+
+                previousTrack() {
+                    console.log('Previous track');
+                },
+
+                nextTrack() {
+                    console.log('Next track');
+                },
+
+                handleTrackEnd() {
+                    this.isPlaying = false;
+                    this.currentTime = 0;
+                    this.progress = 0;
+                },
+
+                formatTime(seconds) {
+                    const mins = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return `${mins}:${secs.toString().padStart(2, '0')}`;
+                },
+
+                toggleRepeat() {
+                    if (this.repeatMode === 'off') {
+                        this.repeatMode = 'all';
+                    } else if (this.repeatMode === 'all') {
+                        this.repeatMode = 'one';
+                    } else {
+                        this.repeatMode = 'off';
+                    }
+                },
+
+                toggleSpeed() {
+                    const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+                    const currentIndex = speeds.indexOf(this.playbackSpeed);
+                    const nextIndex = (currentIndex + 1) % speeds.length;
+                    this.playbackSpeed = speeds[nextIndex];
+                    
+                    if (this.$refs.audio) {
+                        this.$refs.audio.playbackRate = this.playbackSpeed;
+                    }
+                }
+            }
+        }
+
+        setInterval(() => {
+            const app = Alpine.store ? Alpine.store('audio') : null;
+            if (!app) {
+                const audioData = document.querySelector('[x-data]').__x?.$data;
+                if (audioData?.isPlaying) {
+                    audioData.updateProgress();
+                }
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
