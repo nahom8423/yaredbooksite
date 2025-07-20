@@ -1,12 +1,4 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import HomePage from './pages/HomePage'
-import BooksPage from './pages/BooksPage'
-import AudioPage from './pages/AudioPage'
-import ViewerPage from './pages/ViewerPage'
-import ChatPage from './pages/ChatPage'
-
-// Original Chat App Component
 import Sidebar from './components/Sidebar';
 import ChatInput from './components/ChatInput';
 import ChatHeader from './components/ChatHeader';
@@ -19,7 +11,7 @@ import saintYaredImage from './assets/images/saintyared.png';
 import { yaredBotAPI } from './services/yaredBotAPI';
 import analytics from './services/analytics';
 
-function ChatApp() {
+function App() {
   // Initialize with proper mobile detection to prevent FOUC
   const [isMobile, setIsMobile] = useState(() => {
     return window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -833,20 +825,4 @@ function ChatApp() {
   );
 }
 
-// Main App with Router
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/books" element={<BooksPage />} />
-        <Route path="/audio" element={<AudioPage />} />
-        <Route path="/viewer" element={<ViewerPage />} />
-        <Route path="/chat" element={<ChatPage />} />
-      </Routes>
-    </Router>
-  )
-}
-
 export default App;
-export { ChatApp };
