@@ -1,63 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Ethiopic:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Prevent page scrolling */
-html, body, #root {
-  height: 100%;
-  overflow: hidden;
-}
-
-/* Mobile keyboard offset support */
-:root {
-  --kb-offset: 0px;
-  --sidebar-offset: 0px; /* For desktop sidebar spacing */
-}
-
-/* Set initial sidebar offset for desktop to prevent flash */
-@media (min-width: 768px) {
-  :root {
-    --sidebar-offset: 256px;
-  }
-}
-
-/* Prevent flash of unstyled content during initial render */
-.app-container {
-  opacity: 0;
-  transition: opacity 0.1s ease-in;
-}
-
-.app-container.initialized {
-  opacity: 1;
-}
-
-/* Input bar positioning with keyboard awareness */
-.input-bar {
-  position: fixed;
-  bottom: 0;
-  left: var(--sidebar-offset);
-  right: 0;
-  padding: 16px;
-  transform: translateY(var(--kb-offset));
-  transition: transform 0.15s ease-out;
-}
-
-/* Prevent transition flash on initial load */
-.app-container:not(.initialized) .input-bar {
-  transition: none;
-}
-
-/* Ensure chat content has proper bottom padding for input */
-.chat-scroll {
-  padding-bottom: calc(120px + env(safe-area-inset-bottom));
-}
-
-/* Hide scrollbar on textarea */
-textarea::-webkit-scrollbar {
-  display: none;
-}
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Ethiopic:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Ethiopic font class */
 .ethiopic {

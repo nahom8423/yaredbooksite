@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import saintYaredImage from '../assets/images/saintyared.png'
+import ImprovedRealTimeMarkdown from './ImprovedRealTimeMarkdown'
+import SourceCard from './SourceCard'
+import { debugAPI } from '../utils/apiDebug'
+import { processInlineCitations } from '../utils/citationProcessor'
 
-export default function ChatMessage({ message, isTyping = false, skipAnimation = false, onRegenerate }) {
+export default function ChatMessage({ message, isTyping = false, skipAnimation = false, onRegenerate, onSourcesOpen }) {
   const [displayText, setDisplayText] = useState('')
   const [isAnimating, setIsAnimating] = useState(false)
   const [showActions, setShowActions] = useState(false)
@@ -9,6 +13,8 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
   const [isMobile, setIsMobile] = useState(false)
   const [showCopied, setShowCopied] = useState(false)
   const [buttonsVisible, setButtonsVisible] = useState(false)
+  const [showSources, setShowSources] = useState(false)
+  const [highlightedSourceId, setHighlightedSourceId] = useState(null)
 
   // Check if mobile
   useEffect(() => {
@@ -36,6 +42,47 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
     setShowCopied(true)
     setTimeout(() => setShowCopied(false), 2000)
   }
+
+  // Handle citation click
+  const handleCitationClick = (sourceId) => {
+    setShowSources(true)
+    setHighlightedSourceId(parseInt(sourceId, 10))
+    // Auto-hide highlight after 3 seconds
+    setTimeout(() => setHighlightedSourceId(null), 3000)
+  }
+
+  // Process text with inline citations
+  const processTextWithCitations = (text) => {
+    if (!message.sources || !Array.isArray(message.sources) || message.sources.length === 0) {
+      return text;
+    }
+    
+    return processInlineCitations(text, message.sources);
+  }
+
+  // Auto-scroll during typing animation
+  useEffect(() => {
+    if (isAnimating && !message.isUser) {
+      const scrollToBottom = () => {
+        // Find the current message element and scroll it into view
+        const messageElements = document.querySelectorAll('.message-ai');
+        const currentMessage = messageElements[messageElements.length - 1];
+        if (currentMessage) {
+          currentMessage.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'end',
+            inline: 'nearest'
+          });
+        }
+      };
+
+      // Scroll immediately and then periodically during animation
+      scrollToBottom();
+      const scrollInterval = setInterval(scrollToBottom, 100);
+
+      return () => clearInterval(scrollInterval);
+    }
+  }, [isAnimating, message.isUser, displayText]);
 
   // Typing animation for AI responses
   useEffect(() => {
@@ -99,6 +146,36 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
       setButtonsVisible(true)
     }
   }, [message, isAnimating, skipAnimation])
+
+  // Debug sources when message changes
+  useEffect(() => {
+    if (message && !message.isUser) {
+      console.group(`🎨 SOURCES DEBUG - Message ${message.id}`);
+      console.log('Raw message.sources:', message.sources);
+      console.log('Sources type:', typeof message.sources);
+      console.log('Is array?', Array.isArray(message.sources));
+      console.log('Sources length:', message.sources?.length || 0);
+      console.log('Will show sources section?', !isAnimating && message.sources && Array.isArray(message.sources) && message.sources.length > 0);
+      
+      if (message.sources) {
+        message.sources.forEach((source, index) => {
+          console.log(`Source ${index}:`, {
+            title: source?.title,
+            url: source?.url,
+            snippet: source?.snippet?.substring(0, 50),
+            hasTitle: !!source?.title,
+            hasUrl: !!source?.url,
+            fullSource: source
+          });
+        });
+      }
+      console.groupEnd();
+      
+      if (process.env.NODE_ENV === 'development') {
+        debugAPI.logUIRender(message.id, message.sources);
+      }
+    }
+  }, [message, isAnimating])
 
   if (isTyping) {
     return (
@@ -213,10 +290,110 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
             <div style={{
               color: 'white'
             }}>
-              <div style={{ whiteSpace: 'pre-wrap', userSelect: 'text', WebkitUserSelect: 'text', cursor: 'text' }}>{displayText}{isAnimating && <span className="animate-pulse">|</span>}</div>
+              <ImprovedRealTimeMarkdown 
+                text={displayText}
+                isAnimating={isAnimating}
+                sources={message.sources ?? []}
+                onCitationClick={handleCitationClick}
+              />
             </div>
             
-            {/* Action buttons - only show for completed AI messages */}
+            {/* Expandable Sources Section */}
+            {!isAnimating && message.sources && Array.isArray(message.sources) && message.sources.length > 0 && (
+              <div style={{ marginTop: '16px' }}>
+                {/* Sources Toggle Button */}
+                <button
+                  onClick={() => setShowSources(!showSources)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    background: 'transparent',
+                    border: '1px solid #333',
+                    borderRadius: '8px',
+                    padding: '8px 12px',
+                    color: '#888',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    width: 'auto',
+                    transition: 'all 0.2s ease',
+                    opacity: 0,
+                    animation: 'slideInLeft 0.8s ease-out 0.8s forwards'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.borderColor = '#555';
+                    e.target.style.color = '#aaa';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.borderColor = '#333';
+                    e.target.style.color = '#888';
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10,9 9,9 8,9"/>
+                  </svg>
+                  <span>Sources ({message.sources.length})</span>
+                  <svg 
+                    width="14" 
+                    height="14" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2"
+                    style={{
+                      transform: showSources ? 'rotate(180deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.2s ease'
+                    }}
+                  >
+                    <polyline points="6,9 12,15 18,9"/>
+                  </svg>
+                </button>
+
+                {/* Expandable Sources Cards */}
+                {showSources && (
+                  <div style={{
+                    marginTop: '12px',
+                    padding: '12px',
+                    backgroundColor: '#1A1A1A',
+                    border: '1px solid #333',
+                    borderRadius: '8px',
+                    animation: 'slideInDown 0.3s ease-out'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {message.sources.map((source, index) => {
+                        if (!source || (!source.title && !source.url)) return null;
+                        const isHighlighted = highlightedSourceId === (source.id || index + 1);
+                        return (
+                          <div
+                            key={index}
+                            style={{
+                              padding: isHighlighted ? '12px' : '8px',
+                              backgroundColor: isHighlighted ? '#2A2A2A' : '#242424',
+                              border: isHighlighted ? '2px solid #4A90E2' : '1px solid #333',
+                              borderRadius: '6px',
+                              transition: 'all 0.3s ease'
+                            }}
+                          >
+                            <SourceCard 
+                              source={source} 
+                              index={index}
+                              isHighlighted={isHighlighted}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Model badge and action buttons - only show for completed AI messages */}
             {!isAnimating && buttonsVisible && (
               <div style={{
                 display: 'flex',
@@ -224,6 +401,27 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                 gap: '8px',
                 marginTop: '12px'
               }}>
+                {/* Model badge */}
+                {message.model && (
+                  <div style={{
+                    padding: '2px 6px',
+                    backgroundColor: '#1A1A1A',
+                    border: '1px solid #333',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    color: '#888',
+                    fontWeight: '500',
+                    opacity: 0,
+                    animation: 'slideInLeft 0.8s ease-out 0.0s forwards'
+                  }}>
+                    {message.model}
+                    {message.cost && (message.cost > 0) && (
+                      <span style={{ color: '#666', marginLeft: '4px' }}>
+                        ${message.cost.toFixed(4)}
+                      </span>
+                    )}
+                  </div>
+                )}
                 {/* Like button */}
                 <button
                   onClick={() => handleFeedback('like')}
@@ -309,7 +507,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                       alignItems: 'center',
                       justifyContent: 'center',
                       opacity: 0,
-                      animation: 'slideInLeft 0.8s ease-out 0.7s forwards'
+                      animation: 'slideInLeft 0.8s ease-out 0.6s forwards'
                     }}
                     title="Regenerate response"
                   >
@@ -321,6 +519,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                     </svg>
                   </button>
                 )}
+
               </div>
             )}
           </div>

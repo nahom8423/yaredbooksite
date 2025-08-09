@@ -53,7 +53,7 @@ export default function ChatInput({ onSendMessage, isLoading }) {
         value={message}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder="Message Kidus Yared AI"
+        placeholder="Message Kidus Yared AI (Shift+Enter for new line)"
         disabled={isLoading}
         rows="1"
         className="flex-1 bg-transparent text-white placeholder-[#9f9f9f] outline-none disabled:opacity-50 text-base resize-none py-2 max-h-[120px] overflow-y-auto"
