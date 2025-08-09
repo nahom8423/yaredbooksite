@@ -3,6 +3,8 @@
  * Connects to the Discord AI API for Ethiopian Orthodox knowledge
  */
 
+import { debugAPI } from '../utils/apiDebug';
+
 // Use environment variable or fallback to Railway production URL
 // Production site: https://nahom8423.github.io/yaredbooksite/
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://web-production-28e35.up.railway.app';
@@ -53,28 +55,19 @@ class YaredBotAPI {
       // Get existing session ID for this chat, or null for new chat
       const currentSessionId = chatId ? this.chatSessions.get(chatId) : null;
       
+      const requestData = {
+        message: message.trim()
+      };
+
       // Debug logging to ensure session_id is being sent
-      console.log('API Request:', {
-        chatId,
-        currentSessionId,
-        message: message.trim(),
-        hasSession: !!currentSessionId,
-        apiUrl: this.apiUrl,
-        userAgent: navigator.userAgent,
-        isMobile: /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-      });
+      debugAPI.logRequest('/chat', requestData);
       
       const response = await fetch(`${this.apiUrl}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: message.trim(),
-          user_id: 'web_user', // Default user ID for web interface
-          session_id: currentSessionId, // Include session for conversation memory
-          channel_type: 'web' // Specify this is from web interface
-        }),
+        body: JSON.stringify(requestData),
         // Add timeout for mobile networks with fallback for older browsers
         signal: (() => {
           try {
@@ -98,30 +91,29 @@ class YaredBotAPI {
         throw new Error(data.error);
       }
 
-      let responseText = data.response || 'I apologize, but I cannot provide a response at this time.';
+      let responseText = data.answer || data.response || 'I apologize, but I cannot provide a response at this time.';
       
       // Clean up response by removing search indicators
       responseText = responseText.replace(/Found in [^:]+:\s*/g, '');
       responseText = responseText.replace(/^(Looking through|Searching|Analyzing)[^\n]*\n*/gm, '');
+      // Remove FEAST_ID placeholders
+      responseText = responseText.replace(/\[FEAST_ID:\s*([^\]]+)\]/g, '$1');
       responseText = responseText.trim();
 
-      // Store session ID for this chat if provided
-      if (data.session_id && chatId) {
-        this.chatSessions.set(chatId, data.session_id);
-        this.saveSessionsToStorage(); // Persist to localStorage
-        console.log('Session stored:', { chatId, sessionId: data.session_id });
-      }
-
-      console.log('API Response:', {
-        response: responseText.substring(0, 100) + '...',
-        sessionId: data.session_id,
-        storedSession: chatId ? this.chatSessions.get(chatId) : null
-      });
-
-      return {
+      // Note: New API doesn't support sessions yet, but keeping structure for compatibility
+      const sessionId = data.session_id || null;
+      
+      const apiResult = {
         response: responseText,
-        sessionId: data.session_id
+        sessionId: sessionId,
+        sources: data.sources || [],
+        model_used: data.model_used
       };
+
+      // Enhanced debugging with sources analysis
+      debugAPI.logResponse('/chat', apiResult);
+
+      return apiResult;
     } catch (error) {
       console.error('Error calling Yared Bot API:', error);
       
