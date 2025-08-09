@@ -5,14 +5,44 @@ import ChatHeader from './components/ChatHeader';
 import ChatMessage from './components/ChatMessage';
 import ThinkingIndicator from './components/ThinkingIndicator';
 import SearchingIndicator from './components/SearchingIndicator';
-import SearchingTest from './components/SearchingTest';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import DeviceDetector from './components/DeviceDetector';
 import DebugAuth from './components/DebugAuth';
-import DebugTestComponent from './components/DebugTestComponent';
 import saintYaredImage from './assets/images/saintyared.png';
 import { yaredBotAPI } from './services/yaredBotAPI';
 import analytics from './services/analytics';
+
+// Dynamic test components loader (only in development)
+function DevTestComponents() {
+  const [TestComponents, setTestComponents] = useState(null);
+
+  useEffect(() => {
+    // Only load test components in development mode
+    if (import.meta.env.DEV) {
+      Promise.all([
+        import('./components/DebugTestComponent').catch(() => null),
+        import('./components/SearchingTest').catch(() => null)
+      ]).then(([DebugTest, SearchTest]) => {
+        setTestComponents({
+          DebugTestComponent: DebugTest?.default,
+          SearchingTest: SearchTest?.default
+        });
+      });
+    }
+  }, []);
+
+  // Don't render anything in production
+  if (!import.meta.env.DEV || !TestComponents) {
+    return null;
+  }
+
+  return (
+    <>
+      {TestComponents.DebugTestComponent && <TestComponents.DebugTestComponent />}
+      {TestComponents.SearchingTest && <TestComponents.SearchingTest />}
+    </>
+  );
+}
 
 function App() {
   // Initialize with proper mobile detection to prevent FOUC
@@ -867,13 +897,8 @@ function App() {
       />
 
 
-      {/* Debug Test Components (only in development) */}
-      {import.meta.env.DEV && (
-        <>
-          <DebugTestComponent />
-          <SearchingTest />
-        </>
-      )}
+      {/* Debug Test Components (only in development with dynamic imports) */}
+      <DevTestComponents />
     </div>
   );
 }
