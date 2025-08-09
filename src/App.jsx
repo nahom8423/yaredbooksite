@@ -4,9 +4,12 @@ import ChatInput from './components/ChatInput';
 import ChatHeader from './components/ChatHeader';
 import ChatMessage from './components/ChatMessage';
 import ThinkingIndicator from './components/ThinkingIndicator';
+import SearchingIndicator from './components/SearchingIndicator';
+import SearchingTest from './components/SearchingTest';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 import DeviceDetector from './components/DeviceDetector';
 import DebugAuth from './components/DebugAuth';
+import DebugTestComponent from './components/DebugTestComponent';
 import saintYaredImage from './assets/images/saintyared.png';
 import { yaredBotAPI } from './services/yaredBotAPI';
 import analytics from './services/analytics';
@@ -20,6 +23,7 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [messages, setMessages] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
   const [chatHistory, setChatHistory] = useState([])
   const [currentChatId, setCurrentChatId] = useState(null)
 
@@ -144,6 +148,7 @@ function App() {
     }
     document.documentElement.style.setProperty('--sidebar-offset', sidebarOffset)
   }, [isMobile, sidebarVisible])
+
 
   // Set initial CSS variables synchronously to prevent FOUC
   useEffect(() => {
@@ -334,8 +339,18 @@ function App() {
         existingSessionId: yaredBotAPI.getSessionId(chatId)
       });
       
+      // Show searching indicator for web searches
+      setIsSearching(true)
+      
       // Get AI response with session tracking
-      const { response: aiResponse, sessionId } = await yaredBotAPI.sendMessage(messageText, chatId)
+      const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(messageText, chatId)
+      
+      // Hide searching indicator
+      setIsSearching(false)
+      
+      // Debug: Log sources data
+      console.log('Received sources from API:', sources);
+      console.log('Sources type:', typeof sources, 'Length:', sources?.length);
       
       // Track successful AI response
       analytics.trackEngagement('ai_response_received', { 
@@ -355,13 +370,14 @@ function App() {
       
       setIsThinking(false)
       
-      // Add AI message with session ID tracking
+      // Add AI message with session ID tracking and real sources
       const aiMessage = {
         id: Date.now() + 1,
         text: aiResponse,
         isUser: false,
         timestamp: new Date(),
-        sessionId: sessionId // Store session ID with message for debugging
+        sessionId: sessionId, // Store session ID with message for debugging
+        sources: sources || []
       }
       setNewMessageId(aiMessage.id) // Mark this as the new message for animation
       const finalMessages = [...updatedMessages, aiMessage]
@@ -383,6 +399,7 @@ function App() {
       )
     } catch (error) {
       console.error('Error sending message:', error)
+      setIsSearching(false)
       setIsThinking(false)
       setThinkingText('')
       
@@ -423,9 +440,16 @@ function App() {
   // Handle new chat
   const handleNewChat = () => {
     analytics.trackButtonClick('new_chat')
+    
+    // Clear all states immediately to prevent visual artifacts
+    setIsLoading(false)
+    setIsThinking(false)
+    setThinkingText('')
+    
     setMessages([])
     setCurrentChatId(null)
     setNewMessageId(null)
+    
     if (isMobile) {
       setMobileMenuOpen(false)
     }
@@ -436,12 +460,16 @@ function App() {
     console.log('Selecting chat:', chat.id, 'with', chat.messages?.length || 0, 'messages')
     console.log('Chat messages:', chat.messages)
     
-    // Ensure we have valid messages
+    // Clear all loading and thinking states FIRST to prevent visual artifacts
+    setIsLoading(false)
+    setIsThinking(false)
+    setThinkingText('')
+    setNewMessageId(null) // Clear new message ID when loading old chat
+    
+    // Then load the new chat data
     const chatMessages = Array.isArray(chat.messages) ? chat.messages : []
     setMessages(chatMessages)
     setCurrentChatId(chat.id)
-    setNewMessageId(null) // Clear new message ID when loading old chat
-    setIsLoading(false) // Ensure loading state is cleared
     
     if (isMobile) {
       setMobileMenuOpen(false)
@@ -502,6 +530,7 @@ function App() {
     handleSendMessage(suggestion)
   }
 
+
   // Handle message regeneration
   const handleRegenerateMessage = async (messageToRegenerate) => {
     if (!currentChatId || isLoading) return
@@ -561,8 +590,18 @@ function App() {
     }
 
     try {
+      // Show searching indicator for regeneration
+      setIsSearching(true)
+      
       // Get new AI response
-      const { response: aiResponse, sessionId } = await yaredBotAPI.sendMessage(userMessage.text, currentChatId)
+      const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(userMessage.text, currentChatId)
+      
+      // Hide searching indicator
+      setIsSearching(false)
+      
+      // Debug: Log sources data for regeneration
+      console.log('Regenerate - Received sources from API:', sources);
+      console.log('Regenerate - Sources type:', typeof sources, 'Length:', sources?.length);
       
       // Save thinking indicator to history only if it was used
       if (requiresSearch && isThinking) {
@@ -576,13 +615,14 @@ function App() {
       
       setIsThinking(false)
       
-      // Add new AI message
+      // Add new AI message with real sources
       const newAiMessage = {
         id: Date.now() + 1,
         text: aiResponse,
         isUser: false,
         timestamp: new Date(),
-        sessionId: sessionId
+        sessionId: sessionId,
+        sources: sources || []
       }
       setNewMessageId(newAiMessage.id) // Mark this as the new message for animation
       const finalMessages = [...messagesWithoutRegenerated, newAiMessage]
@@ -598,6 +638,7 @@ function App() {
       )
     } catch (error) {
       console.error('Error regenerating message:', error)
+      setIsSearching(false)
       setIsThinking(false)
       setThinkingText('')
       
@@ -689,7 +730,7 @@ function App() {
       )}
       
       {/* Main content area */}
-      <div className="flex-1 flex flex-col transition-all duration-300 ease-in-out">
+      <div className="flex-1 flex flex-col">
         <ChatHeader 
           isMobile={isMobile}
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -761,10 +802,13 @@ function App() {
                       </div>
                     )
                   })}
-                  {isThinking && (
+                  {isSearching && (
+                    <SearchingIndicator isSearching={isSearching} />
+                  )}
+                  {isThinking && !isSearching && (
                     <ThinkingIndicator text={thinkingText} />
                   )}
-                  {isLoading && !isThinking && (
+                  {isLoading && !isThinking && !isSearching && (
                     <ChatMessage isTyping={true} />
                   )}
                 </div>
@@ -821,6 +865,15 @@ function App() {
         isVisible={showDebugAuth}
         onClose={() => setShowDebugAuth(false)}
       />
+
+
+      {/* Debug Test Components (only in development) */}
+      {import.meta.env.DEV && (
+        <>
+          <DebugTestComponent />
+          <SearchingTest />
+        </>
+      )}
     </div>
   );
 }
