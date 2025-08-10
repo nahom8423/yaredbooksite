@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 export default function ThinkingIndicator({ text = "Thinking", isStatic = false }) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [shimmerPosition, setShimmerPosition] = useState(0)
 
   const thinkingDetails = [
     "The user is asking for code to create an animation, like ChatGPT's \"thinking\" indicator. They want a UI design that mimics ChatGPT's thought process animation but aren't requesting detailed chain-of-thought content. I can suggest using common indicators like the typing animation, skeleton loaders, or \"thinking\" bubbles with animated dots to convey processing states.",
@@ -14,20 +14,20 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false 
     "I'll provide the user with a polished HTML snippet that contains everything in one file — HTML, CSS, and JavaScript. This will include a chat container, user and assistant messages, a \"thinking\" indicator, and token streaming. The \"thinking\" badge will stay visible until the answer completes, and I'll add a button for toggling a reasoning summary. Code will be free of comments and will support dark mode with system fonts and CSS variables, keeping it simple and clean."
   ]
 
-  // Left-to-right lighting animation at 360fps smoothness
+  // Smooth shimmer animation
   useEffect(() => {
     if (isStatic) return
 
     const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % text.length)
-    }, 120) // Much faster for 360fps smoothness
+      setShimmerPosition(prev => (prev + 1) % 200) // Smooth continuous movement
+    }, 20) // Very smooth at 50fps
 
     return () => clearInterval(interval)
-  }, [isStatic, text])
+  }, [isStatic])
 
   return (
     <div style={{ marginBottom: '16px', fontSize: '14px' }}>
-      {/* Thinking header - clickable like ChatGPT */}
+      {/* Thinking header with gradient shimmer effect */}
       <div 
         onClick={() => setIsExpanded(!isExpanded)}
         style={{
@@ -35,54 +35,33 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false 
           userSelect: 'none',
           fontSize: '13px',
           fontWeight: '400',
-          fontFamily: 'inherit', // Use same font as chat text
+          fontFamily: 'inherit',
           padding: '4px 0',
           display: 'inline-flex',
           alignItems: 'center',
           gap: '6px'
         }}
       >
-        <div style={{ display: 'flex' }}>
-          {text.split('').map((letter, index) => {
-            let opacity = 0.5 // Base muted opacity
-            let brightness = '#8e8e93'
-            let glow = 'none'
-            
-            if (!isStatic) {
-              const distance = Math.abs(index - currentIndex)
-              if (distance === 0) {
-                // Current letter - brightest
-                opacity = 1
-                brightness = '#ffffff'
-                glow = '0 0 12px rgba(255, 255, 255, 0.8)'
-              } else if (distance === 1) {
-                // Adjacent letters - medium bright
-                opacity = 0.85
-                brightness = '#d1d5db'
-                glow = '0 0 6px rgba(255, 255, 255, 0.4)'
-              } else if (distance === 2) {
-                // Two letters away - slightly bright
-                opacity = 0.7
-                brightness = '#9ca3af'
-                glow = '0 0 3px rgba(255, 255, 255, 0.2)'
-              }
-            }
-            
-            return (
-              <span
-                key={index}
-                style={{
-                  color: brightness,
-                  opacity: opacity,
-                  transition: 'all 0.08s ease', // Ultra smooth transitions
-                  textShadow: glow
-                }}
-              >
-                {letter}
-              </span>
-            )
-          })}
-        </div>
+        <span
+          style={{
+            background: isStatic 
+              ? '#8e8e93' 
+              : `linear-gradient(90deg, 
+                  #8e8e93 0%, 
+                  #8e8e93 ${shimmerPosition - 30}%, 
+                  #ffffff ${shimmerPosition - 10}%, 
+                  #ffffff ${shimmerPosition}%, 
+                  #8e8e93 ${shimmerPosition + 10}%, 
+                  #8e8e93 100%)`,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: isStatic ? '#8e8e93' : 'transparent',
+            color: isStatic ? '#8e8e93' : 'transparent',
+            transition: 'all 0.1s ease'
+          }}
+        >
+          {text}
+        </span>
         <svg 
           width="12" 
           height="12" 
