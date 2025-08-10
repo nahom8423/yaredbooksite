@@ -382,14 +382,16 @@ function App() {
         response_type: requiresWebSearch ? 'ai_response_with_web_search' : 'ai_response_with_knowledge'
       })
       
-      // Save thinking indicator to history only if it was used for knowledge base queries
-      if (!requiresWebSearch && isThinking) {
+      // Compute and store thinking duration if applicable
+      let computedDuration = null
+      if (!requiresWebSearch && thinkingStartTime) {
         const endTime = Date.now()
-        const durationMs = thinkingStartTime ? (endTime - thinkingStartTime) : 0
+        const durationMs = endTime - thinkingStartTime
         const seconds = Math.max(0, durationMs / 1000)
         const formatted = `${seconds.toFixed(1)} seconds`
+        computedDuration = formatted
         const thinkingRecord = {
-          id: Date.now() - 1, // ID before the AI message
+          id: Date.now() - 1, // Best-effort association before AI message
           text: thinkingText || 'thinking',
           timestamp: new Date(),
           duration: formatted
@@ -401,14 +403,15 @@ function App() {
       setIsThinking(false)
       setThinkingStartTime(null)
       
-      // Add AI message with session ID tracking and real sources
+      // Add AI message with session ID tracking, sources, and thinking duration
       const aiMessage = {
         id: Date.now() + 1,
         text: aiResponse,
         isUser: false,
         timestamp: new Date(),
         sessionId: sessionId, // Store session ID with message for debugging
-        sources: sources || []
+        sources: sources || [],
+        thinkingDuration: computedDuration
       }
       setNewMessageId(aiMessage.id) // Mark this as the new message for animation
       const finalMessages = [...updatedMessages, aiMessage]
@@ -628,14 +631,16 @@ function App() {
       console.log('Regenerate - Received sources from API:', sources);
       console.log('Regenerate - Sources type:', typeof sources, 'Length:', sources?.length);
       
-      // Save thinking indicator to history only if it was used for knowledge base queries
-      if (!requiresWebSearch && isThinking) {
+      // Compute and store thinking duration if applicable
+      let regenComputedDuration = null
+      if (!requiresWebSearch && thinkingStartTime) {
         const endTime = Date.now()
-        const durationMs = thinkingStartTime ? (endTime - thinkingStartTime) : 0
+        const durationMs = endTime - thinkingStartTime
         const seconds = Math.max(0, durationMs / 1000)
         const formatted = `${seconds.toFixed(1)} seconds`
+        regenComputedDuration = formatted
         const thinkingRecord = {
-          id: Date.now() - 1, // ID before the AI message
+          id: Date.now() - 1,
           text: thinkingText || 'thinking',
           timestamp: new Date(),
           duration: formatted
@@ -647,14 +652,15 @@ function App() {
       setIsThinking(false)
       setThinkingStartTime(null)
       
-      // Add new AI message with real sources
+      // Add new AI message with real sources and thinking duration
       const newAiMessage = {
         id: Date.now() + 1,
         text: aiResponse,
         isUser: false,
         timestamp: new Date(),
         sessionId: sessionId,
-        sources: sources || []
+        sources: sources || [],
+        thinkingDuration: regenComputedDuration
       }
       setNewMessageId(newAiMessage.id) // Mark this as the new message for animation
       const finalMessages = [...messagesWithoutRegenerated, newAiMessage]
@@ -814,17 +820,18 @@ function App() {
                 /* Chat Messages */
                 <div className="pb-40">
                   {messages.map((message) => {
-                    // Find thinking record that corresponds to this AI message
-                    const thinkingRecord = thinkingHistory.find(
-                      t => t.id === message.id - 1 && !message.isUser
-                    )
+                    // Prefer duration attached to the message; fall back to best-effort history match
+                    const hasMsgDuration = !!message.thinkingDuration
+                    const thinkingRecord = hasMsgDuration
+                      ? { text: thinkingText || 'Thinking', duration: message.thinkingDuration }
+                      : thinkingHistory.find(t => t.id === message.id - 1 && !message.isUser)
                     
                     return (
                       <div key={message.id} style={{ marginBottom: '24px' }}>
                         {thinkingRecord && !message.isUser && (
                           <div style={{ marginBottom: '8px' }}>
                             <ThinkingIndicator 
-                              text={thinkingRecord.text} 
+                              text={thinkingRecord.text}
                               isStatic={true}
                               duration={thinkingRecord.duration}
                             />
