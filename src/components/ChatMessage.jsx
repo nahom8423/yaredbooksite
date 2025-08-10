@@ -38,7 +38,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
 
   // Handle copy message
   const handleCopy = () => {
-    navigator.clipboard.writeText(message.text || displayText)
+    navigator.clipboard.writeText(message?.text || displayText)
     setShowCopied(true)
     setTimeout(() => setShowCopied(false), 2000)
   }
@@ -53,7 +53,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
 
   // Process text with inline citations
   const processTextWithCitations = (text) => {
-    if (!message.sources || !Array.isArray(message.sources) || message.sources.length === 0) {
+    if (!message?.sources || !Array.isArray(message.sources) || message.sources.length === 0) {
       return text;
     }
     
@@ -62,7 +62,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
 
   // Auto-scroll during typing animation
   useEffect(() => {
-    if (isAnimating && !message.isUser) {
+    if (isAnimating && !message?.isUser) {
       const scrollToBottom = () => {
         // Find the current message element and scroll it into view
         const messageElements = document.querySelectorAll('.message-ai');
@@ -82,14 +82,14 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
 
       return () => clearInterval(scrollInterval);
     }
-  }, [isAnimating, message.isUser, displayText]);
+  }, [isAnimating, message?.isUser, displayText]);
 
   // Typing animation for AI responses
   useEffect(() => {
     if (!message) return
     
-    if (message.isUser) {
-      setDisplayText(message.text || '')
+    if (message?.isUser) {
+      setDisplayText(message?.text || '')
       setIsAnimating(false)
       return
     }
@@ -98,7 +98,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
     
     // Skip animation for old chats
     if (skipAnimation) {
-      setDisplayText(message.text || '')
+      setDisplayText(message?.text || '')
       setIsAnimating(false)
       return
     }
@@ -107,7 +107,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
     setIsAnimating(true)
     setDisplayText('')
     
-    const text = message.text || ''
+    const text = message?.text || ''
     if (!text) {
       setIsAnimating(false)
       return
@@ -142,22 +142,22 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
 
   // For non-animated messages, show buttons immediately
   useEffect(() => {
-    if (message && !message.isUser && !isAnimating && skipAnimation) {
+    if (message && !message?.isUser && !isAnimating && skipAnimation) {
       setButtonsVisible(true)
     }
   }, [message, isAnimating, skipAnimation])
 
   // Debug sources when message changes
   useEffect(() => {
-    if (message && !message.isUser) {
-      console.group(`🎨 SOURCES DEBUG - Message ${message.id}`);
-      console.log('Raw message.sources:', message.sources);
-      console.log('Sources type:', typeof message.sources);
-      console.log('Is array?', Array.isArray(message.sources));
-      console.log('Sources length:', message.sources?.length || 0);
-      console.log('Will show sources section?', !isAnimating && message.sources && Array.isArray(message.sources) && message.sources.length > 0);
+    if (message && !message?.isUser) {
+      console.group(`🎨 SOURCES DEBUG - Message ${message?.id}`);
+      console.log('Raw message.sources:', message?.sources);
+      console.log('Sources type:', typeof message?.sources);
+      console.log('Is array?', Array.isArray(message?.sources));
+      console.log('Sources length:', message?.sources?.length || 0);
+      console.log('Will show sources section?', !isAnimating && message?.sources && Array.isArray(message.sources) && message.sources.length > 0);
       
-      if (message.sources) {
+      if (message?.sources) {
         message.sources.forEach((source, index) => {
           console.log(`Source ${index}:`, {
             title: source?.title,
@@ -172,7 +172,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
       console.groupEnd();
       
       if (process.env.NODE_ENV === 'development') {
-        debugAPI.logUIRender(message.id, message.sources);
+        debugAPI.logUIRender(message?.id, message?.sources);
       }
     }
   }, [message, isAnimating])
@@ -238,7 +238,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
     );
   }
 
-  if (message.isUser) {
+  if (message?.isUser) {
     return (
       <div className="message-user" style={{ 
         display: 'flex', 
@@ -293,13 +293,13 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
               <ImprovedRealTimeMarkdown 
                 text={displayText}
                 isAnimating={isAnimating}
-                sources={message.sources ?? []}
+                sources={message?.sources ?? []}
                 onCitationClick={handleCitationClick}
               />
             </div>
             
             {/* Expandable Sources Section */}
-            {!isAnimating && message.sources && Array.isArray(message.sources) && message.sources.length > 0 && (
+            {!isAnimating && message?.sources && Array.isArray(message.sources) && message.sources.length > 0 && (
               <div style={{ marginTop: '16px' }}>
                 {/* Sources Toggle Button */}
                 <button
@@ -337,7 +337,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                     <line x1="16" y1="17" x2="8" y2="17"/>
                     <polyline points="10,9 9,9 8,9"/>
                   </svg>
-                  <span>Sources ({message.sources.length})</span>
+                  <span>Sources ({message?.sources?.length || 0})</span>
                   <svg 
                     width="14" 
                     height="14" 
@@ -365,7 +365,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                     animation: 'slideInDown 0.3s ease-out'
                   }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {message.sources.map((source, index) => {
+                      {message?.sources?.map((source, index) => {
                         if (!source || (!source.title && !source.url)) return null;
                         const isHighlighted = highlightedSourceId === (source.id || index + 1);
                         return (
@@ -402,7 +402,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                 marginTop: '12px'
               }}>
                 {/* Model badge */}
-                {message.model && (
+                {message?.model && (
                   <div style={{
                     padding: '2px 6px',
                     backgroundColor: '#1A1A1A',
@@ -414,10 +414,10 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                     opacity: 0,
                     animation: 'slideInLeft 0.8s ease-out 0.0s forwards'
                   }}>
-                    {message.model}
-                    {message.cost && (message.cost > 0) && (
+                    {message?.model}
+                    {message?.cost && (message.cost > 0) && (
                       <span style={{ color: '#666', marginLeft: '4px' }}>
-                        ${message.cost.toFixed(4)}
+                        ${message?.cost?.toFixed(4)}
                       </span>
                     )}
                   </div>
