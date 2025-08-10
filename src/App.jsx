@@ -810,8 +810,7 @@ function App() {
   }, [showWelcome])
 
   return (
-    <div className={`app-container flex h-screen relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}
-         style={{ zIndex: 1 }}>
+    <div className={`app-container flex h-screen relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}>
       {/* Portal-based overlays mounted on document.body to avoid transform bugs */}
       <WelcomeOverlays show={showWelcome} sidebarWidth={sidebarOverlayWidth} />
       {/* Mobile overlay */}
