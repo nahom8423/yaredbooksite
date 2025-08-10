@@ -793,7 +793,7 @@ function App() {
   const showWelcome = (messages?.length || 0) === 0
 
   return (
-    <div className={`app-container flex h-screen bg-[#171717] relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}
+    <div className={`app-container flex h-screen relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}
          style={{ zIndex: 1 }}>
       {/* Portal-based overlays mounted on document.body to avoid transform bugs */}
       <WelcomeOverlays show={showWelcome} sidebarWidth={sidebarOverlayWidth} />

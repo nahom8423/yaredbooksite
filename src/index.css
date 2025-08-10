@@ -9,3 +9,8 @@
   font-family: 'Noto Serif Ethiopic', serif;
   font-feature-settings: "kern" 1, "liga" 1;
 }
+
+/* Base background color for the app (moved off container) */
+body {
+  background-color: #171717;
+}
