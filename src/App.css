@@ -135,22 +135,16 @@
   .welcome-bg { background-position: 50% 48%; filter: blur(16px) brightness(.68) saturate(1.07); }
 }
 
-/* Show welcome backgrounds when body has is-welcome class */
-body.is-welcome .welcome-bg,
+/* Welcome background - only show when body has is-welcome class */
+body.is-welcome .welcome-bg {
+  opacity: 1;
+}
+
 body.is-welcome .welcome-bg-sidebar {
-  opacity: 1 !important;
+  opacity: 1;
 }
 
-/* Final welcome background implementation */
-.welcome-bg {
-  position: fixed !important;
-  inset: 0 !important;
-  opacity: 1 !important;
-  z-index: -1 !important;
-  pointer-events: none !important;
-}
-
-/* Make key containers transparent when welcome is active to show background */
+/* Make chat container transparent when welcome is shown */
 body.is-welcome .chat-scroll {
   background-color: transparent !important;
 }
