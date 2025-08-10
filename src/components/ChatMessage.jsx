@@ -273,14 +273,16 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
       onMouseLeave={() => setShowActions(false)}
     >
       <div style={{ maxWidth: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+        <div style={{ position: 'relative' }}>
+          {/* Avatar positioned to the left without shifting content */}
           <div style={{
             width: '32px',
             height: '32px',
             borderRadius: '50%',
             overflow: 'hidden',
-            flexShrink: 0,
-            marginTop: '8px'
+            position: 'absolute',
+            left: '-44px', // 32px avatar + 12px typical gap
+            top: '8px'
           }}>
             <img 
               src={saintYaredImage} 
@@ -290,7 +292,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
           </div>
           <div style={{ flex: 1 }}>
             {/* Static thinking duration label aligned with content column */}
-            {!isAnimating && thinkingRecord && (
+            {thinkingRecord && (
               <div style={{ marginBottom: '6px' }}>
                 <ThinkingIndicator
                   text={thinkingRecord.text || 'Thinking'}
