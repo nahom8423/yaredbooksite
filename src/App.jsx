@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Sidebar from './components/Sidebar';
 import ChatInput from './components/ChatInput';
 import ChatHeader from './components/ChatHeader';
@@ -136,6 +136,9 @@ function App() {
   const [thinkingHistory, setThinkingHistory] = useState([])
   const [thinkingStartTime, setThinkingStartTime] = useState(null)
   const [thinkingDuration, setThinkingDuration] = useState(null)
+  // Refs for reliable timing and shimmer delay handling
+  const thinkingStartRef = useRef(null)
+  const shimmerTimeoutRef = useRef(null)
   const [showAnalytics, setShowAnalytics] = useState(false)
   const [showDeviceDetector, setShowDeviceDetector] = useState(false)
   const [showDebugAuth, setShowDebugAuth] = useState(false)
@@ -349,12 +352,15 @@ function App() {
       // Show web search indicator for current events
       setIsSearching(true)
     } else {
-      // Show thinking indicator for knowledge base queries (theological questions)
-      setTimeout(() => {
+      // Start timing immediately; delay shimmer for visual pacing
+      thinkingStartRef.current = Date.now()
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+      }
+      shimmerTimeoutRef.current = setTimeout(() => {
         setIsThinking(true)
         setThinkingText('Thinking')
-        setThinkingStartTime(Date.now())
-      }, 300) // Brief delay for natural timing
+      }, 300)
     }
 
     try {
@@ -382,11 +388,11 @@ function App() {
         response_type: requiresWebSearch ? 'ai_response_with_web_search' : 'ai_response_with_knowledge'
       })
       
-      // Compute and store thinking duration if applicable
+      // Compute and store thinking duration if applicable (independent of isThinking)
       let computedDuration = null
-      if (!requiresWebSearch && thinkingStartTime) {
+      if (!requiresWebSearch && thinkingStartRef.current != null) {
         const endTime = Date.now()
-        const durationMs = endTime - thinkingStartTime
+        const durationMs = endTime - thinkingStartRef.current
         const seconds = Math.max(0, durationMs / 1000)
         const formatted = `${seconds.toFixed(1)} seconds`
         computedDuration = formatted
@@ -400,7 +406,14 @@ function App() {
         setThinkingDuration(formatted)
       }
       
+      // Clear shimmer delay if pending; ensure shimmer doesn't flip on late
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+        shimmerTimeoutRef.current = null
+      }
       setIsThinking(false)
+      setThinkingText('')
+      thinkingStartRef.current = null
       setThinkingStartTime(null)
       
       // Add AI message with session ID tracking, sources, and thinking duration
@@ -466,8 +479,14 @@ function App() {
       )
     } finally {
       setIsLoading(false)
+      // Clear shimmer timeout and reset thinking state
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+        shimmerTimeoutRef.current = null
+      }
       setIsThinking(false)
       setThinkingText('')
+      thinkingStartRef.current = null
       setThinkingStartTime(null)
       setThinkingDuration(null)
     }
@@ -611,12 +630,15 @@ function App() {
       // Show web search indicator for current events
       setIsSearching(true)
     } else {
-      // Show thinking indicator for knowledge base queries (theological questions)
-      setTimeout(() => {
+      // Start timing immediately; delay shimmer for visual pacing
+      thinkingStartRef.current = Date.now()
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+      }
+      shimmerTimeoutRef.current = setTimeout(() => {
         setIsThinking(true)
         setThinkingText('Thinking')
-        setThinkingStartTime(Date.now())
-      }, 300) // Brief delay for natural timing
+      }, 300)
     }
 
     try {
@@ -631,11 +653,11 @@ function App() {
       console.log('Regenerate - Received sources from API:', sources);
       console.log('Regenerate - Sources type:', typeof sources, 'Length:', sources?.length);
       
-      // Compute and store thinking duration if applicable
+      // Compute and store thinking duration if applicable (independent of isThinking)
       let regenComputedDuration = null
-      if (!requiresWebSearch && thinkingStartTime) {
+      if (!requiresWebSearch && thinkingStartRef.current != null) {
         const endTime = Date.now()
-        const durationMs = endTime - thinkingStartTime
+        const durationMs = endTime - thinkingStartRef.current
         const seconds = Math.max(0, durationMs / 1000)
         const formatted = `${seconds.toFixed(1)} seconds`
         regenComputedDuration = formatted
@@ -649,7 +671,13 @@ function App() {
         setThinkingDuration(formatted)
       }
       
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+        shimmerTimeoutRef.current = null
+      }
       setIsThinking(false)
+      setThinkingText('')
+      thinkingStartRef.current = null
       setThinkingStartTime(null)
       
       // Add new AI message with real sources and thinking duration
@@ -677,8 +705,13 @@ function App() {
     } catch (error) {
       console.error('Error regenerating message:', error)
       setIsSearching(false)
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+        shimmerTimeoutRef.current = null
+      }
       setIsThinking(false)
       setThinkingText('')
+      thinkingStartRef.current = null
       setThinkingStartTime(null)
       setThinkingDuration(null)
       
@@ -703,8 +736,13 @@ function App() {
       )
     } finally {
       setIsLoading(false)
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+        shimmerTimeoutRef.current = null
+      }
       setIsThinking(false)
       setThinkingText('')
+      thinkingStartRef.current = null
       setThinkingStartTime(null)
       setThinkingDuration(null)
     }
