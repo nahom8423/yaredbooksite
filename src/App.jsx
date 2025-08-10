@@ -353,6 +353,7 @@ function App() {
       setTimeout(() => {
         setIsThinking(true)
         setThinkingText('Thinking')
+        setThinkingStartTime(Date.now())
       }, 300) // Brief delay for natural timing
     }
 
@@ -383,15 +384,22 @@ function App() {
       
       // Save thinking indicator to history only if it was used for knowledge base queries
       if (!requiresWebSearch && isThinking) {
+        const endTime = Date.now()
+        const durationMs = thinkingStartTime ? (endTime - thinkingStartTime) : 0
+        const seconds = Math.max(0, durationMs / 1000)
+        const formatted = `${seconds.toFixed(1)} seconds`
         const thinkingRecord = {
           id: Date.now() - 1, // ID before the AI message
           text: thinkingText || 'thinking',
-          timestamp: new Date()
+          timestamp: new Date(),
+          duration: formatted
         }
         setThinkingHistory(prev => [...prev, thinkingRecord])
+        setThinkingDuration(formatted)
       }
       
       setIsThinking(false)
+      setThinkingStartTime(null)
       
       // Add AI message with session ID tracking and real sources
       const aiMessage = {
@@ -457,6 +465,8 @@ function App() {
       setIsLoading(false)
       setIsThinking(false)
       setThinkingText('')
+      setThinkingStartTime(null)
+      setThinkingDuration(null)
     }
   }
 
@@ -602,6 +612,7 @@ function App() {
       setTimeout(() => {
         setIsThinking(true)
         setThinkingText('Thinking')
+        setThinkingStartTime(Date.now())
       }, 300) // Brief delay for natural timing
     }
 
@@ -619,15 +630,22 @@ function App() {
       
       // Save thinking indicator to history only if it was used for knowledge base queries
       if (!requiresWebSearch && isThinking) {
+        const endTime = Date.now()
+        const durationMs = thinkingStartTime ? (endTime - thinkingStartTime) : 0
+        const seconds = Math.max(0, durationMs / 1000)
+        const formatted = `${seconds.toFixed(1)} seconds`
         const thinkingRecord = {
           id: Date.now() - 1, // ID before the AI message
           text: thinkingText || 'thinking',
-          timestamp: new Date()
+          timestamp: new Date(),
+          duration: formatted
         }
         setThinkingHistory(prev => [...prev, thinkingRecord])
+        setThinkingDuration(formatted)
       }
       
       setIsThinking(false)
+      setThinkingStartTime(null)
       
       // Add new AI message with real sources
       const newAiMessage = {
@@ -655,6 +673,8 @@ function App() {
       setIsSearching(false)
       setIsThinking(false)
       setThinkingText('')
+      setThinkingStartTime(null)
+      setThinkingDuration(null)
       
       // Add error message
       const errorMessage = {
@@ -679,6 +699,8 @@ function App() {
       setIsLoading(false)
       setIsThinking(false)
       setThinkingText('')
+      setThinkingStartTime(null)
+      setThinkingDuration(null)
     }
   }
 
@@ -804,6 +826,7 @@ function App() {
                             <ThinkingIndicator 
                               text={thinkingRecord.text} 
                               isStatic={true}
+                              duration={thinkingRecord.duration}
                             />
                           </div>
                         )}
