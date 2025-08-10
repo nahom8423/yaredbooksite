@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Welcome Background Test (App-relative)</title>
+  <style>
+    :root { --bg: #171717; --sidebar-w: 256px; }
+    html, body { height: 100%; }
+    body { margin: 0; background: var(--bg); color: white; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto; }
+    .app { position: relative; min-height: 100%; overflow: hidden; }
+    .sidebar { position: absolute; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: rgba(0,0,0,0.25); border-right: 1px solid #222; }
+    .content { margin-left: var(--sidebar-w); min-height: 100vh; padding: 32px; position: relative; z-index: 1; }
+    .welcome-bg, .welcome-bg-sidebar { pointer-events: none; }
+    .welcome-bg { position: fixed; inset: 0; background-image: linear-gradient(to bottom, rgba(23,23,23,0) 40%, rgba(23,23,23,1) 60%), url('public/saintyared.png'); background-size: cover; background-position: center; filter: blur(18px) brightness(0.9); transform: scale(1.05); transition: opacity 220ms ease; opacity: 0; }
+    .welcome-bg-sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: linear-gradient(to right, rgba(0,0,0,0.45), rgba(0,0,0,0)); transition: opacity 220ms ease; opacity: 0; }
+    .app.is-welcome .welcome-bg, .app.is-welcome .welcome-bg-sidebar { opacity: 1; }
+    .options { display: grid; gap: 12px; max-width: 720px; margin-top: 48px; }
+    .pill { display: inline-block; padding: 10px 14px; border-radius: 9999px; background: #1f1f1f; color: #ddd; border: 1px solid #2a2a2a; }
+    .controls { position: fixed; right: 16px; bottom: 16px; z-index: 5; display: flex; gap: 12px; }
+    .btn { background: #2a2a2a; color: #ddd; border: 1px solid #404040; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+  </style>
+  <link rel="preload" as="image" href="public/saintyared.png" />
+  <script>
+    function toggleWelcome(on) {
+      const app = document.querySelector('.app');
+      if (on === undefined) app.classList.toggle('is-welcome');
+      else app.classList.toggle('is-welcome', !!on);
+    }
+    window.addEventListener('DOMContentLoaded', () => toggleWelcome(true));
+  </script>
+</head>
+<body>
+  <div class="app">
+    <div class="welcome-bg"></div>
+    <div class="welcome-bg-sidebar"></div>
+    <div class="sidebar"></div>
+    <div class="content">
+      <h1 style="margin:0; font-size: 28px;">Welcome</h1>
+      <div style="color:#aaa; margin-top:8px;">Ask me about Ethiopian Orthodox tradition, liturgy, history, and theology</div>
+      <div class="options">
+        <span class="pill">Explain the modes Ge'ez, Ezel, Araray</span>
+        <span class="pill">Who is Saint Yared?</span>
+        <span class="pill">How did Zema evolve?</span>
+        <span class="pill">Significance of Mezmur in liturgy</span>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" onclick="toggleWelcome(true)">New Chat (show)</button>
+      <button class="btn" onclick="toggleWelcome(false)">Open Chat (hide)</button>
+      <button class="btn" onclick="toggleWelcome()">Toggle</button>
+    </div>
+  </div>
+</body>
+</html>
+
