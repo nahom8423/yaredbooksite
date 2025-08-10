@@ -177,66 +177,67 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
     }
   }, [message, isAnimating])
 
-  if (isTyping) {
-    return (
-      <div className="message-enter" style={{ 
-        display: 'flex', 
-        justifyContent: 'flex-start', 
-        marginBottom: '24px'
-      }}>
-        <div style={{ maxWidth: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              overflow: 'hidden',
-              flexShrink: 0,
-              marginTop: '4px'
-            }}>
-              <img 
-                src={saintYaredImage} 
-                alt="Kidus Yared" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{
-                padding: '16px',
-                borderRadius: '16px',
-                backgroundColor: '#1f1f1f',
-                color: '#b4b4b4'
-              }}>
-                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    backgroundColor: 'currentColor',
-                    borderRadius: '50%',
-                    animation: 'pulse 1.4s infinite'
-                  }}></div>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    backgroundColor: 'currentColor',
-                    borderRadius: '50%',
-                    animation: 'pulse 1.4s infinite 0.2s'
-                  }}></div>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    backgroundColor: 'currentColor',
-                    borderRadius: '50%',
-                    animation: 'pulse 1.4s infinite 0.4s'
-                  }}></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // OLD TYPING BUBBLES - COMMENTED OUT FOR LATER USE
+  // if (isTyping) {
+  //   return (
+  //     <div className="message-enter" style={{ 
+  //       display: 'flex', 
+  //       justifyContent: 'flex-start', 
+  //       marginBottom: '24px'
+  //     }}>
+  //       <div style={{ maxWidth: '100%' }}>
+  //         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+  //           <div style={{
+  //             width: '32px',
+  //             height: '32px',
+  //             borderRadius: '50%',
+  //             overflow: 'hidden',
+  //             flexShrink: 0,
+  //             marginTop: '4px'
+  //           }}>
+  //             <img 
+  //               src={saintYaredImage} 
+  //               alt="Kidus Yared" 
+  //               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+  //             />
+  //           </div>
+  //           <div style={{ flex: 1 }}>
+  //             <div style={{
+  //               padding: '16px',
+  //               borderRadius: '16px',
+  //               backgroundColor: '#1f1f1f',
+  //               color: '#b4b4b4'
+  //             }}>
+  //               <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+  //                 <div style={{
+  //                   width: '8px',
+  //                   height: '8px',
+  //                   backgroundColor: 'currentColor',
+  //                   borderRadius: '50%',
+  //                   animation: 'pulse 1.4s infinite'
+  //                 }}></div>
+  //                 <div style={{
+  //                   width: '8px',
+  //                   height: '8px',
+  //                   backgroundColor: 'currentColor',
+  //                   borderRadius: '50%',
+  //                   animation: 'pulse 1.4s infinite 0.2s'
+  //                 }}></div>
+  //                 <div style={{
+  //                   width: '8px',
+  //                   height: '8px',
+  //                   backgroundColor: 'currentColor',
+  //                   borderRadius: '50%',
+  //                   animation: 'pulse 1.4s infinite 0.4s'
+  //                 }}></div>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (message?.isUser) {
     return (

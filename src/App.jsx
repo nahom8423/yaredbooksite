@@ -822,9 +822,11 @@ function App() {
                   {isThinking && !isSearching && (
                     <ThinkingIndicator text={thinkingText} />
                   )}
+                  {/* OLD TYPING BUBBLES - COMMENTED OUT
                   {isLoading && !isThinking && !isSearching && (
                     <ChatMessage isTyping={true} />
                   )}
+                  */}
                 </div>
               )}
             </div>

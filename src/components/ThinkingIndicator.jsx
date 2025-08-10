@@ -29,14 +29,14 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false,
           fontWeight: '400',
           fontFamily: 'inherit',
           background: (isStatic || duration) 
-            ? '#8e8e93'
+            ? 'transparent'
             : 'linear-gradient(90deg, #8e8e93 0%, #8e8e93 30%, #ffffff 50%, #8e8e93 70%, #8e8e93 100%)',
-          backgroundSize: '200% 100%',
+          backgroundSize: '400% 100%',
           backgroundClip: 'text',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: (isStatic || duration) ? '#8e8e93' : 'transparent',
           color: (isStatic || duration) ? '#8e8e93' : 'transparent',
-          animation: (isStatic || duration) ? 'none' : 'shimmerMove 4s linear infinite' // Slower animation
+          animation: (isStatic || duration) ? 'none' : 'shimmerMove 3s ease-in-out infinite'
         }}
       >
         {displayText}
@@ -47,12 +47,12 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false,
         <div style={{
           marginTop: '8px',
           padding: '12px',
-          backgroundColor: '#f8f9fa',
+          backgroundColor: '#2A2A2A',
           borderRadius: '8px',
-          border: '1px solid #e3e3e3',
+          border: '1px solid #404040',
           fontSize: '13px',
           lineHeight: '1.5',
-          color: '#1a1a1a',
+          color: '#e0e0e0',
           animation: 'slideDown 0.2s ease-out'
         }}>
           {processToShow.map((line, index) => (
@@ -74,10 +74,13 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false,
         
         @keyframes shimmerMove {
           0% {
-            background-position: -200% 0;
+            background-position: -100% 0;
+          }
+          50% {
+            background-position: 100% 0;
           }
           100% {
-            background-position: 200% 0;
+            background-position: -100% 0;
           }
         }
       `}</style>
