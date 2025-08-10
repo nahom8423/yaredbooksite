@@ -775,6 +775,18 @@ function App() {
   }, [messages, isLoading])
   return (
     <div className={`app-container flex h-screen bg-[#171717] relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}>
+      {/* Welcome background overlays (fade in/out) */}
+      <div 
+        className="welcome-bg"
+        style={{ opacity: messages.length === 0 ? 1 : 0 }}
+      />
+      <div 
+        className="welcome-bg-sidebar"
+        style={{ 
+          opacity: messages.length === 0 ? 1 : 0,
+          width: (!isMobile && sidebarVisible) ? '256px' : (isMobile ? '75vw' : '256px')
+        }}
+      />
       {/* Mobile overlay */}
       {isMobile && (
         <div 

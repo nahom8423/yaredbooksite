@@ -88,3 +88,27 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
+/* Welcome background overlay (new chat) */
+.welcome-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(to bottom, rgba(23,23,23,0) 40%, rgba(23,23,23,1) 60%), url('/saintyared.png');
+  background-size: cover;
+  background-position: center center;
+  filter: blur(18px) brightness(0.9);
+  transform: scale(1.05);
+  transition: opacity 220ms ease;
+}
+
+/* Darken over the sidebar area for better contrast */
+.welcome-bg-sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: linear-gradient(to right, rgba(0,0,0,0.45), rgba(0,0,0,0));
+  transition: opacity 220ms ease, width 220ms ease;
+}
