@@ -202,7 +202,12 @@ export default function ImprovedRealTimeMarkdown({ text, isAnimating = false, st
         color: 'white', 
         marginBottom: '1rem', 
         lineHeight: '1.7',
-        fontSize: '0.95rem'
+        fontSize: '0.95rem',
+        userSelect: 'text',
+        WebkitUserSelect: 'text',
+        MozUserSelect: 'text',
+        msUserSelect: 'text',
+        cursor: 'text'
       }} {...props} />
     ),
     
@@ -412,13 +417,28 @@ export default function ImprovedRealTimeMarkdown({ text, isAnimating = false, st
   }
 
   return (
-    <div className="improved-markdown-realtime">
+    <div 
+      className="improved-markdown-realtime"
+      style={{
+        userSelect: 'text',
+        WebkitUserSelect: 'text',
+        MozUserSelect: 'text',
+        msUserSelect: 'text',
+        cursor: 'text'
+      }}
+    >
       <ReactMarkdown 
         key={renderKey}
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}
         components={markdownComponents}
-        style={combinedStyle}
+        style={{
+          ...combinedStyle,
+          userSelect: 'text',
+          WebkitUserSelect: 'text',
+          MozUserSelect: 'text',
+          msUserSelect: 'text'
+        }}
       >
         {processedText || ''}
       </ReactMarkdown>

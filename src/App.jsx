@@ -330,35 +330,28 @@ function App() {
     
     setIsLoading(true)
     
-    // Determine if this requires searching through texts
-    const needsTextSearch = (text) => {
-      const searchKeywords = [
-        'saint yared', 'liturgy', 'church', 'orthodox', 'tradition', 'history',
-        'calendar', 'fasting', 'feast', 'prayer', 'scripture', 'theology',
-        'monastery', 'priest', 'deacon', 'communion', 'baptism', 'chrismation',
-        'ge\'ez', 'amharic', 'ethiopia', 'tewahedo', 'coptic', 'bible'
+    // Determine if this needs WEB SEARCH (current events) vs KNOWLEDGE BASE (theological questions)
+    const needsWebSearch = (text) => {
+      const webSearchKeywords = [
+        'news', 'current', 'today', 'recent', 'latest', '2024', '2025', 'now', 
+        'breaking', 'update', 'happening', 'trending', 'politics', 'weather',
+        'covid', 'pandemic', 'election', 'war', 'ukraine', 'israel', 'economy'
       ]
       const lowerText = text.toLowerCase()
-      return searchKeywords.some(keyword => lowerText.includes(keyword)) || text.length > 50
+      return webSearchKeywords.some(keyword => lowerText.includes(keyword))
     }
 
-    const requiresSearch = needsTextSearch(messageText)
+    const requiresWebSearch = needsWebSearch(messageText)
     
-    if (requiresSearch) {
-      // Add delay before thinking starts for more realistic timing
+    if (requiresWebSearch) {
+      // Show web search indicator for current events
+      setIsSearching(true)
+    } else {
+      // Show thinking indicator for knowledge base queries (theological questions)
       setTimeout(() => {
         setIsThinking(true)
-        setThinkingText('Looking through Ethiopian Orthodox texts...')
-
-        // Simulate thinking process
-        setTimeout(() => {
-          setThinkingText('Analyzing liturgical knowledge...')
-        }, 1000)
-
-        setTimeout(() => {
-          setThinkingText('Preparing response...')
-        }, 2000)
-      }, 600) // Initial delay before thinking starts
+        setThinkingText('thinking')
+      }, 300) // Brief delay for natural timing
     }
 
     try {
@@ -366,16 +359,14 @@ function App() {
       console.log('Sending message:', {
         chatId,
         message: messageText,
-        existingSessionId: yaredBotAPI.getSessionId(chatId)
+        existingSessionId: yaredBotAPI.getSessionId(chatId),
+        requiresWebSearch
       });
-      
-      // Show searching indicator for web searches
-      setIsSearching(true)
       
       // Get AI response with session tracking
       const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(messageText, chatId)
       
-      // Hide searching indicator
+      // Hide indicators
       setIsSearching(false)
       
       // Debug: Log sources data
@@ -385,14 +376,14 @@ function App() {
       // Track successful AI response
       analytics.trackEngagement('ai_response_received', { 
         response_length: aiResponse.length,
-        response_type: requiresSearch ? 'ai_response_with_knowledge' : 'ai_response'
+        response_type: requiresWebSearch ? 'ai_response_with_web_search' : 'ai_response_with_knowledge'
       })
       
-      // Save thinking indicator to history only if it was used
-      if (requiresSearch && isThinking) {
+      // Save thinking indicator to history only if it was used for knowledge base queries
+      if (!requiresWebSearch && isThinking) {
         const thinkingRecord = {
           id: Date.now() - 1, // ID before the AI message
-          text: 'Looking through Ethiopian Orthodox texts...',
+          text: thinkingText || 'thinking',
           timestamp: new Date()
         }
         setThinkingHistory(prev => [...prev, thinkingRecord])
@@ -588,56 +579,47 @@ function App() {
     // Resend the user's message to get a new AI response
     setIsLoading(true)
 
-    // Determine if this requires searching through texts
-    const needsTextSearch = (text) => {
-      const searchKeywords = [
-        'saint yared', 'liturgy', 'church', 'orthodox', 'tradition', 'history',
-        'calendar', 'fasting', 'feast', 'prayer', 'scripture', 'theology',
-        'monastery', 'priest', 'deacon', 'communion', 'baptism', 'chrismation',
-        'ge\'ez', 'amharic', 'ethiopia', 'tewahedo', 'coptic', 'bible'
+    // Determine if this needs WEB SEARCH (current events) vs KNOWLEDGE BASE (theological questions)
+    const needsWebSearch = (text) => {
+      const webSearchKeywords = [
+        'news', 'current', 'today', 'recent', 'latest', '2024', '2025', 'now', 
+        'breaking', 'update', 'happening', 'trending', 'politics', 'weather',
+        'covid', 'pandemic', 'election', 'war', 'ukraine', 'israel', 'economy'
       ]
       const lowerText = text.toLowerCase()
-      return searchKeywords.some(keyword => lowerText.includes(keyword)) || text.length > 50
+      return webSearchKeywords.some(keyword => lowerText.includes(keyword))
     }
 
-    const requiresSearch = needsTextSearch(userMessage.text)
+    const requiresWebSearch = needsWebSearch(userMessage.text)
     
-    if (requiresSearch) {
-      // Add delay before thinking starts for more realistic timing
+    if (requiresWebSearch) {
+      // Show web search indicator for current events
+      setIsSearching(true)
+    } else {
+      // Show thinking indicator for knowledge base queries (theological questions)
       setTimeout(() => {
         setIsThinking(true)
-        setThinkingText('Looking through Ethiopian Orthodox texts...')
-
-        // Simulate thinking process
-        setTimeout(() => {
-          setThinkingText('Analyzing liturgical knowledge...')
-        }, 1000)
-
-        setTimeout(() => {
-          setThinkingText('Preparing response...')
-        }, 2000)
-      }, 600) // Initial delay before thinking starts
+        setThinkingText('thinking')
+      }, 300) // Brief delay for natural timing
     }
 
     try {
-      // Show searching indicator for regeneration
-      setIsSearching(true)
       
       // Get new AI response
       const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(userMessage.text, currentChatId)
       
-      // Hide searching indicator
+      // Hide indicators
       setIsSearching(false)
       
       // Debug: Log sources data for regeneration
       console.log('Regenerate - Received sources from API:', sources);
       console.log('Regenerate - Sources type:', typeof sources, 'Length:', sources?.length);
       
-      // Save thinking indicator to history only if it was used
-      if (requiresSearch && isThinking) {
+      // Save thinking indicator to history only if it was used for knowledge base queries
+      if (!requiresWebSearch && isThinking) {
         const thinkingRecord = {
           id: Date.now() - 1, // ID before the AI message
-          text: 'Looking through Ethiopian Orthodox texts...',
+          text: thinkingText || 'thinking',
           timestamp: new Date()
         }
         setThinkingHistory(prev => [...prev, thinkingRecord])
