@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 
-export default function ThinkingIndicator({ text = "Thought for 20s", isStatic = false }) {
+export default function ThinkingIndicator({ text = "Thinking", isStatic = false }) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [dots, setDots] = useState('')
+  const [currentIndex, setCurrentIndex] = useState(0)
 
   const thinkingDetails = [
     "The user is asking for code to create an animation, like ChatGPT's \"thinking\" indicator. They want a UI design that mimics ChatGPT's thought process animation but aren't requesting detailed chain-of-thought content. I can suggest using common indicators like the typing animation, skeleton loaders, or \"thinking\" bubbles with animated dots to convey processing states.",
@@ -14,16 +14,16 @@ export default function ThinkingIndicator({ text = "Thought for 20s", isStatic =
     "I'll provide the user with a polished HTML snippet that contains everything in one file — HTML, CSS, and JavaScript. This will include a chat container, user and assistant messages, a \"thinking\" indicator, and token streaming. The \"thinking\" badge will stay visible until the answer completes, and I'll add a button for toggling a reasoning summary. Code will be free of comments and will support dark mode with system fonts and CSS variables, keeping it simple and clean."
   ]
 
-  // Animate dots for non-static display
+  // Left-to-right lighting animation
   useEffect(() => {
     if (isStatic) return
 
     const interval = setInterval(() => {
-      setDots(prev => prev.length >= 3 ? '' : prev + '.')
-    }, 500)
+      setCurrentIndex(prev => (prev + 1) % text.length)
+    }, 200)
 
     return () => clearInterval(interval)
-  }, [isStatic])
+  }, [isStatic, text])
 
   return (
     <div style={{ marginBottom: '16px', fontSize: '14px' }}>
@@ -31,7 +31,6 @@ export default function ThinkingIndicator({ text = "Thought for 20s", isStatic =
       <div 
         onClick={() => setIsExpanded(!isExpanded)}
         style={{
-          color: '#8e8e93',
           cursor: 'pointer',
           userSelect: 'none',
           fontSize: '13px',
@@ -42,7 +41,20 @@ export default function ThinkingIndicator({ text = "Thought for 20s", isStatic =
           gap: '6px'
         }}
       >
-        <span>{text}{!isStatic && dots}</span>
+        <div style={{ display: 'flex' }}>
+          {text.split('').map((letter, index) => (
+            <span
+              key={index}
+              style={{
+                color: !isStatic && index === currentIndex ? '#ffffff' : '#8e8e93',
+                transition: 'color 0.15s ease',
+                textShadow: !isStatic && index === currentIndex ? '0 0 8px rgba(255, 255, 255, 0.8)' : 'none'
+              }}
+            >
+              {letter}
+            </span>
+          ))}
+        </div>
         <svg 
           width="12" 
           height="12" 
@@ -51,6 +63,7 @@ export default function ThinkingIndicator({ text = "Thought for 20s", isStatic =
           stroke="currentColor" 
           strokeWidth="2"
           style={{
+            color: '#8e8e93',
             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
             transition: 'transform 0.2s ease',
             opacity: 0.6
