@@ -103,6 +103,7 @@
   opacity: 0;
   transition: opacity .22s ease;
   will-change: opacity;
+  z-index: -1;
 }
 
 .welcome-bg {

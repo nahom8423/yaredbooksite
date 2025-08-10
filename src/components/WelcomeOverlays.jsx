@@ -5,12 +5,12 @@ export default function WelcomeOverlays({ show = false, sidebarWidth = '256px' }
     <>
       <div
         className="welcome-bg"
-        style={{ opacity: show ? 1 : 0, zIndex: 0 }}
+        style={{ opacity: show ? 1 : 0, zIndex: -1 }}
         aria-hidden="true"
       />
       <div
         className="welcome-bg-sidebar"
-        style={{ width: sidebarWidth, opacity: show ? 1 : 0, zIndex: 0 }}
+        style={{ width: sidebarWidth, opacity: show ? 1 : 0, zIndex: -1 }}
         aria-hidden="true"
       />
     </>
