@@ -803,10 +803,15 @@ function App() {
   }, [showWelcome])
 
   return (
-    <div className={`app-container flex h-screen relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}
+    <div className={`app-container flex h-screen relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''} ${showWelcome ? 'is-welcome' : ''}`}
          style={{ zIndex: 1 }}>
-      {/* Portal-based overlays mounted on document.body to avoid transform bugs */}
-      <WelcomeOverlays show={showWelcome} sidebarWidth={sidebarOverlayWidth} />
+      {/* Welcome background elements - direct approach like HTML test */}
+      {showWelcome && (
+        <>
+          <div className="welcome-bg" />
+          <div className="welcome-bg-sidebar" style={{ width: sidebarOverlayWidth }} />
+        </>
+      )}
       {/* Mobile overlay */}
       {isMobile && (
         <div 
