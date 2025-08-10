@@ -14,20 +14,9 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false 
     "I'll provide the user with a polished HTML snippet that contains everything in one file — HTML, CSS, and JavaScript. This will include a chat container, user and assistant messages, a \"thinking\" indicator, and token streaming. The \"thinking\" badge will stay visible until the answer completes, and I'll add a button for toggling a reasoning summary. Code will be free of comments and will support dark mode with system fonts and CSS variables, keeping it simple and clean."
   ]
 
-  // Smooth shimmer animation
-  useEffect(() => {
-    if (isStatic) return
-
-    const interval = setInterval(() => {
-      setShimmerPosition(prev => (prev + 1) % 200) // Smooth continuous movement
-    }, 20) // Very smooth at 50fps
-
-    return () => clearInterval(interval)
-  }, [isStatic])
-
   return (
     <div style={{ marginBottom: '16px', fontSize: '14px' }}>
-      {/* Thinking header with gradient shimmer effect */}
+      {/* Thinking header with pure CSS shimmer effect */}
       <div 
         onClick={() => setIsExpanded(!isExpanded)}
         style={{
@@ -42,33 +31,21 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false 
           gap: '6px'
         }}
       >
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-          <span style={{ color: '#8e8e93' }}>
-            {text}
-          </span>
-          {!isStatic && (
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: `linear-gradient(90deg, 
-                  transparent ${shimmerPosition - 20}%, 
-                  rgba(255, 255, 255, 1) ${shimmerPosition}%, 
-                  transparent ${shimmerPosition + 20}%)`,
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                color: 'transparent',
-                pointerEvents: 'none'
-              }}
-            >
-              {text}
-            </div>
-          )}
-        </div>
+        <span
+          style={{
+            background: isStatic 
+              ? '#8e8e93'
+              : 'linear-gradient(90deg, #8e8e93 0%, #8e8e93 30%, #ffffff 50%, #8e8e93 70%, #8e8e93 100%)',
+            backgroundSize: '200% 100%',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: isStatic ? '#8e8e93' : 'transparent',
+            color: isStatic ? '#8e8e93' : 'transparent',
+            animation: isStatic ? 'none' : 'shimmerMove 2s linear infinite'
+          }}
+        >
+          {text}
+        </span>
         <svg 
           width="12" 
           height="12" 
@@ -115,6 +92,15 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false 
         @keyframes slideDown {
           from { opacity: 0; transform: translateY(-4px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes shimmerMove {
+          0% {
+            background-position: -200% 0;
+          }
+          100% {
+            background-position: 200% 0;
+          }
         }
       `}</style>
     </div>
