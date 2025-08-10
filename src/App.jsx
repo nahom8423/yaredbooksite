@@ -839,7 +839,7 @@ function App() {
         />
         
         {/* Chat content */}
-        <div className="flex-1 bg-[#171717] text-white flex flex-col h-full relative chat-scroll">
+        <div className={`flex-1 ${showWelcome ? 'bg-transparent' : 'bg-[#171717]'} text-white flex flex-col h-full relative chat-scroll`}>
           {/* Scrollable content area */}
           <div 
             className="flex-1 overflow-y-auto px-6 overscroll-behavior-none"
