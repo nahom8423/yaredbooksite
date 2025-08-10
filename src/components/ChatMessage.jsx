@@ -291,16 +291,6 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
             />
           </div>
           <div style={{ flex: 1 }}>
-            {/* Static thinking duration label aligned with content column */}
-            {thinkingRecord && (
-              <div style={{ marginBottom: '6px' }}>
-                <ThinkingIndicator
-                  text={thinkingRecord.text || 'Thinking'}
-                  isStatic={true}
-                  duration={thinkingRecord.duration}
-                />
-              </div>
-            )}
             <div style={{
               color: 'white'
             }}>

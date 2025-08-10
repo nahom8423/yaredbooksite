@@ -868,12 +868,32 @@ function App() {
                     
                     return (
                       <div key={message.id} style={{ marginBottom: '24px' }}>
+                        {/* Static thinking label above this AI message, aligned to bubble's x-axis with avatar */}
+                        {thinkingRecord && (
+                          <div style={{ position: 'relative', marginBottom: '6px' }}>
+                            <div style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '50%',
+                              overflow: 'hidden',
+                              position: 'absolute',
+                              left: '-44px',
+                              top: '0px'
+                            }}>
+                              <img src={saintYaredImage} alt="Kidus Yared" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </div>
+                            <ThinkingIndicator 
+                              text={thinkingRecord.text}
+                              isStatic={true}
+                              duration={thinkingRecord.duration}
+                            />
+                          </div>
+                        )}
                         <ChatMessage
                           message={message}
                           avatar={saintYaredImage}
                           skipAnimation={message.id !== newMessageId}
                           onRegenerate={!message.isUser ? handleRegenerateMessage : undefined}
-                          thinkingRecord={thinkingRecord}
                         />
                       </div>
                     )
@@ -881,8 +901,22 @@ function App() {
                   {isSearching && (
                     <SearchingIndicator isSearching={isSearching} />
                   )}
+                  {/* Active thinking row with avatar, aligned with message column */}
                   {isThinking && !isSearching && (
-                    <ThinkingIndicator text={thinkingText} />
+                    <div style={{ position: 'relative', marginTop: '8px' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        overflow: 'hidden',
+                        position: 'absolute',
+                        left: '-44px',
+                        top: '0px'
+                      }}>
+                        <img src={saintYaredImage} alt="Kidus Yared" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <ThinkingIndicator text={thinkingText} />
+                    </div>
                   )}
                   {/* OLD TYPING BUBBLES - COMMENTED OUT
                   {isLoading && !isThinking && !isSearching && (
