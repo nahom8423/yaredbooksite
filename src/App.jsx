@@ -870,7 +870,7 @@ function App() {
                       <div key={message.id} style={{ marginBottom: '24px' }}>
                         {/* Static thinking label above this AI message, aligned to bubble's x-axis with avatar */}
                         {thinkingRecord && (
-                          <div style={{ position: 'relative', marginBottom: '6px', animation: 'fadeInUp 180ms ease-out' }}>
+                          <div style={{ position: 'relative', marginBottom: '6px' }}>
                             <div style={{
                               width: '32px',
                               height: '32px',
@@ -878,8 +878,7 @@ function App() {
                               overflow: 'hidden',
                               position: 'absolute',
                               left: '-44px',
-                              top: '0px',
-                              animation: 'scaleIn 180ms ease-out'
+                              top: '0px'
                             }}>
                               <img src={saintYaredImage} alt="Kidus Yared" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             </div>
@@ -904,7 +903,7 @@ function App() {
                   )}
                   {/* Active thinking row with avatar, aligned with message column */}
                   {isThinking && !isSearching && (
-                    <div style={{ position: 'relative', marginTop: '8px', animation: 'fadeInUp 200ms ease-out' }}>
+                    <div style={{ position: 'relative', marginTop: '8px' }}>
                       <div style={{
                         width: '32px',
                         height: '32px',
@@ -912,8 +911,7 @@ function App() {
                         overflow: 'hidden',
                         position: 'absolute',
                         left: '-44px',
-                        top: '0px',
-                        animation: 'scaleIn 200ms ease-out'
+                        top: '0px'
                       }}>
                         <img src={saintYaredImage} alt="Kidus Yared" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
