@@ -790,7 +790,14 @@ function App() {
       scrollRef.scrollTop = scrollRef.scrollHeight
     }
   }, [messages, isLoading])
-  const showWelcome = (messages?.length || 0) === 0 && (!currentChatId || currentChatId === null)
+  const showWelcome = (messages?.length || 0) === 0
+  console.log('🎭 WELCOME DEBUG:', {
+    showWelcome,
+    messagesLength: messages?.length || 0,
+    currentChatId,
+    hasCurrentChat: currentChatId !== null,
+    finalShowWelcome: showWelcome
+  })
 
   // Add body class for welcome background CSS
   useEffect(() => {
