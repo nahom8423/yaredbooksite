@@ -42,26 +42,33 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false 
           gap: '6px'
         }}
       >
-        <span
-          style={{
-            background: isStatic 
-              ? '#8e8e93' 
-              : `linear-gradient(90deg, 
-                  #8e8e93 0%, 
-                  #8e8e93 ${shimmerPosition - 30}%, 
-                  #ffffff ${shimmerPosition - 10}%, 
-                  #ffffff ${shimmerPosition}%, 
-                  #8e8e93 ${shimmerPosition + 10}%, 
-                  #8e8e93 100%)`,
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: isStatic ? '#8e8e93' : 'transparent',
-            color: isStatic ? '#8e8e93' : 'transparent',
-            transition: 'all 0.1s ease'
-          }}
-        >
-          {text}
-        </span>
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <span style={{ color: '#8e8e93' }}>
+            {text}
+          </span>
+          {!isStatic && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: `linear-gradient(90deg, 
+                  transparent ${shimmerPosition - 20}%, 
+                  rgba(255, 255, 255, 1) ${shimmerPosition}%, 
+                  transparent ${shimmerPosition + 20}%)`,
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                color: 'transparent',
+                pointerEvents: 'none'
+              }}
+            >
+              {text}
+            </div>
+          )}
+        </div>
         <svg 
           width="12" 
           height="12" 
