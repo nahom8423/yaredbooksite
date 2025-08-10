@@ -141,18 +141,16 @@ body.is-welcome .welcome-bg-sidebar {
   opacity: 1 !important;
 }
 
-/* Debug: Force show welcome background for testing */
+/* Final welcome background implementation */
 .welcome-bg {
-  /* Force massive z-index and red background to test visibility */
   position: fixed !important;
   inset: 0 !important;
-  background: red !important;
-  opacity: 0.6 !important;
-  z-index: 2147483647 !important;
+  opacity: 1 !important;
+  z-index: -1 !important;
   pointer-events: none !important;
 }
 
-/* Force all backgrounds transparent when welcome is active */
-body.is-welcome * {
+/* Make key containers transparent when welcome is active to show background */
+body.is-welcome .chat-scroll {
   background-color: transparent !important;
 }
