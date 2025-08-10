@@ -143,15 +143,16 @@ body.is-welcome .welcome-bg-sidebar {
 
 /* Debug: Force show welcome background for testing */
 .welcome-bg {
-  /* Uncomment next line to force visibility for debugging */
-  opacity: 1 !important;
-  /* Also add a fallback background color to test if CSS is loading */
-  background-color: rgba(255, 0, 0, 0.1) !important;
+  /* Force massive z-index and red background to test visibility */
+  position: fixed !important;
+  inset: 0 !important;
+  background: red !important;
+  opacity: 0.6 !important;
+  z-index: 2147483647 !important;
+  pointer-events: none !important;
 }
 
-/* Additional direct targeting for portal elements */
-body > .welcome-bg,
-body > div.welcome-bg {
-  opacity: 1 !important;
-  background-color: rgba(0, 255, 0, 0.2) !important;
+/* Force all backgrounds transparent when welcome is active */
+body.is-welcome * {
+  background-color: transparent !important;
 }
