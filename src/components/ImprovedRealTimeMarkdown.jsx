@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'
@@ -10,6 +10,8 @@ import MarkdownVideo from './MarkdownVideo'
  */
 export default function ImprovedRealTimeMarkdown({ text, isAnimating = false, style = {}, sources = [], onCitationClick }) {
   const [renderKey, setRenderKey] = useState(0)
+  const containerRef = useRef(null)
+  const cursorRef = useRef(null)
   
   const processedText = useMemo(() => {
     if (!text) return text;
@@ -146,6 +148,35 @@ export default function ImprovedRealTimeMarkdown({ text, isAnimating = false, st
       return () => clearInterval(scrollInterval);
     }
   }, [isAnimating, text])
+
+  // Place the typing cursor inline at the end of the last text block
+  useEffect(() => {
+    const container = containerRef.current
+    // Clean up any existing cursor
+    if (cursorRef.current && cursorRef.current.parentNode) {
+      cursorRef.current.parentNode.removeChild(cursorRef.current)
+      cursorRef.current = null
+    }
+    if (!isAnimating || !container) return
+    // Find the last inline-friendly element to attach cursor
+    const candidates = container.querySelectorAll('p, li, blockquote, h1, h2, h3, h4, td')
+    const last = candidates.length > 0 ? candidates[candidates.length - 1] : container
+    const span = document.createElement('span')
+    span.textContent = '|'
+    span.style.color = 'white'
+    span.style.animation = 'blink 1s infinite'
+    span.style.marginLeft = '2px'
+    span.style.display = 'inline-block'
+    span.style.lineHeight = '1'
+    last.appendChild(span)
+    cursorRef.current = span
+    return () => {
+      if (cursorRef.current && cursorRef.current.parentNode) {
+        cursorRef.current.parentNode.removeChild(cursorRef.current)
+        cursorRef.current = null
+      }
+    }
+  }, [isAnimating, renderKey])
 
   // Simplified markdown components with consistent styling
   const markdownComponents = useMemo(() => ({
@@ -426,6 +457,7 @@ export default function ImprovedRealTimeMarkdown({ text, isAnimating = false, st
         msUserSelect: 'text',
         cursor: 'text'
       }}
+      ref={containerRef}
     >
       <ReactMarkdown 
         key={renderKey}
@@ -442,18 +474,7 @@ export default function ImprovedRealTimeMarkdown({ text, isAnimating = false, st
       >
         {processedText || ''}
       </ReactMarkdown>
-      {isAnimating && (
-        <span 
-          className="typing-cursor" 
-          style={{
-            color: 'white',
-            animation: 'blink 1s infinite',
-            marginLeft: '2px'
-          }}
-        >
-          |
-        </span>
-      )}
+      {/* cursor appended inline via effect when animating */}
       
       {/* Add CSS for cursor animation and table styling */}
       <style>{`

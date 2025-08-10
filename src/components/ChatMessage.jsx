@@ -274,22 +274,6 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
     >
       <div style={{ maxWidth: '100%' }}>
         <div style={{ position: 'relative' }}>
-          {/* Avatar positioned to the left without shifting content */}
-          <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            overflow: 'hidden',
-            position: 'absolute',
-            left: '-44px', // 32px avatar + 12px typical gap
-            top: '8px'
-          }}>
-            <img 
-              src={saintYaredImage} 
-              alt="Kidus Yared" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
           <div style={{ flex: 1 }}>
             <div style={{
               color: 'white'
