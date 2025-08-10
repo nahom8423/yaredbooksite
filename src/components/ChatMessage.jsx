@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import saintYaredImage from '../assets/images/saintyared.png'
 import ImprovedRealTimeMarkdown from './ImprovedRealTimeMarkdown'
+import ThinkingIndicator from './ThinkingIndicator'
 import SourceCard from './SourceCard'
 import { debugAPI } from '../utils/apiDebug'
 import { processInlineCitations } from '../utils/citationProcessor'
 
-export default function ChatMessage({ message, isTyping = false, skipAnimation = false, onRegenerate, onSourcesOpen }) {
+export default function ChatMessage({ message, isTyping = false, skipAnimation = false, onRegenerate, onSourcesOpen, thinkingRecord = null }) {
   const [displayText, setDisplayText] = useState('')
   const [isAnimating, setIsAnimating] = useState(false)
   const [showActions, setShowActions] = useState(false)
@@ -288,6 +289,16 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
             />
           </div>
           <div style={{ flex: 1 }}>
+            {/* Static thinking duration label aligned with content column */}
+            {!isAnimating && thinkingRecord && (
+              <div style={{ marginBottom: '6px' }}>
+                <ThinkingIndicator
+                  text={thinkingRecord.text || 'Thinking'}
+                  isStatic={true}
+                  duration={thinkingRecord.duration}
+                />
+              </div>
+            )}
             <div style={{
               color: 'white'
             }}>

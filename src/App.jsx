@@ -860,26 +860,20 @@ function App() {
                   {messages.map((message) => {
                     // Prefer duration attached to the message; fall back to best-effort history match
                     const hasMsgDuration = !!message.thinkingDuration
-                    const thinkingRecord = hasMsgDuration
-                      ? { text: thinkingText || 'Thinking', duration: message.thinkingDuration }
-                      : thinkingHistory.find(t => t.id === message.id - 1 && !message.isUser)
+                    const thinkingRecord = (!message.isUser) ? (
+                      hasMsgDuration
+                        ? { text: 'Thinking', duration: message.thinkingDuration }
+                        : thinkingHistory.find(t => t.id === message.id - 1 && !message.isUser)
+                    ) : null
                     
                     return (
                       <div key={message.id} style={{ marginBottom: '24px' }}>
-                        {thinkingRecord && !message.isUser && (
-                          <div style={{ marginBottom: '8px' }}>
-                            <ThinkingIndicator 
-                              text={thinkingRecord.text}
-                              isStatic={true}
-                              duration={thinkingRecord.duration}
-                            />
-                          </div>
-                        )}
                         <ChatMessage
                           message={message}
                           avatar={saintYaredImage}
                           skipAnimation={message.id !== newMessageId}
                           onRegenerate={!message.isUser ? handleRegenerateMessage : undefined}
+                          thinkingRecord={thinkingRecord}
                         />
                       </div>
                     )
