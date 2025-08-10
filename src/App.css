@@ -121,6 +121,9 @@
   background-size: cover;
   background-position: 50% 24%;
   filter: blur(24px) brightness(.66) saturate(1.08);
+  /* Force visibility for final test */
+  opacity: 1 !important;
+  z-index: 2147483647 !important;
 }
 
 .welcome-bg-sidebar {
