@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixed Shimmer Test</title>
+    <style>
+        body {
+            background: #171717;
+            color: white;
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 40px;
+            margin: 0;
+        }
+        
+        .shimmer-text {
+            fontSize: '16px';
+            fontWeight: '400';
+            background: linear-gradient(90deg, #8e8e93 0%, #8e8e93 30%, #ffffff 50%, #8e8e93 70%, #8e8e93 100%);
+            background-size: 400% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            animation: shimmerMove 3s ease-in-out infinite;
+            cursor: pointer;
+        }
+        
+        @keyframes shimmerMove {
+          0% {
+            background-position: -100% 0;
+          }
+          50% {
+            background-position: 100% 0;
+          }
+          100% {
+            background-position: -100% 0;
+          }
+        }
+        
+        .static-text {
+            color: #8e8e93;
+            background: transparent;
+        }
+        
+        .dropdown {
+            margin-top: 8px;
+            padding: 12px;
+            background-color: #2A2A2A;
+            border-radius: 8px;
+            border: 1px solid #404040;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #e0e0e0;
+            animation: slideDown 0.2s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0; 
+                transform: translateY(-4px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Fixed ThinkingIndicator Test</h1>
+    
+    <h2>Active Thinking (with shimmer):</h2>
+    <div class="shimmer-text">Thinking</div>
+    
+    <h2>Completed Thinking (static):</h2>
+    <div class="static-text">Thought for 2.3s</div>
+    
+    <h2>Dark Theme Dropdown:</h2>
+    <div class="dropdown">
+        Analyzing the question about Saint Yared and liturgical music...
+        <br><br>
+        Searching through Ethiopian Orthodox Church historical records and manuscripts about Saint Yared's contributions to church music and liturgy.
+        <br><br>
+        Cross-referencing information about the development of Ge'ez liturgical chanting, the three modes of church music (Ge'ez, Ezel, and Araray), and Saint Yared's role in systematizing Ethiopian Orthodox musical traditions.
+    </div>
+</body>
+</html>

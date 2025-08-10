@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shimmer Thinking Animation Test</title>
+    <style>
+        body {
+            background: #171717;
+            color: white;
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 40px;
+            margin: 0;
+        }
+        
+        .thinking-container {
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .thinking-header {
+            cursor: pointer;
+            user-select: none;
+            font-size: 13px;
+            font-weight: 400;
+            padding: 4px 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .thinking-text {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .base-text {
+            color: #8e8e93;
+        }
+        
+        .shimmer-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 1) 50%, 
+                transparent 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            pointer-events: none;
+            animation: shimmer 2s linear infinite;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+        
+        .arrow {
+            color: #8e8e93;
+            opacity: 0.6;
+            transition: transform 0.2s ease;
+        }
+        
+        .expanded-content {
+            margin-top: 8px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e3e3e3;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #1a1a1a;
+            display: none;
+        }
+        
+        .expanded-content.show {
+            display: block;
+            animation: slideDown 0.2s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { 
+                opacity: 0; 
+                transform: translateY(-4px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        /* Alternative shimmer using CSS animation */
+        .shimmer-alt {
+            background: linear-gradient(90deg, 
+                #8e8e93 0%, 
+                #8e8e93 30%, 
+                #ffffff 50%, 
+                #8e8e93 70%, 
+                #8e8e93 100%);
+            background-size: 200% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmerMove 2s linear infinite;
+        }
+        
+        @keyframes shimmerMove {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+        
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+        
+        .demo-title {
+            color: #fff;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shimmer Thinking Animation Tests</h1>
+    
+    <div class="demo-section">
+        <div class="demo-title">Version 1: Layered Approach (Base + Overlay)</div>
+        <div class="thinking-container">
+            <div class="thinking-header" onclick="toggleExpanded('content1')">
+                <div class="thinking-text">
+                    <span class="base-text">Thinking</span>
+                    <div class="shimmer-overlay">Thinking</div>
+                </div>
+                <svg class="arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6,9 12,15 18,9"/>
+                </svg>
+            </div>
+            <div id="content1" class="expanded-content">
+                <p>This version uses a gray base text with a white shimmer overlay that moves across it.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <div class="demo-title">Version 2: Pure CSS Background Gradient</div>
+        <div class="thinking-container">
+            <div class="thinking-header" onclick="toggleExpanded('content2')">
+                <span class="shimmer-alt">Thinking</span>
+                <svg class="arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6,9 12,15 18,9"/>
+                </svg>
+            </div>
+            <div id="content2" class="expanded-content">
+                <p>This version uses pure CSS background gradient with background-clip: text.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="demo-section">
+        <div class="demo-title">Version 3: JavaScript Controlled Position</div>
+        <div class="thinking-container">
+            <div class="thinking-header" onclick="toggleExpanded('content3')">
+                <div class="thinking-text">
+                    <span class="base-text">Thinking</span>
+                    <div id="js-shimmer" class="shimmer-overlay" style="background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 1) 50%, transparent 100%);">Thinking</div>
+                </div>
+                <svg class="arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6,9 12,15 18,9"/>
+                </svg>
+            </div>
+            <div id="content3" class="expanded-content">
+                <p>This version uses JavaScript to control the shimmer position precisely.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleExpanded(contentId) {
+            const content = document.getElementById(contentId);
+            content.classList.toggle('show');
+        }
+        
+        // JavaScript controlled shimmer for version 3
+        let shimmerPos = 0;
+        const jsShimmer = document.getElementById('js-shimmer');
+        
+        setInterval(() => {
+            shimmerPos = (shimmerPos + 2) % 200;
+            jsShimmer.style.background = `linear-gradient(90deg, 
+                transparent ${shimmerPos - 30}%, 
+                rgba(255, 255, 255, 1) ${shimmerPos}%, 
+                transparent ${shimmerPos + 30}%)`;
+        }, 30);
+    </script>
+</body>
+</html>
