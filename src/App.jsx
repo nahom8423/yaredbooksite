@@ -794,11 +794,19 @@ function App() {
 
   // Add body class for welcome background CSS
   useEffect(() => {
+    console.log('🎭 Welcome state changed:', { 
+      showWelcome, 
+      messagesLength: messages.length,
+      bodyClasses: document.body.className 
+    })
     if (showWelcome) {
       document.body.classList.add('is-welcome')
+      console.log('✅ Added is-welcome class to body')
     } else {
       document.body.classList.remove('is-welcome')
+      console.log('❌ Removed is-welcome class from body')
     }
+    console.log('📝 Body classes after update:', document.body.className)
     return () => document.body.classList.remove('is-welcome')
   }, [showWelcome])
 

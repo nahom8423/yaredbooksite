@@ -140,3 +140,9 @@ body.is-welcome .welcome-bg,
 body.is-welcome .welcome-bg-sidebar {
   opacity: 1 !important;
 }
+
+/* Debug: Force show welcome background for testing */
+.welcome-bg {
+  /* Uncomment next line to force visibility for debugging */
+  /* opacity: 1 !important; */
+}
