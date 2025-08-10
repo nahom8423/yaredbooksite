@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import WelcomeOverlays from './components/WelcomeOverlays'
 import Sidebar from './components/Sidebar';
 import ChatInput from './components/ChatInput';
 import ChatHeader from './components/ChatHeader';
@@ -143,6 +144,8 @@ function App() {
   const [showDeviceDetector, setShowDeviceDetector] = useState(false)
   const [showDebugAuth, setShowDebugAuth] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [sidebarOverlayWidth, setSidebarOverlayWidth] = useState('256px')
+  const sidebarWrapperRef = useRef(null)
 
 
   // Modern viewport offset handling for mobile browsers
@@ -197,7 +200,19 @@ function App() {
     setIsInitialized(true)
   }, []) // Run once on mount
 
-  // (welcome overlay measurement removed)
+  // Measure sidebar width to size the sidebar overlay tint (for portal overlays)
+  useEffect(() => {
+    const measure = () => {
+      try {
+        const w = sidebarWrapperRef.current?.offsetWidth || 256
+        setSidebarOverlayWidth(`${w}px`)
+        document.documentElement.style.setProperty('--sidebar-w', `${w}px`)
+      } catch (_) {}
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [sidebarVisible, isMobile, mobileMenuOpen])
 
   // Recovery function for lost data
   const recoverChatHistory = () => {
@@ -775,8 +790,13 @@ function App() {
       scrollRef.scrollTop = scrollRef.scrollHeight
     }
   }, [messages, isLoading])
+  const showWelcome = (messages?.length || 0) === 0
+
   return (
-    <div className={`app-container flex h-screen bg-[#171717] relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}>
+    <div className={`app-container flex h-screen bg-[#171717] relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}
+         style={{ zIndex: 1 }}>
+      {/* Portal-based overlays mounted on document.body to avoid transform bugs */}
+      <WelcomeOverlays show={showWelcome} sidebarWidth={sidebarOverlayWidth} />
       {/* Mobile overlay */}
       {isMobile && (
         <div 
@@ -789,7 +809,7 @@ function App() {
       
       {/* Sidebar */}
       {(sidebarVisible || isMobile) && (
-        <div className={`${
+        <div ref={sidebarWrapperRef} className={`${
           isMobile 
             ? `fixed left-0 top-0 h-full w-3/4 z-50 transform transition-all duration-300 ease-in-out ${
                 mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
