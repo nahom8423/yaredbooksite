@@ -148,3 +148,10 @@ body.is-welcome .welcome-bg-sidebar {
   /* Also add a fallback background color to test if CSS is loading */
   background-color: rgba(255, 0, 0, 0.1) !important;
 }
+
+/* Additional direct targeting for portal elements */
+body > .welcome-bg,
+body > div.welcome-bg {
+  opacity: 1 !important;
+  background-color: rgba(0, 255, 0, 0.2) !important;
+}
