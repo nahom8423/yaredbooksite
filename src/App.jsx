@@ -792,6 +792,16 @@ function App() {
   }, [messages, isLoading])
   const showWelcome = (messages?.length || 0) === 0
 
+  // Add body class for welcome background CSS
+  useEffect(() => {
+    if (showWelcome) {
+      document.body.classList.add('is-welcome')
+    } else {
+      document.body.classList.remove('is-welcome')
+    }
+    return () => document.body.classList.remove('is-welcome')
+  }, [showWelcome])
+
   return (
     <div className={`app-container flex h-screen relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}
          style={{ zIndex: 1 }}>
