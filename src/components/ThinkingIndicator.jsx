@@ -42,18 +42,45 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false 
         }}
       >
         <div style={{ display: 'flex' }}>
-          {text.split('').map((letter, index) => (
-            <span
-              key={index}
-              style={{
-                color: !isStatic && index === currentIndex ? '#ffffff' : '#8e8e93',
-                transition: 'color 0.15s ease',
-                textShadow: !isStatic && index === currentIndex ? '0 0 8px rgba(255, 255, 255, 0.8)' : 'none'
-              }}
-            >
-              {letter}
-            </span>
-          ))}
+          {text.split('').map((letter, index) => {
+            let opacity = 0.5 // Base muted opacity
+            let brightness = '#8e8e93'
+            let glow = 'none'
+            
+            if (!isStatic) {
+              const distance = Math.abs(index - currentIndex)
+              if (distance === 0) {
+                // Current letter - brightest
+                opacity = 1
+                brightness = '#ffffff'
+                glow = '0 0 12px rgba(255, 255, 255, 0.8)'
+              } else if (distance === 1) {
+                // Adjacent letters - medium bright
+                opacity = 0.85
+                brightness = '#d1d5db'
+                glow = '0 0 6px rgba(255, 255, 255, 0.4)'
+              } else if (distance === 2) {
+                // Two letters away - slightly bright
+                opacity = 0.7
+                brightness = '#9ca3af'
+                glow = '0 0 3px rgba(255, 255, 255, 0.2)'
+              }
+            }
+            
+            return (
+              <span
+                key={index}
+                style={{
+                  color: brightness,
+                  opacity: opacity,
+                  transition: 'all 0.2s ease',
+                  textShadow: glow
+                }}
+              >
+                {letter}
+              </span>
+            )
+          })}
         </div>
         <svg 
           width="12" 
