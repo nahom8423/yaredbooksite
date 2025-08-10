@@ -12,11 +12,11 @@
     .sidebar { position: absolute; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: rgba(0,0,0,0.25); border-right: 1px solid #222; }
     .content { margin-left: var(--sidebar-w); min-height: 100vh; padding: 32px; position: relative; z-index: 1; }
     .welcome-bg, .welcome-bg-sidebar { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity .22s ease; will-change: opacity; }
-    .welcome-bg { background-image: linear-gradient(to bottom, rgba(23,23,23,0) 0%, rgba(23,23,23,0) 88%, rgba(23,23,23,0.10) 90%, rgba(23,23,23,0.28) 93%, rgba(23,23,23,0.60) 96%, var(--app-bg) 100%), url('public/saintyared.png'); background-size: cover; background-position: 50% 38%; filter: blur(20px) brightness(.72) saturate(1.05); }
+    .welcome-bg { background-image: linear-gradient(to bottom, rgba(23,23,23,0) 0%, rgba(23,23,23,0) 86%, rgba(23,23,23,0.18) 90%, rgba(23,23,23,0.36) 93%, rgba(23,23,23,0.72) 96%, var(--app-bg) 100%), url('public/saintyared.png'); background-size: cover; background-position: 50% 32%; filter: blur(22px) brightness(.70) saturate(1.06); }
     .welcome-bg-sidebar { width: var(--sidebar-w); background: linear-gradient(to right, rgba(0,0,0,.62) 0%, rgba(0,0,0,.3) 50%, rgba(0,0,0,0) 100%); opacity: 0; transition: opacity .22s ease; }
     .app.is-welcome .welcome-bg, .app.is-welcome .welcome-bg-sidebar { opacity: 1; }
-    @media (max-width: 1024px) { .welcome-bg { background-position: 50% 42%; filter: blur(18px) brightness(.70) saturate(1.06); } }
-    @media (max-width: 640px)  { .welcome-bg { background-position: 50% 48%; filter: blur(16px) brightness(.68) saturate(1.07); } }
+    @media (max-width: 1024px) { .welcome-bg { background-position: 50% 38%; filter: blur(20px) brightness(.70) saturate(1.06); } }
+    @media (max-width: 640px)  { .welcome-bg { background-position: 50% 44%; filter: blur(18px) brightness(.68) saturate(1.07); } }
     .options { display: grid; gap: 12px; max-width: 720px; margin-top: 48px; }
     .pill { display: inline-block; padding: 10px 14px; border-radius: 9999px; background: #1f1f1f; color: #ddd; border: 1px solid #2a2a2a; }
     .controls { position: fixed; right: 16px; bottom: 16px; z-index: 5; display: flex; gap: 12px; }
