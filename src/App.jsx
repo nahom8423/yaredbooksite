@@ -134,6 +134,8 @@ function App() {
   const [isThinking, setIsThinking] = useState(false)
   const [thinkingText, setThinkingText] = useState('')
   const [thinkingHistory, setThinkingHistory] = useState([])
+  const [thinkingStartTime, setThinkingStartTime] = useState(null)
+  const [thinkingDuration, setThinkingDuration] = useState(null)
   const [showAnalytics, setShowAnalytics] = useState(false)
   const [showDeviceDetector, setShowDeviceDetector] = useState(false)
   const [showDebugAuth, setShowDebugAuth] = useState(false)
