@@ -15,6 +15,7 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false,
   ]
 
   const displayText = duration ? `Thought for ${duration}` : text
+  const isShimmering = !(isStatic || duration)
   const processToShow = thinkingProcess || defaultThinkingProcess
 
   return (
@@ -28,15 +29,17 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false,
           fontSize: '16px', // Same size as chat text
           fontWeight: '400',
           fontFamily: 'inherit',
-          background: (isStatic || duration) 
-            ? 'transparent'
-            : 'linear-gradient(90deg, #8e8e93 0%, #8e8e93 30%, #ffffff 50%, #8e8e93 70%, #8e8e93 100%)',
-          backgroundSize: '400% 100%',
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: (isStatic || duration) ? '#8e8e93' : 'transparent',
-          color: (isStatic || duration) ? '#8e8e93' : 'transparent',
-          animation: (isStatic || duration) ? 'none' : 'shimmerMove 3s ease-in-out infinite'
+          // Only apply shimmer styles when actively thinking
+          background: isShimmering
+            ? 'linear-gradient(90deg, #8e8e93 0%, #8e8e93 30%, #ffffff 50%, #8e8e93 70%, #8e8e93 100%)'
+            : 'none',
+          backgroundSize: isShimmering ? '400% 100%' : 'auto',
+          backgroundClip: isShimmering ? 'text' : 'initial',
+          WebkitBackgroundClip: isShimmering ? 'text' : 'initial',
+          WebkitTextFillColor: isShimmering ? 'transparent' : '#8e8e93',
+          color: isShimmering ? 'transparent' : '#8e8e93',
+          animation: isShimmering ? 'shimmerMove 3s ease-in-out infinite' : 'none',
+          display: 'inline'
         }}
       >
         {displayText}
@@ -47,9 +50,9 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false,
         <div style={{
           marginTop: '8px',
           padding: '12px',
-          backgroundColor: '#2A2A2A',
+          backgroundColor: '#171717', // Match chat background
           borderRadius: '8px',
-          border: '1px solid #404040',
+          border: 'none', // No border to blend seamlessly
           fontSize: '13px',
           lineHeight: '1.5',
           color: '#e0e0e0',
