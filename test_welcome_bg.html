@@ -12,8 +12,8 @@
     .sidebar { position: absolute; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: rgba(0,0,0,0.25); border-right: 1px solid #222; }
     .content { margin-left: var(--sidebar-w); min-height: 100vh; padding: 32px; position: relative; z-index: 1; }
     .welcome-bg, .welcome-bg-sidebar { pointer-events: none; }
-    .welcome-bg { position: fixed; inset: 0; background-image: linear-gradient(to bottom, rgba(23,23,23,0) 40%, rgba(23,23,23,1) 60%), url('public/saintyared.png'); background-size: cover; background-position: center; filter: blur(18px) brightness(0.9); transform: scale(1.05); transition: opacity 220ms ease; opacity: 0; }
-    .welcome-bg-sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: linear-gradient(to right, rgba(0,0,0,0.45), rgba(0,0,0,0)); transition: opacity 220ms ease; opacity: 0; }
+    .welcome-bg { position: fixed; inset: 0; background-image: linear-gradient(to bottom, rgba(23,23,23,0) 0%, rgba(23,23,23,0) 88%, rgba(23,23,23,0.8) 94%, rgba(23,23,23,1) 100%), url('public/saintyared.png'); background-size: cover; background-position: center 35%; filter: blur(18px) brightness(0.78); transition: opacity 220ms ease; opacity: 0; }
+    .welcome-bg-sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); background: linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0)); transition: opacity 220ms ease; opacity: 0; }
     .app.is-welcome .welcome-bg, .app.is-welcome .welcome-bg-sidebar { opacity: 1; }
     .options { display: grid; gap: 12px; max-width: 720px; margin-top: 48px; }
     .pill { display: inline-block; padding: 10px 14px; border-radius: 9999px; background: #1f1f1f; color: #ddd; border: 1px solid #2a2a2a; }
@@ -53,4 +53,3 @@
   </div>
 </body>
 </html>
-
