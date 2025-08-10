@@ -350,7 +350,7 @@ function App() {
       // Show thinking indicator for knowledge base queries (theological questions)
       setTimeout(() => {
         setIsThinking(true)
-        setThinkingText('thinking')
+        setThinkingText('Thinking')
       }, 300) // Brief delay for natural timing
     }
 
@@ -599,7 +599,7 @@ function App() {
       // Show thinking indicator for knowledge base queries (theological questions)
       setTimeout(() => {
         setIsThinking(true)
-        setThinkingText('thinking')
+        setThinkingText('Thinking')
       }, 300) // Brief delay for natural timing
     }
 

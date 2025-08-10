@@ -14,13 +14,13 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false 
     "I'll provide the user with a polished HTML snippet that contains everything in one file — HTML, CSS, and JavaScript. This will include a chat container, user and assistant messages, a \"thinking\" indicator, and token streaming. The \"thinking\" badge will stay visible until the answer completes, and I'll add a button for toggling a reasoning summary. Code will be free of comments and will support dark mode with system fonts and CSS variables, keeping it simple and clean."
   ]
 
-  // Left-to-right lighting animation
+  // Left-to-right lighting animation at 360fps smoothness
   useEffect(() => {
     if (isStatic) return
 
     const interval = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % text.length)
-    }, 200)
+    }, 120) // Much faster for 360fps smoothness
 
     return () => clearInterval(interval)
   }, [isStatic, text])
@@ -34,7 +34,8 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false 
           cursor: 'pointer',
           userSelect: 'none',
           fontSize: '13px',
-          fontWeight: '500',
+          fontWeight: '400',
+          fontFamily: 'inherit', // Use same font as chat text
           padding: '4px 0',
           display: 'inline-flex',
           alignItems: 'center',
@@ -73,7 +74,7 @@ export default function ThinkingIndicator({ text = "Thinking", isStatic = false 
                 style={{
                   color: brightness,
                   opacity: opacity,
-                  transition: 'all 0.2s ease',
+                  transition: 'all 0.08s ease', // Ultra smooth transitions
                   textShadow: glow
                 }}
               >
