@@ -875,7 +875,7 @@ function App() {
         <div className={`flex-1 ${showWelcome ? '!bg-transparent' : 'bg-[#171717]'} text-white flex flex-col h-full relative chat-scroll`}>
           {/* Scrollable content area */}
           <div 
-            className="flex-1 overflow-y-auto px-6 overscroll-behavior-none"
+            className={`flex-1 ${showWelcome ? 'overflow-hidden' : 'overflow-y-auto'} px-6 overscroll-behavior-none`}
             onScroll={handleScroll}
             ref={setScrollRef}
             style={{ WebkitOverflowScrolling: 'touch' }}
