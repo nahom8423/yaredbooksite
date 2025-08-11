@@ -103,7 +103,8 @@
   opacity: 0;
   transition: opacity .22s ease;
   will-change: opacity;
-  z-index: -1;
+  /* Place above body background but below app content */
+  z-index: 0;
 }
 
 .welcome-bg {
@@ -121,9 +122,6 @@
   background-size: cover;
   background-position: 50% 24%;
   filter: blur(24px) brightness(.66) saturate(1.08);
-  /* Force visibility for final test */
-  opacity: 1 !important;
-  z-index: 2147483647 !important;
 }
 
 .welcome-bg-sidebar {
@@ -145,6 +143,12 @@ body.is-welcome .welcome-bg {
 
 body.is-welcome .welcome-bg-sidebar {
   opacity: 1;
+}
+
+/* Ensure the React app renders above the background overlays */
+.app-container {
+  position: relative;
+  z-index: 1;
 }
 
 /* Make chat container transparent when welcome is shown */
