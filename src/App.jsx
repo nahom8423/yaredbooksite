@@ -535,7 +535,7 @@ function App() {
       
       // Calculate quick response duration
       const quickDuration = Date.now() - quickStartTime
-      const quickDurationFormatted = `${(quickDuration / 1000).toFixed(1)}s`
+      const quickDurationFormatted = `${Math.round(quickDuration / 1000)}s`
       
       // Clear thinking indicators
       if (shimmerTimeoutRef.current) {
@@ -784,7 +784,7 @@ function App() {
       
       // Calculate detailed response duration
       const detailedDuration = Date.now() - detailedStartTime
-      const detailedDurationFormatted = `${(detailedDuration / 1000).toFixed(1)}s`
+      const detailedDurationFormatted = `${Math.round(detailedDuration / 1000)}s`
       
       // Clear thinking indicators
       if (shimmerTimeoutRef.current) {

@@ -22,5 +22,5 @@ export function needsDetailedKnowledge(message) {
   if (m.split(/\s+/).length > 18) return true;
   if ((m.match(/\?/g) || []).length > 1) return true;
 
-  return true; // conservative default
+  return false; // default to quick unless a rule triggers
 }

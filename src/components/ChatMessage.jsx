@@ -391,16 +391,26 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
               }}>
                 {/* Response type badge */}
                 {message?.responseType && (
-                  <span style={{
-                    backgroundColor: message.responseType === 'quick' ? '#e0f7ff' : '#f2ecff',
-                    color: message.responseType === 'quick' ? '#034' : '#402080',
-                    fontSize: '11px',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    marginRight: '4px'
-                  }}>
-                    {message.responseType === 'quick' ? 'Fast' : 'Detailed'}
-                  </span>
+                  (() => {
+                    const rt = message.responseType;
+                    const isQuick = rt === 'quick';
+                    const isWeb = rt === 'web_search';
+                    const label = isQuick ? 'Fast' : (isWeb ? 'Web' : 'Detailed');
+                    const bg = isQuick ? '#e0f7ff' : (isWeb ? '#e8f5e9' : '#f2ecff');
+                    const fg = isQuick ? '#034' : (isWeb ? '#1b5e20' : '#402080');
+                    return (
+                      <span style={{
+                        backgroundColor: bg,
+                        color: fg,
+                        fontSize: '11px',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        marginRight: '4px'
+                      }}>
+                        {label}
+                      </span>
+                    );
+                  })()
                 )}
                 {/* Model badge */}
                 {message?.model && (
