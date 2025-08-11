@@ -146,6 +146,8 @@ function App() {
   const [isInitialized, setIsInitialized] = useState(false)
   const [sidebarOverlayWidth, setSidebarOverlayWidth] = useState('256px')
   const sidebarWrapperRef = useRef(null)
+  // Mobile suggestions count: 3 for narrow phones (e.g., iPhone 15 Pro width 393), 4 for wider
+  const [mobilePillCount, setMobilePillCount] = useState(() => (typeof window !== 'undefined' && window.innerWidth <= 393 ? 3 : 4))
 
 
   // Modern viewport offset handling for mobile browsers
@@ -213,6 +215,17 @@ function App() {
     window.addEventListener('resize', measure)
     return () => window.removeEventListener('resize', measure)
   }, [sidebarVisible, isMobile, mobileMenuOpen])
+
+  // Track viewport width to adjust mobile suggestion pill count responsively
+  useEffect(() => {
+    const updatePillCount = () => {
+      const w = typeof window !== 'undefined' ? window.innerWidth : 414
+      setMobilePillCount(w <= 393 ? 3 : 4)
+    }
+    updatePillCount()
+    window.addEventListener('resize', updatePillCount)
+    return () => window.removeEventListener('resize', updatePillCount)
+  }, [])
 
   // Recovery function for lost data
   const recoverChatHistory = () => {
@@ -884,7 +897,7 @@ function App() {
                     
                     {/* Suggestions - Pills */}
                     <div className="flex flex-wrap justify-center gap-3 max-w-2xl mx-auto">
-                      {(isMobile ? yaredBotAPI.getSuggestedQuestions().slice(0, 4) : yaredBotAPI.getSuggestedQuestions()).map((suggestion, index) => (
+                      {(isMobile ? yaredBotAPI.getSuggestedQuestions().slice(0, mobilePillCount) : yaredBotAPI.getSuggestedQuestions()).map((suggestion, index) => (
                         <button
                           key={index}
                           onClick={() => handleSuggestionClick(suggestion)}
