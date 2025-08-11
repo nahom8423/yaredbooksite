@@ -7,6 +7,10 @@ import { useState } from 'react'
 export default function SourceCard({ source, index }) {
   const [imageError, setImageError] = useState(false)
   const [thumbnailLoaded, setThumbnailLoaded] = useState(false)
+  const [showComingSoon, setShowComingSoon] = useState(false)
+  
+  // Check if this is a knowledge base source (PDF/document)
+  const isKnowledgeBaseSource = !source.url || source.url.startsWith('doc_') || source.title?.includes('Prayer Book') || source.title?.includes('መልክአ') || source.title?.includes('Athanasius') || source.title?.includes('Ethiopian Fasts')
 
   // Extract domain for favicon
   const getDomain = (url) => {
@@ -75,7 +79,15 @@ export default function SourceCard({ source, index }) {
       e.currentTarget.style.backgroundColor = '#1A1A1A'
       e.currentTarget.style.borderColor = '#333'
     }}
-    onClick={() => source.url && window.open(source.url, '_blank', 'noopener,noreferrer')}
+    onClick={() => {
+      if (isKnowledgeBaseSource) {
+        // Show coming soon tooltip for knowledge base sources
+        setShowComingSoon(true)
+        setTimeout(() => setShowComingSoon(false), 2000)
+      } else if (source.url) {
+        window.open(source.url, '_blank', 'noopener,noreferrer')
+      }
+    }}
     >
       {/* Source number */}
       <div style={{
@@ -94,8 +106,25 @@ export default function SourceCard({ source, index }) {
         {index + 1}
       </div>
 
-      {/* Thumbnail */}
-      {showThumbnail && (
+      {/* Book icon for knowledge base sources */}
+      {isKnowledgeBaseSource ? (
+        <div style={{
+          width: '40px',
+          height: '40px',
+          borderRadius: '6px',
+          backgroundColor: '#2563eb',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          marginTop: '2px'
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+      ) : showThumbnail && (
         <div style={{
           width: '80px',
           height: '60px',
@@ -176,44 +205,75 @@ export default function SourceCard({ source, index }) {
           {source.title || 'Untitled'}
         </div>
         
-        {/* Domain */}
+        {/* Domain or Source type */}
         <div style={{
           color: '#888',
           fontSize: '12px',
           marginBottom: '6px',
           display: 'flex',
           alignItems: 'center',
-          gap: '6px'
+          gap: '6px',
+          position: 'relative'
         }}>
-          <img
-            src={`https://${domain}/favicon.ico`}
-            alt=""
-            style={{
-              width: '12px',
-              height: '12px',
-              borderRadius: '2px'
-            }}
-            onError={(e) => {
-              e.target.style.display = 'none'
-            }}
-          />
-          {domain}
+          {isKnowledgeBaseSource ? (
+            <>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+              Knowledge Base
+              {showComingSoon && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '20px',
+                  left: '0',
+                  backgroundColor: '#333',
+                  color: 'white',
+                  padding: '4px 8px',
+                  borderRadius: '4px',
+                  fontSize: '11px',
+                  whiteSpace: 'nowrap',
+                  zIndex: 1000,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                }}>
+                  📖 Coming soon - Book viewer in development
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <img
+                src={`https://${domain}/favicon.ico`}
+                alt=""
+                style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '2px'
+                }}
+                onError={(e) => {
+                  e.target.style.display = 'none'
+                }}
+              />
+              {domain}
+            </>
+          )}
         </div>
         
-        {/* Snippet */}
-        {source.snippet && (
-          <div style={{
-            color: '#aaa',
-            fontSize: '12px',
-            lineHeight: '1.4',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden'
-          }}>
-            {source.snippet}
-          </div>
-        )}
+        {/* Snippet or description */}
+        <div style={{
+          color: '#aaa',
+          fontSize: '12px',
+          lineHeight: '1.4',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden'
+        }}>
+          {isKnowledgeBaseSource ? 
+            `From theological library: ${source.title || 'Unknown document'}` : 
+            (source.snippet || 'No preview available')
+          }
+        </div>
       </div>
     </div>
   )

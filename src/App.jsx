@@ -365,7 +365,7 @@ function App() {
     
     setIsLoading(true)
     
-    // Determine if this needs WEB SEARCH (current events) vs KNOWLEDGE BASE (theological questions)
+    // Determine routing: WEB SEARCH vs QUICK ANSWER vs DETAILED KNOWLEDGE BASE
     const needsWebSearch = (text) => {
       const webSearchKeywords = [
         'news', 'current', 'today', 'recent', 'latest', '2024', '2025', 'now', 
@@ -376,7 +376,53 @@ function App() {
       return webSearchKeywords.some(keyword => lowerText.includes(keyword))
     }
 
+    const needsDetailedKnowledge = (text) => {
+      const lowerText = text.toLowerCase()
+      
+      // Simple questions that should get quick responses
+      const simplePatterns = [
+        /^what is (eotc|ethiopian orthodox|orthodox)/,
+        /^who is (saint|kidus|abune)/,
+        /^what are the.{1,20}(fast|feast|holiday)/,
+        /^when is (easter|christmas|timkat)/,
+        /^how many.{1,10}(book|gospel|apostle)/,
+        /^what does.{1,10}(mean|represent)/
+      ]
+      
+      // Check if it's a simple question
+      if (simplePatterns.some(pattern => pattern.test(lowerText))) {
+        return false // Use quick response
+      }
+      
+      // Complex keywords requiring detailed knowledge
+      const detailedKeywords = [
+        // Explicit requests for detailed info
+        'explain in detail', 'detailed explanation', 'comprehensive', 'according to',
+        'church teaching', 'official position', 'theological analysis',
+        // Complex theological concepts
+        'liturgical significance', 'doctrinal', 'dogmatic', 'exegesis', 'hermeneutics',
+        'patristic', 'church fathers', 'ecumenical council', 'christological',
+        // Specific practices requiring detailed explanation  
+        'fasting rules', 'communion preparation', 'ordination ceremony',
+        'marriage blessing', 'baptismal', 'consecration',
+        // Complex historical/cultural topics requiring sources
+        'church history', 'monastic tradition', 'hagiography', 
+        // Specific prayers/texts requiring citations
+        'prayer text', 'hymn text', 'liturgical text', 'ge\'ez translation',
+        // Questions explicitly asking for sources
+        'source', 'reference', 'citation', 'where is this from'
+      ]
+      
+      // Also check for question complexity
+      const isComplexQuestion = text.length > 120 || 
+                               text.split(' ').length > 20 ||
+                               (text.includes('explain') && (text.includes('detail') || text.includes('why') || text.includes('how')))
+      
+      return detailedKeywords.some(keyword => lowerText.includes(keyword)) || isComplexQuestion
+    }
+
     const requiresWebSearch = needsWebSearch(messageText)
+    const requiresDetailedKnowledge = needsDetailedKnowledge(messageText)
     
     if (requiresWebSearch) {
       // Show web search indicator for current events - use original full pipeline
@@ -430,7 +476,92 @@ function App() {
       return // Exit early for web search
     }
     
-    // For theological questions: Use two-tier response system
+    // For theological questions: Use smart routing
+    if (requiresDetailedKnowledge) {
+      // Complex questions go directly to detailed RAG pipeline
+      thinkingStartRef.current = Date.now()
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+      }
+      shimmerTimeoutRef.current = setTimeout(() => {
+        setIsThinking(true)
+        setThinkingText('Searching knowledge base')
+      }, 300)
+      
+      try {
+        const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(messageText, chatId)
+        
+        // Calculate duration
+        const endTime = Date.now()
+        const durationMs = endTime - thinkingStartRef.current
+        const formatted = `${(durationMs / 1000).toFixed(1)}s`
+        
+        // Clear thinking indicators
+        if (shimmerTimeoutRef.current) {
+          clearTimeout(shimmerTimeoutRef.current)
+          shimmerTimeoutRef.current = null
+        }
+        setIsThinking(false)
+        setThinkingText('')
+        
+        // Add detailed AI message
+        const aiMessage = {
+          id: Date.now() + 1,
+          text: aiResponse,
+          isUser: false,
+          timestamp: new Date(),
+          sessionId: sessionId,
+          sources: sources || [],
+          responseType: 'detailed',
+          canExpand: false,
+          thinkingDuration: formatted
+        }
+        
+        setNewMessageId(aiMessage.id)
+        const finalMessages = [...updatedMessages, aiMessage]
+        setMessages(finalMessages)
+        
+        setChatHistory(prevHistory => 
+          prevHistory.map(chat => 
+            chat.id === chatId 
+              ? { ...chat, messages: finalMessages }
+              : chat
+          )
+        )
+        
+        if (!newChatCreated) {
+          setNewChatCreated(chatId)
+          setTimeout(() => setNewChatCreated(null), 3000)
+        }
+        
+      } catch (error) {
+        console.error('Error with detailed response:', error)
+        setIsThinking(false)
+        setThinkingText('')
+        const errorMessage = {
+          id: Date.now() + 1,
+          text: 'Sorry, I encountered an error. Please try again.',
+          isUser: false,
+          timestamp: new Date(),
+          isError: true
+        }
+        setMessages([...updatedMessages, errorMessage])
+      } finally {
+        setIsLoading(false)
+        if (shimmerTimeoutRef.current) {
+          clearTimeout(shimmerTimeoutRef.current)
+          shimmerTimeoutRef.current = null
+        }
+        setIsThinking(false)
+        setThinkingText('')
+        thinkingStartRef.current = null
+        setThinkingStartTime(null)
+        setThinkingDuration(null)
+      }
+      return // Exit early for detailed knowledge questions
+    }
+    
+    // Simple questions: Use two-tier response system  
     // Start timing for thinking indicator
     thinkingStartRef.current = Date.now()
     if (shimmerTimeoutRef.current) {
@@ -442,7 +573,7 @@ function App() {
     }, 300)
 
     try {
-      // TIER 1: Quick response (2-3 seconds)
+      // TIER 1: Quick response (2-3 seconds) for simple questions
       const quickStartTime = Date.now()
       const { response: quickResponse, responseType, canExpand, modelUsed } = await yaredBotAPI.sendQuickMessage(messageText, chatId)
       
@@ -777,7 +908,7 @@ function App() {
     // Resend the user's message to get a new AI response
     setIsLoading(true)
 
-    // Determine if this needs WEB SEARCH (current events) vs KNOWLEDGE BASE (theological questions)
+    // Use same smart routing logic as main handler
     const needsWebSearch = (text) => {
       const webSearchKeywords = [
         'news', 'current', 'today', 'recent', 'latest', '2024', '2025', 'now', 
@@ -788,13 +919,93 @@ function App() {
       return webSearchKeywords.some(keyword => lowerText.includes(keyword))
     }
 
+    const needsDetailedKnowledge = (text) => {
+      const lowerText = text.toLowerCase()
+      
+      // Simple questions that should get quick responses
+      const simplePatterns = [
+        /^what is (eotc|ethiopian orthodox|orthodox)/,
+        /^who is (saint|kidus|abune)/,
+        /^what are the.{1,20}(fast|feast|holiday)/,
+        /^when is (easter|christmas|timkat)/,
+        /^how many.{1,10}(book|gospel|apostle)/,
+        /^what does.{1,10}(mean|represent)/
+      ]
+      
+      if (simplePatterns.some(pattern => pattern.test(lowerText))) {
+        return false
+      }
+      
+      const detailedKeywords = [
+        'explain in detail', 'detailed explanation', 'comprehensive', 'according to',
+        'church teaching', 'official position', 'theological analysis',
+        'liturgical significance', 'doctrinal', 'dogmatic', 'exegesis', 'hermeneutics',
+        'patristic', 'church fathers', 'ecumenical council', 'christological',
+        'fasting rules', 'communion preparation', 'ordination ceremony',
+        'marriage blessing', 'baptismal', 'consecration',
+        'church history', 'monastic tradition', 'hagiography',
+        'prayer text', 'hymn text', 'liturgical text', 'ge\'ez translation',
+        'source', 'reference', 'citation', 'where is this from'
+      ]
+      
+      const isComplexQuestion = text.length > 120 || text.split(' ').length > 20 ||
+                               (text.includes('explain') && (text.includes('detail') || text.includes('why') || text.includes('how')))
+      
+      return detailedKeywords.some(keyword => lowerText.includes(keyword)) || isComplexQuestion
+    }
+
     const requiresWebSearch = needsWebSearch(userMessage.text)
+    const requiresDetailedKnowledge = needsDetailedKnowledge(userMessage.text)
     
     if (requiresWebSearch) {
-      // Show web search indicator for current events
+      // Web search path
       setIsSearching(true)
+      try {
+        const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(userMessage.text, currentChatId)
+        setIsSearching(false)
+        
+        const newAiMessage = {
+          id: Date.now() + 1,
+          text: aiResponse,
+          isUser: false,
+          timestamp: new Date(),
+          sessionId: sessionId,
+          sources: sources || [],
+          responseType: 'web_search'
+        }
+        setNewMessageId(newAiMessage.id)
+        const finalMessages = [...messagesWithoutRegenerated, newAiMessage]
+        setMessages(finalMessages)
+        
+        setChatHistory(prevHistory => 
+          prevHistory.map(chat => 
+            chat.id === currentChatId 
+              ? { ...chat, messages: finalMessages }
+              : chat
+          )
+        )
+      } catch (error) {
+        console.error('Error regenerating web search:', error)
+        setIsSearching(false)
+        // Handle error
+      } finally {
+        setIsLoading(false)
+      }
+      return
+    }
+    
+    if (requiresDetailedKnowledge) {
+      // Detailed knowledge path
+      thinkingStartRef.current = Date.now()
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+      }
+      shimmerTimeoutRef.current = setTimeout(() => {
+        setIsThinking(true)
+        setThinkingText('Searching knowledge base')
+      }, 300)
     } else {
-      // Start timing immediately; delay shimmer for visual pacing
+      // Simple question path
       thinkingStartRef.current = Date.now()
       if (shimmerTimeoutRef.current) {
         clearTimeout(shimmerTimeoutRef.current)
@@ -806,9 +1017,16 @@ function App() {
     }
 
     try {
+      // Get new AI response based on routing
+      const apiMethod = requiresDetailedKnowledge ? 
+        () => yaredBotAPI.sendMessage(userMessage.text, currentChatId) :
+        () => yaredBotAPI.sendQuickMessage(userMessage.text, currentChatId)
       
-      // Get new AI response
-      const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(userMessage.text, currentChatId)
+      const result = await apiMethod()
+      const aiResponse = result.response || result.answer
+      const sessionId = result.sessionId
+      const sources = result.sources || []
+      const modelUsed = result.modelUsed || result.model_used
       
       // Hide indicators
       setIsSearching(false)
@@ -844,7 +1062,7 @@ function App() {
       thinkingStartRef.current = null
       setThinkingStartTime(null)
       
-      // Add new AI message with real sources and thinking duration
+      // Add new AI message with appropriate metadata
       const newAiMessage = {
         id: Date.now() + 1,
         text: aiResponse,
@@ -852,6 +1070,9 @@ function App() {
         timestamp: new Date(),
         sessionId: sessionId,
         sources: sources || [],
+        responseType: requiresDetailedKnowledge ? 'detailed' : 'quick',
+        canExpand: requiresDetailedKnowledge ? false : (result.canExpand || result.can_expand || false),
+        modelUsed: modelUsed,
         thinkingDuration: regenComputedDuration
       }
       setNewMessageId(newAiMessage.id) // Mark this as the new message for animation

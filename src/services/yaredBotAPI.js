@@ -64,17 +64,8 @@ class YaredBotAPI {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestData),
-        // Quick timeout for fast responses
-        signal: (() => {
-          try {
-            if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) {
-              return AbortSignal.timeout(10000); // 10 second timeout for quick responses
-            }
-          } catch (e) {
-            console.warn('AbortSignal.timeout not supported for quick responses');
-          }
-          return undefined;
-        })(),
+        // Quick timeout for fast responses - simplified
+        signal: AbortSignal && AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined,
       });
 
       if (!response.ok) {
@@ -121,17 +112,8 @@ class YaredBotAPI {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestData),
-        // Add timeout for mobile networks with fallback for older browsers
-        signal: (() => {
-          try {
-            if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) {
-              return AbortSignal.timeout(60000); // 60 second timeout for modern browsers
-            }
-          } catch (e) {
-            console.warn('AbortSignal.timeout not supported, using fallback');
-          }
-          return undefined; // Fallback for older mobile browsers
-        })()
+        // Add timeout for mobile networks - simplified
+        signal: AbortSignal && AbortSignal.timeout ? AbortSignal.timeout(60000) : undefined
       });
 
       if (!response.ok) {
