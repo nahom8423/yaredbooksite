@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import analytics from '../services/analytics'
+import IngestionInspector from './IngestionInspector'
 
 export default function AnalyticsDashboard({ isVisible, onClose }) {
   const [stats, setStats] = useState(null)
@@ -161,20 +162,20 @@ export default function AnalyticsDashboard({ isVisible, onClose }) {
                     </div>
                   )}
 
-                  {/* Device Breakdown */}
-                  {stats.top_devices && stats.top_devices.length > 0 && (
-                    <div className="bg-[#2A2A2A] rounded-lg p-4">
-                      <h3 className="text-lg font-semibold text-white mb-4">Devices Used</h3>
-                      <div className="space-y-2">
-                        {stats.top_devices.map((device, index) => (
-                          <div key={index} className="flex justify-between items-center">
-                            <span className="text-gray-300">{device.device}</span>
-                            <span className="text-[#D4AF37] font-semibold">{device.count} sessions</span>
-                          </div>
-                        ))}
+              {/* Device Breakdown */}
+              {stats.top_devices && stats.top_devices.length > 0 && (
+                <div className="bg-[#2A2A2A] rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-4">Devices Used</h3>
+                  <div className="space-y-2">
+                    {stats.top_devices.map((device, index) => (
+                      <div key={index} className="flex justify-between items-center">
+                        <span className="text-gray-300">{device.device}</span>
+                        <span className="text-[#D4AF37] font-semibold">{device.count} sessions</span>
                       </div>
-                    </div>
-                  )}
+                    ))}
+                  </div>
+                </div>
+              )}
 
                   {/* Browsers Used */}
                   {stats.top_browsers && stats.top_browsers.length > 0 && (
@@ -190,6 +191,9 @@ export default function AnalyticsDashboard({ isVisible, onClose }) {
                       </div>
                     </div>
                   )}
+
+                  {/* Ingestion Inspector */}
+                  <IngestionInspector />
 
                   {/* Recent Sessions (Who's been on your site) */}
                   {stats.recent_sessions && stats.recent_sessions.length > 0 && (
