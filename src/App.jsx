@@ -854,6 +854,7 @@ function App() {
       <div className="flex-1 flex flex-col">
         <ChatHeader 
           isMobile={isMobile}
+          isWelcome={showWelcome}
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
         />
         

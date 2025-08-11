@@ -1,9 +1,9 @@
 import sidebarIcon from '../assets/icons/sidebar.png'
 import settingsIcon from '../assets/icons/settings.png'
 
-export default function ChatHeader({ isMobile, onMenuToggle }) {
+export default function ChatHeader({ isMobile, isWelcome = false, onMenuToggle }) {
   return (
-    <div className="px-4 py-3 bg-[#171717] flex items-center justify-between md:justify-center">
+    <div className={`px-4 py-3 ${isWelcome ? 'bg-[#171717]/70 backdrop-blur-[2px]' : 'bg-[#171717]'} flex items-center justify-between md:justify-center`}>
       {/* Mobile menu button */}
       {isMobile && (
         <button 
