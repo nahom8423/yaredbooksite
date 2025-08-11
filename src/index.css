@@ -14,3 +14,61 @@
 body {
   background-color: #171717;
 }
+
+/* Welcome background overlays (styles only; no layout changes) */
+:root {
+  --app-bg: #171717;
+  --sidebar-w: 256px;
+}
+
+.welcome-bg,
+.welcome-bg-sidebar {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .22s ease;
+  will-change: opacity;
+  z-index: 0;
+}
+
+.welcome-bg {
+  background-image:
+    linear-gradient(
+      to bottom,
+      rgba(23,23,23,0) 0%,
+      rgba(23,23,23,0) 88%,
+      rgba(23,23,23,0.10) 90%,
+      rgba(23,23,23,0.28) 93%,
+      rgba(23,23,23,0.60) 96%,
+      var(--app-bg) 100%
+    ),
+    url('/saintyared.png');
+  background-size: cover;
+  background-position: 50% 24%;
+  filter: blur(24px) brightness(.66) saturate(1.08);
+}
+
+.welcome-bg-sidebar {
+  width: var(--sidebar-w);
+  background: linear-gradient(to right, rgba(0,0,0,.62) 0%, rgba(0,0,0,.3) 50%, rgba(0,0,0,0) 100%);
+}
+
+@media (max-width: 1024px) {
+  .welcome-bg { background-position: 50% 42%; filter: blur(18px) brightness(.70) saturate(1.06); }
+}
+@media (max-width: 640px) {
+  .welcome-bg { background-position: 50% 48%; filter: blur(16px) brightness(.68) saturate(1.07); }
+}
+
+/* Only show overlays when welcome state is active */
+body.is-welcome .welcome-bg,
+body.is-welcome .welcome-bg-sidebar {
+  opacity: 1;
+}
+
+/* Ensure app renders above background overlays without layout shift */
+.app-container {
+  position: relative;
+  z-index: 1;
+}

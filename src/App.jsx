@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import './App.css'
 import WelcomeOverlays from './components/WelcomeOverlays'
 import Sidebar from './components/Sidebar';
 import ChatInput from './components/ChatInput';
