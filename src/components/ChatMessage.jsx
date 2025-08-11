@@ -6,7 +6,7 @@ import SourceCard from './SourceCard'
 import { debugAPI } from '../utils/apiDebug'
 import { processInlineCitations } from '../utils/citationProcessor'
 
-export default function ChatMessage({ message, isTyping = false, skipAnimation = false, onRegenerate, onSourcesOpen, thinkingRecord = null }) {
+export default function ChatMessage({ message, isTyping = false, skipAnimation = false, onRegenerate, onExpand, onSourcesOpen, thinkingRecord = null }) {
   const [displayText, setDisplayText] = useState('')
   const [isAnimating, setIsAnimating] = useState(false)
   const [showActions, setShowActions] = useState(false)
@@ -481,6 +481,45 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                   )}
                 </button>
 
+                {/* Get Detailed Sources button (for quick responses that can be expanded) */}
+                {onExpand && message?.canExpand && (
+                  <button
+                    onClick={() => onExpand(message)}
+                    style={{
+                      padding: '6px 10px',
+                      backgroundColor: '#1A4ED8',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      fontSize: '11px',
+                      fontWeight: '500',
+                      color: 'white',
+                      opacity: 0,
+                      animation: 'slideInLeft 0.8s ease-out 0.6s forwards',
+                      transition: 'all 0.2s ease'
+                    }}
+                    title="Get detailed answer with sources"
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = '#1e5ce8';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = '#1A4ED8';
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14,2 14,8 20,8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <span>Get Sources</span>
+                  </button>
+                )}
+
                 {/* Regenerate button */}
                 {onRegenerate && (
                   <button
@@ -495,7 +534,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                       alignItems: 'center',
                       justifyContent: 'center',
                       opacity: 0,
-                      animation: 'slideInLeft 0.8s ease-out 0.6s forwards'
+                      animation: 'slideInLeft 0.8s ease-out 0.7s forwards'
                     }}
                     title="Regenerate response"
                   >

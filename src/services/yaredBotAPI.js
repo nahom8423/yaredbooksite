@@ -45,7 +45,60 @@ class YaredBotAPI {
   }
 
   /**
-   * Send a message to Kidus Yared AI
+   * Send a quick message for fast response (2-3s)
+   * @param {string} message - User's message  
+   * @param {string} chatId - Chat ID for conversation context
+   * @returns {Promise<{response: string, responseType: string, canExpand: boolean}>}
+   */
+  async sendQuickMessage(message, chatId = null) {
+    try {
+      const requestData = {
+        message: message.trim()
+      };
+
+      debugAPI('📞 Quick API Request: /chat/quick', `Timestamp: ${new Date().toISOString()}`, `Request data: ${JSON.stringify(requestData)}`, `Session ID: ${chatId || 'None'}`);
+
+      const response = await fetch(`${this.apiUrl}/chat/quick`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+        // Quick timeout for fast responses
+        signal: (() => {
+          try {
+            if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) {
+              return AbortSignal.timeout(10000); // 10 second timeout for quick responses
+            }
+          } catch (e) {
+            console.warn('AbortSignal.timeout not supported for quick responses');
+          }
+          return undefined;
+        })(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Quick response failed: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      return {
+        response: data.answer,
+        responseType: data.response_type || 'quick',
+        canExpand: data.can_expand || false,
+        modelUsed: data.model_used,
+        sources: data.sources || []
+      };
+
+    } catch (error) {
+      console.error('Quick response error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Send a message to Kidus Yared AI (detailed response with RAG)
    * @param {string} message - User's message
    * @param {string} chatId - Chat ID for conversation context
    * @returns {Promise<{response: string, sessionId: string}>} - AI response and session ID
@@ -72,7 +125,7 @@ class YaredBotAPI {
         signal: (() => {
           try {
             if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) {
-              return AbortSignal.timeout(30000); // 30 second timeout for modern browsers
+              return AbortSignal.timeout(60000); // 60 second timeout for modern browsers
             }
           } catch (e) {
             console.warn('AbortSignal.timeout not supported, using fallback');

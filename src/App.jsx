@@ -322,7 +322,7 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeydown)
   }, [])
 
-  // Handle sending messages to Yared Bot
+  // Handle sending messages to Yared Bot with two-tier response system
   const handleSendMessage = async (messageText) => {
     if (!messageText.trim() || isLoading) return
 
@@ -379,137 +379,167 @@ function App() {
     const requiresWebSearch = needsWebSearch(messageText)
     
     if (requiresWebSearch) {
-      // Show web search indicator for current events
+      // Show web search indicator for current events - use original full pipeline
       setIsSearching(true)
-    } else {
-      // Start timing immediately; delay shimmer for visual pacing
-      thinkingStartRef.current = Date.now()
-      if (shimmerTimeoutRef.current) {
-        clearTimeout(shimmerTimeoutRef.current)
+      
+      try {
+        // Get AI response with session tracking (full pipeline for web search)
+        const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(messageText, chatId)
+        
+        // Hide indicators
+        setIsSearching(false)
+        
+        // Add AI message with session ID tracking and sources
+        const aiMessage = {
+          id: Date.now() + 1,
+          text: aiResponse,
+          isUser: false,
+          timestamp: new Date(),
+          sessionId: sessionId,
+          sources: sources || [],
+          responseType: 'web_search'
+        }
+        setNewMessageId(aiMessage.id)
+        const finalMessages = [...updatedMessages, aiMessage]
+        setMessages(finalMessages)
+        
+        // Update chat history
+        setChatHistory(prevHistory => 
+          prevHistory.map(chat => 
+            chat.id === chatId 
+              ? { ...chat, messages: finalMessages }
+              : chat
+          )
+        )
+        
+      } catch (error) {
+        console.error('Error with web search:', error)
+        setIsSearching(false)
+        // Handle error (existing error handling code)
+        const errorMessage = {
+          id: Date.now() + 1,
+          text: 'Sorry, I encountered an error with the web search. Please try again.',
+          isUser: false,
+          timestamp: new Date(),
+          isError: true
+        }
+        setMessages([...updatedMessages, errorMessage])
+      } finally {
+        setIsLoading(false)
       }
-      shimmerTimeoutRef.current = setTimeout(() => {
-        setIsThinking(true)
-        setThinkingText('Thinking')
-      }, 300)
+      return // Exit early for web search
     }
+    
+    // For theological questions: Use two-tier response system
+    // Start timing for thinking indicator
+    thinkingStartRef.current = Date.now()
+    if (shimmerTimeoutRef.current) {
+      clearTimeout(shimmerTimeoutRef.current)
+    }
+    shimmerTimeoutRef.current = setTimeout(() => {
+      setIsThinking(true)
+      setThinkingText('Thinking')
+    }, 300)
 
     try {
-      // Log current session status for debugging
-      console.log('Sending message:', {
-        chatId,
-        message: messageText,
-        existingSessionId: yaredBotAPI.getSessionId(chatId),
-        requiresWebSearch
-      });
+      // TIER 1: Quick response (2-3 seconds)
+      const quickStartTime = Date.now()
+      const { response: quickResponse, responseType, canExpand, modelUsed } = await yaredBotAPI.sendQuickMessage(messageText, chatId)
       
-      // Get AI response with session tracking
-      const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(messageText, chatId)
+      // Calculate quick response duration
+      const quickDuration = Date.now() - quickStartTime
+      const quickDurationFormatted = `${(quickDuration / 1000).toFixed(1)}s`
       
-      // Hide indicators
-      setIsSearching(false)
-      
-      // Debug: Log sources data
-      console.log('Received sources from API:', sources);
-      console.log('Sources type:', typeof sources, 'Length:', sources?.length);
-      
-      // Track successful AI response
-      analytics.trackEngagement('ai_response_received', { 
-        response_length: aiResponse.length,
-        response_type: requiresWebSearch ? 'ai_response_with_web_search' : 'ai_response_with_knowledge'
-      })
-      
-      // Compute and store thinking duration if applicable (independent of isThinking)
-      let computedDuration = null
-      if (!requiresWebSearch && thinkingStartRef.current != null) {
-        const endTime = Date.now()
-        const durationMs = endTime - thinkingStartRef.current
-        const seconds = Math.max(0, durationMs / 1000)
-        const formatted = `${Math.round(seconds)} seconds`
-        computedDuration = formatted
-        const thinkingRecord = {
-          id: Date.now() - 1, // Best-effort association before AI message
-          text: thinkingText || 'thinking',
-          timestamp: new Date(),
-          duration: formatted
-        }
-        setThinkingHistory(prev => [...prev, thinkingRecord])
-        setThinkingDuration(formatted)
-      }
-      
-      // Clear shimmer delay if pending; ensure shimmer doesn't flip on late
+      // Clear thinking indicators
       if (shimmerTimeoutRef.current) {
         clearTimeout(shimmerTimeoutRef.current)
         shimmerTimeoutRef.current = null
       }
       setIsThinking(false)
       setThinkingText('')
-      thinkingStartRef.current = null
-      setThinkingStartTime(null)
       
-      // Add AI message with session ID tracking, sources, and thinking duration
-      const aiMessage = {
+      // Add quick AI message with expand option
+      const quickAiMessage = {
         id: Date.now() + 1,
-        text: aiResponse,
+        text: quickResponse,
         isUser: false,
         timestamp: new Date(),
-        sessionId: sessionId, // Store session ID with message for debugging
-        sources: sources || [],
-        thinkingDuration: computedDuration
+        responseType: 'quick',
+        canExpand: canExpand,
+        modelUsed: modelUsed,
+        thinkingDuration: quickDurationFormatted,
+        sources: [] // Quick responses don't have sources yet
       }
-      setNewMessageId(aiMessage.id) // Mark this as the new message for animation
-      const finalMessages = [...updatedMessages, aiMessage]
-      setMessages(finalMessages)
       
-      // Trigger sidebar animation when AI responds
+      setNewMessageId(quickAiMessage.id)
+      const messagesWithQuick = [...updatedMessages, quickAiMessage]
+      setMessages(messagesWithQuick)
+      
+      // Update chat history with quick response
+      setChatHistory(prevHistory => 
+        prevHistory.map(chat => 
+          chat.id === chatId 
+            ? { ...chat, messages: messagesWithQuick }
+            : chat
+        )
+      )
+      
+      // Track successful quick response
+      analytics.trackEngagement('quick_response_received', { 
+        response_length: quickResponse.length,
+        duration_ms: quickDuration,
+        model_used: modelUsed
+      })
+      
+      // Trigger sidebar animation
       if (!newChatCreated) {
         setNewChatCreated(chatId)
         setTimeout(() => setNewChatCreated(null), 3000)
       }
       
-      // Update chat history with AI response
-      setChatHistory(prevHistory => 
-        prevHistory.map(chat => 
-          chat.id === chatId 
-            ? { ...chat, messages: finalMessages }
-            : chat
-        )
-      )
     } catch (error) {
-      console.error('Error sending message:', error)
+      console.error('Error with quick response:', error)
       setIsSearching(false)
       setIsThinking(false)
       setThinkingText('')
       
-      // Determine error message based on error type
-      let errorText = 'Sorry, I encountered an error. Please try again.'
-      if (error.name === 'TimeoutError' || error.message.includes('timeout')) {
-        errorText = 'Request timed out. Please check your connection and try again.'
-      } else if (error.message.includes('fetch') || error.message.includes('network')) {
-        errorText = 'Unable to connect to the server. Please check your internet connection.'
-      }
-      
-      // Add error message
-      const errorMessage = {
-        id: Date.now() + 1,
-        text: errorText,
-        isUser: false,
-        timestamp: new Date(),
-        isError: true
-      }
-      const errorMessages = [...updatedMessages, errorMessage]
-      setMessages(errorMessages)
-      
-      // Update chat history with error message
-      setChatHistory(prevHistory => 
-        prevHistory.map(chat => 
-          chat.id === chatId 
-            ? { ...chat, messages: errorMessages }
-            : chat
+      // Fallback to detailed response if quick fails
+      try {
+        const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(messageText, chatId)
+        
+        const aiMessage = {
+          id: Date.now() + 1,
+          text: aiResponse,
+          isUser: false,
+          timestamp: new Date(),
+          sessionId: sessionId,
+          sources: sources || [],
+          responseType: 'detailed_fallback'
+        }
+        setNewMessageId(aiMessage.id)
+        const finalMessages = [...updatedMessages, aiMessage]
+        setMessages(finalMessages)
+        
+        setChatHistory(prevHistory => 
+          prevHistory.map(chat => 
+            chat.id === chatId 
+              ? { ...chat, messages: finalMessages }
+              : chat
+          )
         )
-      )
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError)
+        const errorMessage = {
+          id: Date.now() + 1,
+          text: 'Sorry, I encountered an error. Please try again.',
+          isUser: false,
+          timestamp: new Date(),
+          isError: true
+        }
+        setMessages([...updatedMessages, errorMessage])
+      }
     } finally {
       setIsLoading(false)
-      // Clear shimmer timeout and reset thinking state
       if (shimmerTimeoutRef.current) {
         clearTimeout(shimmerTimeoutRef.current)
         shimmerTimeoutRef.current = null
@@ -615,6 +645,110 @@ function App() {
     handleSendMessage(suggestion)
   }
 
+
+  // Handle expanding quick response to detailed response with sources
+  const handleExpandResponse = async (messageToExpand) => {
+    if (!currentChatId || isLoading) return
+
+    // Find the message index and get the user message that preceded this AI response
+    const messageIndex = messages.findIndex(msg => msg.id === messageToExpand.id)
+    if (messageIndex <= 0) return
+
+    const userMessage = messages[messageIndex - 1]
+    if (!userMessage.isUser) return
+
+    setIsLoading(true)
+    
+    // Show thinking indicator for detailed response
+    thinkingStartRef.current = Date.now()
+    if (shimmerTimeoutRef.current) {
+      clearTimeout(shimmerTimeoutRef.current)
+    }
+    shimmerTimeoutRef.current = setTimeout(() => {
+      setIsThinking(true)
+      setThinkingText('Searching knowledge base')
+    }, 300)
+
+    try {
+      // Get detailed response with RAG pipeline
+      const detailedStartTime = Date.now()
+      const { response: detailedResponse, sessionId, sources } = await yaredBotAPI.sendMessage(userMessage.text, currentChatId)
+      
+      // Calculate detailed response duration
+      const detailedDuration = Date.now() - detailedStartTime
+      const detailedDurationFormatted = `${(detailedDuration / 1000).toFixed(1)}s`
+      
+      // Clear thinking indicators
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+        shimmerTimeoutRef.current = null
+      }
+      setIsThinking(false)
+      setThinkingText('')
+      
+      // Update the existing message to detailed version
+      const updatedMessage = {
+        ...messageToExpand,
+        text: detailedResponse,
+        responseType: 'detailed',
+        canExpand: false,
+        sources: sources || [],
+        sessionId: sessionId,
+        thinkingDuration: detailedDurationFormatted
+      }
+      
+      // Update messages array
+      const updatedMessages = messages.map(msg => 
+        msg.id === messageToExpand.id ? updatedMessage : msg
+      )
+      setMessages(updatedMessages)
+      
+      // Update chat history
+      setChatHistory(prevHistory => 
+        prevHistory.map(chat => 
+          chat.id === currentChatId 
+            ? { ...chat, messages: updatedMessages }
+            : chat
+        )
+      )
+      
+      // Track successful detailed response
+      analytics.trackEngagement('detailed_response_received', { 
+        response_length: detailedResponse.length,
+        duration_ms: detailedDuration,
+        sources_count: sources?.length || 0
+      })
+      
+    } catch (error) {
+      console.error('Error expanding response:', error)
+      setIsThinking(false)
+      setThinkingText('')
+      
+      // Show error in place of expansion
+      const errorMessage = {
+        ...messageToExpand,
+        text: messageToExpand.text + '\n\n❌ Failed to load detailed sources. Please try regenerating this message.',
+        canExpand: true // Allow retry
+      }
+      
+      const updatedMessages = messages.map(msg => 
+        msg.id === messageToExpand.id ? errorMessage : msg
+      )
+      setMessages(updatedMessages)
+      
+    } finally {
+      setIsLoading(false)
+      if (shimmerTimeoutRef.current) {
+        clearTimeout(shimmerTimeoutRef.current)
+        shimmerTimeoutRef.current = null
+      }
+      setIsThinking(false)
+      setThinkingText('')
+      thinkingStartRef.current = null
+      setThinkingStartTime(null)
+      setThinkingDuration(null)
+    }
+  }
 
   // Handle message regeneration
   const handleRegenerateMessage = async (messageToRegenerate) => {
@@ -951,6 +1085,7 @@ function App() {
                           avatar={saintYaredImage}
                           skipAnimation={message.id !== newMessageId}
                           onRegenerate={!message.isUser ? handleRegenerateMessage : undefined}
+                          onExpand={!message.isUser && message.canExpand ? handleExpandResponse : undefined}
                         />
                       </div>
                     )
