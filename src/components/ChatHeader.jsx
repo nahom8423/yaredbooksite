@@ -1,5 +1,6 @@
 import sidebarIcon from '../assets/icons/sidebar.png'
 import settingsIcon from '../assets/icons/settings.png'
+import saintYaredImage from '../assets/images/saintyared.png'
 
 export default function ChatHeader({ isMobile, isWelcome = false, onMenuToggle }) {
   return (
@@ -16,7 +17,12 @@ export default function ChatHeader({ isMobile, isWelcome = false, onMenuToggle }
       
       {/* Title - only show on mobile */}
       {isMobile && (
-        <h1 className="text-white font-medium text-lg">Kidus Yared</h1>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full overflow-hidden">
+            <img src={saintYaredImage} alt="Kidus Yared" className="w-full h-full object-cover" />
+          </div>
+          <h1 className="text-white font-medium text-lg">Kidus Yared</h1>
+        </div>
       )}
       
 

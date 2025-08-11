@@ -411,7 +411,7 @@ function App() {
         const endTime = Date.now()
         const durationMs = endTime - thinkingStartRef.current
         const seconds = Math.max(0, durationMs / 1000)
-        const formatted = `${seconds.toFixed(1)} seconds`
+        const formatted = `${Math.round(seconds)} seconds`
         computedDuration = formatted
         const thinkingRecord = {
           id: Date.now() - 1, // Best-effort association before AI message
@@ -913,17 +913,19 @@ function App() {
                         {/* Static thinking label above this AI message, aligned to bubble's x-axis with avatar */}
                         {thinkingRecord && (
                           <div style={{ position: 'relative', marginBottom: '6px' }}>
-                            <div style={{
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '50%',
-                              overflow: 'hidden',
-                              position: 'absolute',
-                              left: '-44px',
-                              top: '0px'
-                            }}>
-                              <img src={saintYaredImage} alt="Kidus Yared" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            </div>
+                            {!isMobile && (
+                              <div style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                overflow: 'hidden',
+                                position: 'absolute',
+                                left: '-44px',
+                                top: '0px'
+                              }}>
+                                <img src={saintYaredImage} alt="Kidus Yared" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              </div>
+                            )}
                             <ThinkingIndicator 
                               text={thinkingRecord.text}
                               isStatic={true}
@@ -946,17 +948,19 @@ function App() {
                   {/* Active thinking row with avatar, aligned with message column */}
                   {isThinking && !isSearching && (
                     <div style={{ position: 'relative', marginTop: '8px' }}>
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        overflow: 'hidden',
-                        position: 'absolute',
-                        left: '-44px',
-                        top: '0px'
-                      }}>
-                        <img src={saintYaredImage} alt="Kidus Yared" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      </div>
+                      {!isMobile && (
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '50%',
+                          overflow: 'hidden',
+                          position: 'absolute',
+                          left: '-44px',
+                          top: '0px'
+                        }}>
+                          <img src={saintYaredImage} alt="Kidus Yared" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </div>
+                      )}
                       <ThinkingIndicator text={thinkingText} />
                     </div>
                   )}
