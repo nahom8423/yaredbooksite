@@ -878,13 +878,13 @@ function App() {
                     <h1 className="text-2xl font-semibold mb-3 text-white">
                       How can I help you today?
                     </h1>
-                    <div className="text-base mb-8 text-gray-400">
+                    <div className={`text-base mb-8 ${isMobile ? 'text-gray-400' : 'text-gray-300'}`}>
                       Ask me about Ethiopian Orthodox tradition, liturgy, history, and theology
                     </div>
                     
                     {/* Suggestions - Pills */}
                     <div className="flex flex-wrap justify-center gap-3 max-w-2xl mx-auto">
-                      {yaredBotAPI.getSuggestedQuestions().map((suggestion, index) => (
+                      {(isMobile ? yaredBotAPI.getSuggestedQuestions().slice(0, 4) : yaredBotAPI.getSuggestedQuestions()).map((suggestion, index) => (
                         <button
                           key={index}
                           onClick={() => handleSuggestionClick(suggestion)}
