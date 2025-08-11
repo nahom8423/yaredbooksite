@@ -381,7 +381,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
               </div>
             )}
             
-            {/* Model badge and action buttons - only show for completed AI messages */}
+            {/* Badges + actions - only show for completed AI messages */}
             {!isAnimating && buttonsVisible && (
               <div style={{
                 display: 'flex',
@@ -389,6 +389,19 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                 gap: '8px',
                 marginTop: '12px'
               }}>
+                {/* Response type badge */}
+                {message?.responseType && (
+                  <span style={{
+                    backgroundColor: message.responseType === 'quick' ? '#e0f7ff' : '#f2ecff',
+                    color: message.responseType === 'quick' ? '#034' : '#402080',
+                    fontSize: '11px',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    marginRight: '4px'
+                  }}>
+                    {message.responseType === 'quick' ? 'Fast' : 'Detailed'}
+                  </span>
+                )}
                 {/* Model badge */}
                 {message?.model && (
                   <div style={{
@@ -482,7 +495,7 @@ export default function ChatMessage({ message, isTyping = false, skipAnimation =
                 </button>
 
                 {/* Get Detailed Sources button (for quick responses that can be expanded) */}
-                {onExpand && message?.canExpand && (
+                {onExpand && message?.responseType === 'quick' && message?.canExpand && (
                   <button
                     onClick={() => onExpand(message)}
                     style={{

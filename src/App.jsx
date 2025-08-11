@@ -12,6 +12,7 @@ import DebugAuth from './components/DebugAuth';
 import saintYaredImage from './assets/images/saintyared.png';
 import { yaredBotAPI } from './services/yaredBotAPI';
 import analytics from './services/analytics';
+import { needsDetailedKnowledge } from './utils/routing';
 
 // Dynamic test components loader (only in development)
 function DevTestComponents() {
@@ -376,51 +377,6 @@ function App() {
       return webSearchKeywords.some(keyword => lowerText.includes(keyword))
     }
 
-    const needsDetailedKnowledge = (text) => {
-      const lowerText = text.toLowerCase()
-      
-      // Simple questions that should get quick responses
-      const simplePatterns = [
-        /^what is (eotc|ethiopian orthodox|orthodox)/,
-        /^who is (saint|kidus|abune)/,
-        /^what are the.{1,20}(fast|feast|holiday)/,
-        /^when is (easter|christmas|timkat)/,
-        /^how many.{1,10}(book|gospel|apostle)/,
-        /^what does.{1,10}(mean|represent)/
-      ]
-      
-      // Check if it's a simple question
-      if (simplePatterns.some(pattern => pattern.test(lowerText))) {
-        return false // Use quick response
-      }
-      
-      // Complex keywords requiring detailed knowledge
-      const detailedKeywords = [
-        // Explicit requests for detailed info
-        'explain in detail', 'detailed explanation', 'comprehensive', 'according to',
-        'church teaching', 'official position', 'theological analysis',
-        // Complex theological concepts
-        'liturgical significance', 'doctrinal', 'dogmatic', 'exegesis', 'hermeneutics',
-        'patristic', 'church fathers', 'ecumenical council', 'christological',
-        // Specific practices requiring detailed explanation  
-        'fasting rules', 'communion preparation', 'ordination ceremony',
-        'marriage blessing', 'baptismal', 'consecration',
-        // Complex historical/cultural topics requiring sources
-        'church history', 'monastic tradition', 'hagiography', 
-        // Specific prayers/texts requiring citations
-        'prayer text', 'hymn text', 'liturgical text', 'ge\'ez translation',
-        // Questions explicitly asking for sources
-        'source', 'reference', 'citation', 'where is this from'
-      ]
-      
-      // Also check for question complexity
-      const isComplexQuestion = text.length > 120 || 
-                               text.split(' ').length > 20 ||
-                               (text.includes('explain') && (text.includes('detail') || text.includes('why') || text.includes('how')))
-      
-      return detailedKeywords.some(keyword => lowerText.includes(keyword)) || isComplexQuestion
-    }
-
     const requiresWebSearch = needsWebSearch(messageText)
     const requiresDetailedKnowledge = needsDetailedKnowledge(messageText)
     
@@ -589,17 +545,38 @@ function App() {
       setIsThinking(false)
       setThinkingText('')
       
-      // Add quick AI message with expand option
-      const quickAiMessage = {
-        id: Date.now() + 1,
-        text: quickResponse,
-        isUser: false,
-        timestamp: new Date(),
-        responseType: 'quick',
-        canExpand: canExpand,
-        modelUsed: modelUsed,
-        thinkingDuration: quickDurationFormatted,
-        sources: [] // Quick responses don't have sources yet
+      // If quick response is missing or flagged as detailed, fallback to detailed immediately
+      let quickAiMessage
+      if (!quickResponse || String(quickResponse).trim().length === 0 || responseType === 'detailed') {
+        const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(messageText, chatId)
+        quickAiMessage = {
+          id: Date.now() + 1,
+          text: aiResponse,
+          isUser: false,
+          timestamp: new Date(),
+          sessionId: sessionId,
+          sources: sources || [],
+          responseType: 'detailed',
+          canExpand: false,
+          thinkingDuration: quickDurationFormatted,
+          routedVia: 'frontend_quick_fallback',
+          originalQuestion: messageText
+        }
+      } else {
+        // Add quick AI message with expand option
+        quickAiMessage = {
+          id: Date.now() + 1,
+          text: quickResponse,
+          isUser: false,
+          timestamp: new Date(),
+          responseType: 'quick',
+          canExpand: canExpand,
+          modelUsed: modelUsed,
+          thinkingDuration: quickDurationFormatted,
+          sources: [], // Quick responses don't have sources yet
+          routedVia: 'frontend_quick',
+          originalQuestion: messageText
+        }
       }
       
       setNewMessageId(quickAiMessage.id)
@@ -615,11 +592,11 @@ function App() {
         )
       )
       
-      // Track successful quick response
-      analytics.trackEngagement('quick_response_received', { 
-        response_length: quickResponse.length,
-        duration_ms: quickDuration,
-        model_used: modelUsed
+      // Track response with routing path
+      analytics.trackEngagement('ai_response_received', { 
+        response_length: (quickAiMessage?.text || '').length,
+        response_type: quickAiMessage.responseType,
+        routed_via: quickAiMessage.routedVia || 'frontend_quick'
       })
       
       // Trigger sidebar animation
@@ -919,41 +896,6 @@ function App() {
       return webSearchKeywords.some(keyword => lowerText.includes(keyword))
     }
 
-    const needsDetailedKnowledge = (text) => {
-      const lowerText = text.toLowerCase()
-      
-      // Simple questions that should get quick responses
-      const simplePatterns = [
-        /^what is (eotc|ethiopian orthodox|orthodox)/,
-        /^who is (saint|kidus|abune)/,
-        /^what are the.{1,20}(fast|feast|holiday)/,
-        /^when is (easter|christmas|timkat)/,
-        /^how many.{1,10}(book|gospel|apostle)/,
-        /^what does.{1,10}(mean|represent)/
-      ]
-      
-      if (simplePatterns.some(pattern => pattern.test(lowerText))) {
-        return false
-      }
-      
-      const detailedKeywords = [
-        'explain in detail', 'detailed explanation', 'comprehensive', 'according to',
-        'church teaching', 'official position', 'theological analysis',
-        'liturgical significance', 'doctrinal', 'dogmatic', 'exegesis', 'hermeneutics',
-        'patristic', 'church fathers', 'ecumenical council', 'christological',
-        'fasting rules', 'communion preparation', 'ordination ceremony',
-        'marriage blessing', 'baptismal', 'consecration',
-        'church history', 'monastic tradition', 'hagiography',
-        'prayer text', 'hymn text', 'liturgical text', 'ge\'ez translation',
-        'source', 'reference', 'citation', 'where is this from'
-      ]
-      
-      const isComplexQuestion = text.length > 120 || text.split(' ').length > 20 ||
-                               (text.includes('explain') && (text.includes('detail') || text.includes('why') || text.includes('how')))
-      
-      return detailedKeywords.some(keyword => lowerText.includes(keyword)) || isComplexQuestion
-    }
-
     const requiresWebSearch = needsWebSearch(userMessage.text)
     const requiresDetailedKnowledge = needsDetailedKnowledge(userMessage.text)
     
@@ -1133,6 +1075,45 @@ function App() {
     }
   }
 
+  // Expand a quick answer into a detailed one with sources
+  const expandDetailed = async (quickMsg) => {
+    const question = quickMsg?.originalQuestion
+      || messages[messages.findIndex(m => m.id === quickMsg.id) - 1]?.text
+      || ''
+    if (!question) return
+
+    const placeholderId = Date.now() + 1000
+    const loadingMsg = {
+      id: placeholderId,
+      text: '(Fetching detailed answer...)',
+      isUser: false,
+      timestamp: new Date(),
+      responseType: 'loading'
+    }
+    setMessages(prev => [...prev, loadingMsg])
+
+    try {
+      const { response: aiResponse, sessionId, sources } = await yaredBotAPI.sendMessage(question, currentChatId)
+      setMessages(prev => prev.map(m => 
+        m.id === placeholderId
+          ? {
+              ...m,
+              text: aiResponse,
+              sources: sources || [],
+              responseType: 'detailed',
+              sessionId
+            }
+          : m
+      ))
+    } catch (e) {
+      setMessages(prev => prev.map(m => 
+        m.id === placeholderId
+          ? { ...m, text: 'Failed to load detailed answer.' }
+          : m
+      ))
+    }
+  }
+
 
   // Handle scroll events
   const handleScroll = (e) => {
@@ -1301,13 +1282,13 @@ function App() {
                             />
                           </div>
                         )}
-                        <ChatMessage
-                          message={message}
-                          avatar={saintYaredImage}
-                          skipAnimation={message.id !== newMessageId}
-                          onRegenerate={!message.isUser ? handleRegenerateMessage : undefined}
-                          onExpand={!message.isUser && message.canExpand ? handleExpandResponse : undefined}
-                        />
+        <ChatMessage
+          message={message}
+          avatar={saintYaredImage}
+          skipAnimation={message.id !== newMessageId}
+          onRegenerate={!message.isUser ? handleRegenerateMessage : undefined}
+          onExpand={!message.isUser ? handleExpandResponse : undefined}
+        />
                       </div>
                     )
                   })}
