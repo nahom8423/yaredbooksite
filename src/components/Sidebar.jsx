@@ -5,7 +5,7 @@ import ellipsisIcon from '../assets/icons/ellipsis.png'
 import saintYaredImage from '../assets/images/saintyared.png'
 import analytics from '../services/analytics'
 
-export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onChatSelect, currentChatId, onChatDelete, onChatRename, newChatCreated, onAnalyticsOpen }) {
+export default function Sidebar({ isMobile, isWelcome = false, onClose, onNewChat, chatHistory, onChatSelect, currentChatId, onChatDelete, onChatRename, newChatCreated, onAnalyticsOpen }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [openDropdown, setOpenDropdown] = useState(null)
   const [isRenaming, setIsRenaming] = useState(null)
@@ -143,7 +143,7 @@ export default function Sidebar({ isMobile, onClose, onNewChat, chatHistory, onC
   }
 
   return (
-    <div className={`${isMobile ? 'w-full' : 'w-64'} bg-[#0f0f0f] text-white h-screen flex flex-col transition-all duration-300 ease-in-out`}>
+    <div className={`${isMobile ? 'w-full' : 'w-64'} ${isWelcome ? 'bg-[#0f0f0f]/60 backdrop-blur-[2px]' : 'bg-[#0f0f0f]'} text-white h-screen flex flex-col transition-all duration-300 ease-in-out`}>
       {/* Top header with icons - Fixed at top */}
       <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
         {/* Sidebar Toggle Icon - Left side */}

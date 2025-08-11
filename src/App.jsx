@@ -790,7 +790,9 @@ function App() {
       scrollRef.scrollTop = scrollRef.scrollHeight
     }
   }, [messages, isLoading])
-  const showWelcome = (messages?.length || 0) === 0
+  // Show welcome background until the first AI message appears in the current chat
+  const hasAIMessage = Array.isArray(messages) && messages.some(m => !m.isUser && !m.isError)
+  const showWelcome = !hasAIMessage
   console.log('🎭 WELCOME DEBUG:', {
     showWelcome,
     messagesLength: messages?.length || 0,
@@ -832,18 +834,19 @@ function App() {
               }` 
             : 'relative'
         }`}>
-          <Sidebar 
-            isMobile={isMobile}
-            onClose={() => setMobileMenuOpen(false)}
-            onNewChat={handleNewChat}
-            chatHistory={chatHistory}
-            onChatSelect={handleChatSelect}
-            currentChatId={currentChatId}
-            onChatDelete={handleChatDelete}
-            onChatRename={handleChatRename}
-            newChatCreated={newChatCreated}
-            onAnalyticsOpen={() => setShowAnalytics(true)}
-          />
+      <Sidebar 
+          isMobile={isMobile}
+          isWelcome={showWelcome}
+          onClose={() => setMobileMenuOpen(false)}
+          onNewChat={handleNewChat}
+          chatHistory={chatHistory}
+          onChatSelect={handleChatSelect}
+          currentChatId={currentChatId}
+          onChatDelete={handleChatDelete}
+          onChatRename={handleChatRename}
+          newChatCreated={newChatCreated}
+          onAnalyticsOpen={() => setShowAnalytics(true)}
+        />
         </div>
       )}
       
@@ -851,6 +854,7 @@ function App() {
       <div className="flex-1 flex flex-col">
         <ChatHeader 
           isMobile={isMobile}
+          isWelcome={showWelcome}
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
         />
         
