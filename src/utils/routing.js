@@ -5,7 +5,10 @@ export function needsDetailedKnowledge(message) {
   const triggerKeywords = [
     'source', 'sources', 'detailed', 'in detail', 'compare', 'comparison',
     'list', 'differences', 'difference between', 'versus', 'vs', 'timeline',
-    'chronology', 'history of', 'summarize with sources'
+    'chronology', 'history of', 'summarize with sources',
+    // Domain-specific: fasting questions need canonical list + citations
+    'required fasts', 'obligatory fasts', 'canonical fasts', 'fasts of the church', 'fasting periods', 'fasting rules', 'fasts of eotc',
+    'abiy tsom', 'hudadi', 'nineveh', 'filseta', 'apostles fast', 'nativity fast', 'advent fast', 'wednesdays and fridays'
   ];
   if (triggerKeywords.some(k => m.includes(k))) return true;
 
@@ -21,4 +24,3 @@ export function needsDetailedKnowledge(message) {
 
   return true; // conservative default
 }
-
