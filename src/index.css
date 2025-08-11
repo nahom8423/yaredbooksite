@@ -72,3 +72,22 @@ body.is-welcome .welcome-bg-sidebar {
   position: relative;
   z-index: 1;
 }
+
+/* Welcome: soften chat bar area and input surface */
+body.is-welcome .input-bar {
+  /* Soften with translucent gradient and subtle blur */
+  background: linear-gradient(
+    to top,
+    rgba(23, 23, 23, 0.92) 0%,
+    rgba(23, 23, 23, 0.72) 55%,
+    rgba(23, 23, 23, 0.00) 100%
+  ) !important;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+body.is-welcome .chat-input-surface {
+  background-color: rgba(45, 45, 45, 0.62) !important;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}

@@ -36,7 +36,7 @@ export default function ChatInput({ onSendMessage, isLoading }) {
   }
 
   return (
-    <div className="w-full bg-[#2d2d2d] rounded-3xl min-h-[44px] px-2 py-1 flex items-end gap-2 focus-within:bg-[#272727] transition-colors">
+    <div className="chat-input-surface w-full bg-[#2d2d2d] rounded-3xl min-h-[44px] px-2 py-1 flex items-end gap-2 focus-within:bg-[#272727] transition-colors">
       <button 
         className="w-8 h-8 rounded-full flex items-center justify-center hover:opacity-80 relative group flex-shrink-0 mb-1"
         title="Attach file"
