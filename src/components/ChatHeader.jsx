@@ -4,7 +4,7 @@ import saintYaredImage from '../assets/images/saintyared.png'
 
 export default function ChatHeader({ isMobile, isWelcome = false, onMenuToggle }) {
   return (
-    <div className={`px-4 py-3 ${isWelcome ? 'bg-transparent' : 'bg-[#171717]'} flex items-center justify-between md:justify-center`}>
+    <div className={`sticky top-0 z-30 px-4 py-3 ${isWelcome ? 'bg-transparent' : 'bg-[#171717]'} flex items-center justify-between md:justify-center`}>
       {/* Mobile menu button */}
       {isMobile && (
         <button 
