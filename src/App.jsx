@@ -1232,17 +1232,34 @@ function App() {
                     </div>
                     
                     {/* Suggestions - Pills */}
-                    <div className="flex flex-wrap justify-center gap-3 max-w-2xl mx-auto">
-                      {(isMobile ? yaredBotAPI.getSuggestedQuestions().slice(0, mobilePillCount) : yaredBotAPI.getSuggestedQuestions()).map((suggestion, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleSuggestionClick(suggestion)}
-                          className="px-4 py-2 text-sm rounded-full border border-[#2A2A2A] bg-[#1F1F1F] hover:bg-[#2A2A2A] hover:border-gray-500 cursor-pointer transition-all text-gray-300 hover:text-white"
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
-                    </div>
+                    {isMobile ? (
+                      <div className="flex flex-wrap justify-center gap-3 max-w-2xl mx-auto">
+                        {yaredBotAPI.getSuggestedQuestions().slice(0, mobilePillCount).map((suggestion, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            className="px-4 py-2 text-sm rounded-full border border-white/10 bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:border-white/20 cursor-pointer transition-all text-white/90 hover:text-white"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
+                        {yaredBotAPI.getSuggestedQuestions().slice(0, 4).map((suggestion, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            className="group flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.06] hover:bg-white/[0.12] transition-all px-4 py-3 text-left shadow-[0_1px_0_0_rgba(255,255,255,0.05)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.35)]"
+                          >
+                            <span className="mt-1.5 inline-block w-2 h-2 rounded-full bg-[#D4AF37] shadow-[0_0_0_2px_rgba(212,175,55,0.15)]"></span>
+                            <span className="text-sm md:text-[15px] leading-snug text-gray-200 group-hover:text-white">
+                              {suggestion}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
