@@ -167,7 +167,9 @@ function App() {
           // Only apply when a text input is focused and height reduction is significant
           const active = document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
           const apply = active && keyboardHeight > 80
-          const offset = apply ? keyboardHeight : 0 // positive px; CSS translates by -1x
+          // Clamp to at most 60% of viewport to avoid overshoot
+          const maxOffset = Math.round(window.innerHeight * 0.6)
+          const offset = apply ? Math.min(keyboardHeight, maxOffset) : 0 // positive px; CSS translates by -1x
           document.documentElement.style.setProperty('--kb-offset', offset + 'px')
         }
       }, 10) // Small debounce to prevent rapid jumping
@@ -191,22 +193,15 @@ function App() {
     }
   }, [])
 
-  // Lock root height to visual viewport to avoid Safari toolbar jumps
+  // Lock root height to a stable value to avoid Safari toolbar jumps
   useEffect(() => {
     const setAppHeight = () => {
-      const vv = window.visualViewport
-      const h = vv ? vv.height : window.innerHeight
+      const h = window.innerHeight // keep stable on keyboard open
       document.documentElement.style.setProperty('--app-height', `${Math.round(h)}px`)
     }
     setAppHeight()
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', setAppHeight)
-    }
     window.addEventListener('resize', setAppHeight)
     return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', setAppHeight)
-      }
       window.removeEventListener('resize', setAppHeight)
     }
   }, [])
