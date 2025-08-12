@@ -191,6 +191,26 @@ function App() {
     }
   }, [])
 
+  // Lock root height to visual viewport to avoid Safari toolbar jumps
+  useEffect(() => {
+    const setAppHeight = () => {
+      const vv = window.visualViewport
+      const h = vv ? vv.height : window.innerHeight
+      document.documentElement.style.setProperty('--app-height', `${Math.round(h)}px`)
+    }
+    setAppHeight()
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', setAppHeight)
+    }
+    window.addEventListener('resize', setAppHeight)
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', setAppHeight)
+      }
+      window.removeEventListener('resize', setAppHeight)
+    }
+  }, [])
+
   // Handle sidebar offset for input bar positioning (desktop only)
   useEffect(() => {
     let sidebarOffset = '0px'
@@ -1218,7 +1238,7 @@ function App() {
         />
         
         {/* Chat content */}
-        <div className={`flex-1 ${showWelcome ? '!bg-transparent' : 'bg-[#171717]'} text-white flex flex-col h-full relative chat-scroll`}>
+        <div className={`flex-1 ${showWelcome ? '!bg-transparent' : 'bg-[#171717]'} text-white flex flex-col h-full relative chat-scroll ${isMobile ? 'mt-14' : ''}`}>
           {/* Scrollable content area */}
           <div 
             className={`flex-1 ${showWelcome ? 'overflow-hidden' : 'overflow-y-auto'} px-6 overscroll-behavior-none`}
