@@ -164,20 +164,30 @@ function App() {
         if (vv) {
           // Calculate how much the keyboard has reduced the viewport
           const keyboardHeight = Math.max(0, window.innerHeight - vv.height)
-          // Only apply offset if keyboard height is significant (> 50px)
-          const offset = keyboardHeight > 50 ? -keyboardHeight : 0
+          // Only apply when a text input is focused and height reduction is significant
+          const active = document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)
+          const apply = active && keyboardHeight > 80
+          const offset = apply ? keyboardHeight : 0 // positive px; CSS translates by -1x
           document.documentElement.style.setProperty('--kb-offset', offset + 'px')
         }
       }, 10) // Small debounce to prevent rapid jumping
     }
     
     setOffset()
+    // Update on viewport changes and input focus changes
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', setOffset)
-      return () => {
+    }
+    document.addEventListener('focusin', setOffset, true)
+    document.addEventListener('focusout', setOffset, true)
+
+    return () => {
+      if (window.visualViewport) {
         window.visualViewport.removeEventListener('resize', setOffset)
-        if (timeoutId) clearTimeout(timeoutId)
       }
+      document.removeEventListener('focusin', setOffset, true)
+      document.removeEventListener('focusout', setOffset, true)
+      if (timeoutId) clearTimeout(timeoutId)
     }
   }, [])
 
