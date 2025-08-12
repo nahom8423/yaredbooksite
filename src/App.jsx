@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import WelcomeOverlays from './components/WelcomeOverlays'
+import WelcomeBg from './components/WelcomeBg'
 import Sidebar from './components/Sidebar';
 import ChatInput from './components/ChatInput';
 import ChatHeader from './components/ChatHeader';
@@ -1187,8 +1187,8 @@ function App() {
 
   return (
     <div className={`app-container flex h-screen relative overflow-hidden touch-none ${isInitialized ? 'initialized' : ''}`}>
-      {/* Portal-based overlays mounted on document.body to avoid transform bugs */}
-      <WelcomeOverlays show={showWelcome} sidebarWidth={sidebarOverlayWidth} />
+      {/* Portal-based radial masked background */}
+      <WelcomeBg show={showWelcome} />
       {/* Mobile overlay */}
       {isMobile && (
         <div 

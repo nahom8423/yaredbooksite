@@ -78,6 +78,14 @@ body.is-welcome .welcome-bg-sidebar {
   z-index: 1;
 }
 
+/* Radial mask for welcome background image */
+.welcome-mask{
+  -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #fff 65%, rgba(255,255,255,0) 100%);
+  mask-image: radial-gradient(ellipse 60% 60% at 50% 45%, #fff 65%, rgba(255,255,255,0) 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
 /* Welcome: soften chat bar area and input surface */
 body.is-welcome .input-bar {
   /* Soften with translucent gradient and subtle blur */
