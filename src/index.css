@@ -15,6 +15,11 @@ body {
   background-color: #171717;
 }
 
+/* Prevent page scroll on welcome screen */
+body.is-welcome {
+  overflow: hidden;
+}
+
 /* Welcome background overlays (styles only; no layout changes) */
 :root {
   --app-bg: #171717;
