@@ -99,9 +99,30 @@ class YaredBotAPI {
       // Get existing session ID for this chat, or null for new chat
       const currentSessionId = chatId ? this.chatSessions.get(chatId) : null;
       
-      const requestData = {
-        message: message.trim()
-      };
+      const text = message.trim();
+      // Detect Ethiopic script or translation keywords to enable translation mode
+      const hasEthiopic = /[\u1200-\u137F]/.test(text);
+      const tlKeywords = [
+        'translate', 'translation', 'meaning', 'what does', 'means', 'define', 'definition', 'ትርጉም', 'ምን ማለት'
+      ];
+      const looksLikeTranslation = hasEthiopic || tlKeywords.some(k => text.toLowerCase().includes(k));
+
+      // Optional local toggles from localStorage
+      const includeTranslit = (() => {
+        try { return localStorage.getItem('translate_include_transliteration') === 'true'; } catch { return false; }
+      })();
+      const translateStrategy = (() => {
+        try { return localStorage.getItem('translate_strategy') || 'auto'; } catch { return 'auto'; }
+      })();
+
+      const requestData = { message: text };
+      if (looksLikeTranslation) {
+        requestData.mode = 'translate';
+        requestData.include_transliteration = includeTranslit;
+        if (translateStrategy && translateStrategy !== 'auto') {
+          requestData.translate_strategy = translateStrategy; // e.g., 'segment'
+        }
+      }
 
       // Debug logging to ensure session_id is being sent
       debugAPI.logRequest('/chat', requestData);
