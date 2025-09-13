@@ -1,0 +1,15 @@
+<!doctype html><meta charset="utf-8"><title>Redirecting…</title>
+<script>
+(function(){
+  var p = location.pathname || '/';
+  if (p.startsWith('/zema/')) {
+    var rest = p.slice('/zema'.length);
+    var q = location.search || '';
+    var h = location.hash || '';
+    location.replace('/zema/#' + rest + (q||'') + (h||''));
+  } else {
+    location.replace('/');
+  }
+})();
+</script>
+<p>Redirecting…</p>
