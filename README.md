@@ -1,12 +1,50 @@
-# React + Vite
+# Zema Bet
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[Live demo](https://nahom8423.github.io/yaredbooksite/) · [Source](https://github.com/nahom8423/yaredbooksite)
 
-Currently, two official plugins are available:
+Zema Bet is a source-aware conversational interface for questions about Ethiopian Orthodox Tewahedo history, liturgy, theology, Ge'ez, and the musical tradition of Saint Yared. I built the frontend to make specialized cultural and religious material easier to explore while keeping supporting sources visible to the reader.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## What it does
 
-## Expanding the ESLint configuration
+- Offers quick answers that can be expanded into detailed, source-supported responses
+- Displays citations and source cards alongside the conversation
+- Preserves local chat history and supports renaming, deleting, and regenerating messages
+- Renders structured Markdown, tables, links, and embedded media
+- Adapts the interface for desktop and mobile use
+- Connects to a separate API and knowledge base through a configurable endpoint
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Why this project matters
+
+Many useful resources in this area are distributed across books, recordings, community knowledge, and material that is difficult to search. Zema Bet explores how software can improve access without treating generated text as a substitute for sources or knowledgeable people. The larger project also informs my work on human-reviewed tools for historical Ge'ez manuscripts.
+
+## Technology
+
+- React 18 and Vite
+- Tailwind CSS
+- `react-markdown` with GitHub-flavored Markdown support
+- REST API integration
+- GitHub Pages deployment
+
+## Run locally
+
+```bash
+git clone https://github.com/nahom8423/yaredbooksite.git
+cd yaredbooksite
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+Set `VITE_API_URL` in `.env.local` if you want to use a different backend.
+
+## Verification
+
+```bash
+npm run build
+```
+
+The repository contains the frontend only. The production knowledge base and backend are maintained separately.
+
+## Status
+
+Active prototype. Current work focuses on clearer source attribution, better handling of long-form responses, and a more deliberate human-review workflow for culturally specialized material.
